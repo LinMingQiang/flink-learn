@@ -1,5 +1,4 @@
-package com.flink.common.entry
-
+package com.flink.test
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer08
 import scala.collection.JavaConversions._
@@ -14,8 +13,9 @@ import java.io.Serializable
 import org.apache.hadoop.hbase.client.Put
 import com.flink.comom.dbUtil.FlinkHbaseFactory
 import org.apache.hadoop.hbase.client.Get
-object test {
-  var t:String=null
+import com.flink.common.entry.TopicMessageDeserialize
+
+object LocalFlinkTest {
   def main(args: Array[String]): Unit = {
    val pro = new Properties();  
         pro.put("bootstrap.servers", BROKER);  
@@ -28,9 +28,10 @@ object test {
     val kafkasource=new FlinkKafkaConsumer08[(String,String)](TOPIC.split(",").toList,topicMsgSchame ,pro)
     //kafkasource.setStartFromLatest()//默认是从上次消费
     
-    val env=StreamExecutionEnvironment.getExecutionEnvironment
+    val env=StreamExecutionEnvironment.createRemoteEnvironment("localhost", 6123, "F:\\workspace\\flink\\flink-kafka\\target\\flink-kafka-0.0.1-SNAPSHOT.jar")
     //env.enableCheckpointing(60000)//更新offsets。每60s提交一次
     val sourceStream = env.addSource(kafkasource)
+    
     sourceStream.map{x=>
      x._1 match{case "smartadsdeliverylog"=>
      val datas=x._2.split(",")
@@ -46,29 +47,9 @@ object test {
      }
     .keyBy(0)
     .addSink{x=>
-      var (rowkey,(pv,cv))=x
-      val put=new Put(rowkey.getBytes)
-      val g=new Get(rowkey.getBytes)
-      val get=FlinkHbaseFactory.get("flink_test", g, Array("pv","cv"))
-      if(get!=null){
-        pv+=get(0).toInt
-        cv+=get(1).toInt
-      }
-      put.addColumn("info".getBytes, "pv".getBytes, pv.toString.getBytes)
-      put.addColumn("info".getBytes, "cv".getBytes, cv.toString.getBytes)
-      FlinkHbaseFactory.put("flink_test", put)
+      println(x)
     }
     env.execute()
     
-  }
-  def testd(s:String)={
-    if(t==null){
-      println("null")
-      t=s
-    }
-    ""
-  }
-  class stu() extends Serializable{
-    val a=""
   }
 }

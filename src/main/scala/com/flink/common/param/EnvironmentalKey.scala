@@ -5,5 +5,5 @@ trait EnvironmentalKey {
   val HBASE_ZOOKEEPER = "kylin-node4,kylin-node3,kylin-node2"
   val KAFKA_ZOOKEEPER = "solr2.zhiziyun.com,solr1.zhiziyun.com,mongodb3"
   val BROKER = "kafka1:9092,kafka2:9092,kafka3:9092"
-  val TOPIC = "smartadsclicklog"
+  val TOPIC = "smartadsdeliverylog,smartadsclicklog"
 }
