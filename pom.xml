@@ -109,7 +109,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>com.flink.common.entry.test</mainClass>
+							<mainClass>com.flink.test.LocalFlinkTest</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
