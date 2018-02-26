@@ -14,6 +14,7 @@ object FlinkHbaseFactory {
   var tables: HashMap[String, Table] = new HashMap[String, Table]
   def initConn() {
     if (conn == null || conn.isClosed()) {
+      println("----  Init Conn  -----")
       var hconf = HBaseConfiguration.create()
       hconf.set("hbase.zookeeper.quorum", HBASE_ZOOKEEPER)
       hconf.set("hbase.zookeeper.property.clientPort", "2181")
