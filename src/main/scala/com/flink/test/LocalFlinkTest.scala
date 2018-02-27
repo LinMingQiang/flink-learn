@@ -28,12 +28,12 @@ object LocalFlinkTest {
     val topicMsgSchame = new TopicMessageDeserialize() //自定义
     val kafkasource = new FlinkKafkaConsumer08[(String, String)](TOPIC.split(",").toList, topicMsgSchame, pro)
     kafkasource.setStartFromLatest()//不加这个默认是从上次消费
-
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(10)
     env.enableCheckpointing(60000)//更新offsets。每60s提交一次
     val sourceStream = env.addSource(kafkasource)
     sourceStream.map { x =>
+      println(x)
       x._1 match {
         case "smartadsdeliverylog" =>
           val datas = x._2.split(",")
