@@ -1,9 +1,10 @@
 package com.flink.common.entry
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer08
+
 import scala.collection.JavaConversions._
 import java.util.Properties
-import com.flink.common.sink.SystemPrintSink
+
 import scala.beans.BeanProperty
 
 object LocalFlinkTest {
@@ -23,7 +24,8 @@ object LocalFlinkTest {
     val kafkasource = new FlinkKafkaConsumer08[(String, String)](TOPIC.split(",").toList, new TopicMessageDeserialize(), pro)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
     val env = getFlinkEnv()
-    env.addSource(kafkasource)
+    env
+      .addSource(kafkasource)
       .map { x =>
         val datas = x._2.split(",")
         val statdate = datas(0).substring(0, 10) //日期
@@ -36,11 +38,15 @@ object LocalFlinkTest {
       .filter { _ != null }
       .keyBy(_.key) //按key分组，可以把key相同的发往同一个slot处理
       .sum("pv")
-      .addSink(new SystemPrintSink)
+      //.map(new AdlogPVRichMapFunction)
+      .print
+      .setParallelism(6)
+      //.sum("pv")
+      //.addSink(new SystemPrintSink)
 
     env.execute()
   }
-  class WordCount(
+  case class WordCount(
       var plan: String, 
       var startdate:String,
       var hour:String,
