@@ -1,7 +1,7 @@
 # flink-demo 
-flink 1.8.0
-kafka 0.10
-整体流程示意
+flink 1.8.0 <br>
+kafka 0.10 <br>
+整体流程示意 <br>
 
 kafka ->  flink (state管理) -> hbase
 
