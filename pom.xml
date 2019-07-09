@@ -19,16 +19,13 @@
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 		<encoding>UTF-8</encoding>
+		<flink.version>1.8.0</flink.version>
 		<scala.version>2.11.5</scala.version>
 		<scala.compat.version>2.11</scala.compat.version>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-streaming-scala_2.11</artifactId>
-			<version>1.7.0</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-client</artifactId>
@@ -42,13 +39,18 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-streaming-scala_2.11</artifactId>
+			<version>${flink.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-clients_2.11</artifactId>
-			<version>1.7.0</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-kafka-0.8_2.11</artifactId>
-			<version>1.7.0</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka_2.10 -->
 		<dependency>
