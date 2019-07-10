@@ -1,17 +1,17 @@
 package com.flink.common.richf
 
-import com.flink.common.entry.LocalFlinkTest.WordCount
+import com.flink.common.bean.{AdlogBean, StatisticalIndic}
 import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichFunction, RichMapFunction}
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.configuration.Configuration
 
-class AdlogPVRichMapFunction extends RichMapFunction[WordCount,WordCount]{
-  var sum : ValueState[Int] = _
-  override def map(value: WordCount): WordCount = {
+class AdlogPVRichMapFunction extends RichMapFunction[AdlogBean,AdlogBean]{
+  var sum : ValueState[StatisticalIndic] = _
+  override def map(value: AdlogBean): AdlogBean = {
     val newsum = if(sum == null){
       value.pv
     }else{
-      sum.value()+value.pv
+      StatisticalIndic(sum.value().pv+value.pv.pv)
     }
     sum.update(newsum)
     value.pv = newsum
@@ -20,6 +20,9 @@ class AdlogPVRichMapFunction extends RichMapFunction[WordCount,WordCount]{
 
   override def open(parameters: Configuration): Unit = {
     sum = getRuntimeContext.getState(
-      new ValueStateDescriptor[(Int)]("average", classOf[(Int)]))
+      new ValueStateDescriptor[StatisticalIndic](
+        "statisticalIndic",
+        classOf[(StatisticalIndic)],
+        StatisticalIndic(0)))
   }
 }
