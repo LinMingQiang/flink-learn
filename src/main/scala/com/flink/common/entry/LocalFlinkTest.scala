@@ -9,7 +9,7 @@ import com.flink.common.bean.{AdlogBean, StatisticalIndic}
 import com.flink.common.richf.{AdlogPVRichFlatMapFunction, AdlogPVRichMapFunction}
 import com.flink.common.sink.{StateRecoverySinkCheckpointFunc, SystemPrintSink}
 
-//com.flink.common.entry.LocalFlinkTest
+
 object LocalFlinkTest {
   /**
     * @author LMQ
@@ -24,7 +24,7 @@ object LocalFlinkTest {
     pro.put("group.id", "test");
     pro.put("auto.commit.enable", "true")//kafka 0.8-
     pro.put("enable.auto.commit", "true")//kafka 0.9+
-    pro.put("auto.commit.interval.ms", "6000");
+    pro.put("auto.commit.interval.ms", "60000");
     val kafkasource = new FlinkKafkaConsumer08[(String, String)](TOPIC.split(",").toList, new TopicMessageDeserialize(), pro)
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
@@ -43,11 +43,11 @@ object LocalFlinkTest {
       .filter { _ != null }
       .keyBy(_.key) //按key分组，可以把key相同的发往同一个slot处理
       .flatMap(new AdlogPVRichFlatMapFunction)//通常都是用的flatmap，功能类似 (filter + map)
-      .addSink(new SystemPrintSink())
-      //.print
-      .setParallelism(3)
+      .print
+      //.addSink(new StateRecoverySinkCheckpointFunc(100))
 
-    env.execute()
+
+    env.execute("lmq-flink-demo")
   }
 
 }
