@@ -9,8 +9,13 @@ import org.apache.flink.util.Collector
 class AdlogPVRichFlatMapFunction extends RichFlatMapFunction[AdlogBean, AdlogBean] {
   var lastState: ValueState[StatisticalIndic] = _
 
+  /**
+    * @author LMQ
+    * @desc 每次一套
+    * @param value
+    * @param out
+    */
   override def flatMap(value: AdlogBean, out: Collector[AdlogBean]): Unit = {
-
     val ls = lastState.value()
     val news = StatisticalIndic(ls.pv + value.pv.pv)
     lastState.update(news)
@@ -18,9 +23,15 @@ class AdlogPVRichFlatMapFunction extends RichFlatMapFunction[AdlogBean, AdlogBea
     out.collect(value)
   }
 
+  /**
+    * @author LMQ
+    * @desc 当首次打开此operator的时候调用，拿到 此key的句柄
+    * @param parameters
+    */
   override def open(parameters: Configuration): Unit = {
     val desc = new ValueStateDescriptor[(StatisticalIndic)](
       "StatisticalIndic", classOf[(StatisticalIndic)], StatisticalIndic(0))
+    //desc.setQueryable("StatisticalIndic")
     lastState = getRuntimeContext().getState(desc)
   }
 
