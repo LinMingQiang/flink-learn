@@ -27,7 +27,7 @@ object LocalFlinkTest {
     pro.put("auto.commit.interval.ms", "60000");
     val kafkasource = new FlinkKafkaConsumer08[(String, String)](TOPIC.split(",").toList, new TopicMessageDeserialize(), pro)
     kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromLatest() //不加这个默认是从上次消费
+    kafkasource.setStartFromLatest() //不加这个默认是从上次消费，如果从checkpoint恢复，那这里不起作用
     val env = getFlinkEnv()
     env
       .addSource(kafkasource)
@@ -43,10 +43,11 @@ object LocalFlinkTest {
       .filter { _ != null }
       .keyBy(_.key) //按key分组，可以把key相同的发往同一个slot处理
       .flatMap(new AdlogPVRichFlatMapFunction)//通常都是用的flatmap，功能类似 (filter + map)
-      .addSink(new StateRecoverySinkCheckpointFunc(100))
-      .setParallelism(1)
+      .print
+      //.addSink(new StateRecoverySinkCheckpointFunc(10))
+      .setParallelism(6)
 
-    env.execute()
+    env.execute("lmq-flink-demo")
   }
 
 }
