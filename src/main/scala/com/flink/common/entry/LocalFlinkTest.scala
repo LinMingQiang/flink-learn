@@ -21,7 +21,7 @@ object LocalFlinkTest {
     val pro = new Properties();
     pro.put("bootstrap.servers", BROKER);
     pro.put("zookeeper.connect", KAFKA_ZOOKEEPER);
-    pro.put("group.id", "test");
+    pro.put("group.id", "test")
     pro.put("auto.commit.enable", "true")//kafka 0.8-
     pro.put("enable.auto.commit", "true")//kafka 0.9+
     pro.put("auto.commit.interval.ms", "60000");
