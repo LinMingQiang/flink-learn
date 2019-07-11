@@ -12,7 +12,6 @@ package object entry extends EnvironmentalKey {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     env.enableCheckpointing(6000) //更新offsets。每60s提交一次
-    env.getCheckpointConfig.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
     //超时
     //env.getCheckpointConfig.setCheckpointTimeout(5000)
     // 同一时间只允许进行一个检查点

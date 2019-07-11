@@ -13,6 +13,7 @@ import com.flink.common.sink.{StateRecoverySinkCheckpointFunc, SystemPrintSink}
 object InitStateByCheckpoint {
   val cp="file:///C:\\Users\\Master\\Desktop\\init_checkpoint"
   def main(args: Array[String]): Unit = {
+    println(cp)
     val pro = new Properties();
     pro.put("bootstrap.servers", BROKER);
     pro.put("zookeeper.connect", KAFKA_ZOOKEEPER);
@@ -35,14 +36,14 @@ object InitStateByCheckpoint {
           new AdlogBean(plan,statdate,hour,StatisticalIndic(1))
         } else null
       }
-      .filter { _ != null }
+      .filter { x=> x != null && x.plan.equals("J4hUm12U0mI")}
       .keyBy(_.key) //按key分组，可以把key相同的发往同一个slot处理
       .flatMap(new AdlogPVRichFlatMapFunction)//通常都是用的flatmap，功能类似 (filter + map)
-      .print
-      //.addSink(new SystemPrintSink)
+      //.print
+      .addSink(new SystemPrintSink)
 
 
-    env.execute("lmq-flink-demo")
+    env.execute("InitStateByCheckpoint")
   }
 
 }
