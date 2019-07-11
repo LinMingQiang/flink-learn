@@ -1,4 +1,5 @@
 package com.flink.common.entry
+
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer08
 
@@ -6,19 +7,12 @@ import scala.collection.JavaConversions._
 import java.util.Properties
 
 import com.flink.common.bean.{AdlogBean, StatisticalIndic}
-import com.flink.common.richf.{AdlogPVRichFlatMapFunction, AdlogPVRichMapFunction}
+import com.flink.common.richf.{AdlogPVRichFlatMapFunction, AdlogPVRichMapFunction, StateRecoveryRichFlatmapFunc}
 import com.flink.common.sink.{StateRecoverySinkCheckpointFunc, SystemPrintSink}
 
-
-object LocalFlinkTest {
-  val cp="file:///C:\\Users\\Master\\Desktop\\rocksdbcheckpoint"
-  /**
-    * @author LMQ
-    * @version 1.8.0
-    * @param args
-    */
+object InitStateByCheckpoint {
+  val cp="file:///C:\\Users\\Master\\Desktop\\init_checkpoint"
   def main(args: Array[String]): Unit = {
-    println(">>>>>>>>>>>>>")
     val pro = new Properties();
     pro.put("bootstrap.servers", BROKER);
     pro.put("zookeeper.connect", KAFKA_ZOOKEEPER);
@@ -35,8 +29,8 @@ object LocalFlinkTest {
       .map { x =>
         val datas = x._2.split(",")
         val statdate = datas(0).substring(0, 10) //日期
-        val hour = datas(0).substring(11, 13) //hour
-        val plan = datas(25)
+      val hour = datas(0).substring(11, 13) //hour
+      val plan = datas(25)
         if (plan.nonEmpty) {
           new AdlogBean(plan,statdate,hour,StatisticalIndic(1))
         } else null
@@ -45,7 +39,7 @@ object LocalFlinkTest {
       .keyBy(_.key) //按key分组，可以把key相同的发往同一个slot处理
       .flatMap(new AdlogPVRichFlatMapFunction)//通常都是用的flatmap，功能类似 (filter + map)
       .print
-      //.addSink(new StateRecoverySinkCheckpointFunc(100))
+      //.addSink(new SystemPrintSink)
 
 
     env.execute("lmq-flink-demo")
