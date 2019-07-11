@@ -1,4 +1,4 @@
-package com.flink.comom.dbUtil
+package com.flink.commom.dbUtil
 
 import org.apache.hadoop.hbase.client.Connection
 import org.apache.hadoop.hbase.HBaseConfiguration
