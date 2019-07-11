@@ -15,6 +15,7 @@ import scala.collection.mutable.ListBuffer
 class StateRecoverySinkCheckpointFunc(threshold: Int = 10) extends SinkFunction[AdlogBean] with CheckpointedFunction{
   @transient
   private var checkPointedState: ListState[(AdlogBean)] = _
+  private var checkPointedSBuffer = ListBuffer[(AdlogBean)]()
   private val bufferedElements = ListBuffer[(AdlogBean)]() //用于批量提交，如果写hbase的话，建议批量提交，例如一个分区数量达到100了，那就提交一次
 
   /**
@@ -45,12 +46,13 @@ class StateRecoverySinkCheckpointFunc(threshold: Int = 10) extends SinkFunction[
     * @param context
     */
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
-    println(">>> snapshotState <<",bufferedElements.size)
+   println(">>> snapshotState <<",checkPointedSBuffer.size)
     //执行顺序应该是，先这个，然后再
     checkPointedState.clear()//清除之前状态以装载新的状态数据
-    for (element <- bufferedElements) {
+    for (element <- checkPointedSBuffer) {
       checkPointedState.add(element)
    }
+    checkPointedSBuffer.clear()
   }
 
   /**
@@ -58,13 +60,13 @@ class StateRecoverySinkCheckpointFunc(threshold: Int = 10) extends SinkFunction[
     * @param value
     */
   override def invoke(value: AdlogBean): Unit = {
-    checkPointedState.add(value)
+    println(value)
     bufferedElements += value
     if (bufferedElements.size == threshold) {
 
       //数量达到上限。
       //do something (write to hbase or hdfs ...)
-      println(">>> invoke clear <<<")
+      checkPointedSBuffer.++=(bufferedElements)
       bufferedElements.clear()
     }
   }
