@@ -10,11 +10,17 @@ package object entry extends EnvironmentalKey {
 
   def getFlinkEnv() = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(1)
+
     env.enableCheckpointing(6000) //更新offsets。每60s提交一次
     env.getCheckpointConfig.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
-    env.setStateBackend(new FsStateBackend(("file:///C:\\Users\\Administrator\\Desktop\\fscheckpoint")))
-    //env.setStateBackend((new RocksDBStateBackend("file:///C:\\Users\\Administrator\\Desktop\\rocksdbcheckpoint")))
+    //超时
+    //env.getCheckpointConfig.setCheckpointTimeout(5000)
+    // 同一时间只允许进行一个检查点
+    env.getCheckpointConfig.setMaxConcurrentCheckpoints(1);
+    // 表示一旦Flink处理程序被cancel后，会保留Checkpoint数据，以便根据实际需要恢复到指定的Checkpoint
+    env.getCheckpointConfig.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+    //env.setStateBackend(new FsStateBackend(("file:///C:\\Users\\Administrator\\Desktop\\fscheckpoint")))
+    env.setStateBackend((new RocksDBStateBackend("file:///C:\\Users\\Administrator\\Desktop\\rocksdbcheckpoint")))
     env
   }
 }
