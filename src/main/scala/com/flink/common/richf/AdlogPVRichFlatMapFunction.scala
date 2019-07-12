@@ -6,7 +6,8 @@ import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 
-class AdlogPVRichFlatMapFunction extends RichFlatMapFunction[AdlogBean, AdlogBean] {
+class AdlogPVRichFlatMapFunction
+    extends RichFlatMapFunction[AdlogBean, AdlogBean] {
   var lastState: ValueState[StatisticalIndic] = _
 
   /**
@@ -19,7 +20,7 @@ class AdlogPVRichFlatMapFunction extends RichFlatMapFunction[AdlogBean, AdlogBea
     val ls = lastState.value()
     val news = StatisticalIndic(ls.pv + value.pv.pv)
     lastState.update(news)
-    value.pv=news
+    value.pv = news
     out.collect(value)
   }
 
@@ -30,7 +31,9 @@ class AdlogPVRichFlatMapFunction extends RichFlatMapFunction[AdlogBean, AdlogBea
     */
   override def open(parameters: Configuration): Unit = {
     val desc = new ValueStateDescriptor[(StatisticalIndic)](
-      "StatisticalIndic", classOf[(StatisticalIndic)], StatisticalIndic(0))
+      "StatisticalIndic",
+      classOf[(StatisticalIndic)],
+      StatisticalIndic(0))
     //desc.setQueryable("StatisticalIndic")
     lastState = getRuntimeContext().getState(desc)
   }
