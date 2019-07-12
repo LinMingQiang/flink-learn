@@ -70,6 +70,7 @@
         <sourceDirectory>src/main/scala</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
         <plugins>
+            <!--   jar包打一起         -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.5.5</version>
@@ -94,6 +95,35 @@
                     </execution>
                 </executions>
             </plugin>
+
+<!--   jar包打进一个lib下         -->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>copy</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-dependencies</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <outputDirectory>-->
+<!--                                ${project.build.directory}/lib-->
+<!--                            </outputDirectory>-->
+<!--                            <excludeArtifactIds>-->
+<!--                                spark-core_2.10,-->
+<!--                                spark-streaming_2.10-->
+<!--                            </excludeArtifactIds>-->
+<!--                            &lt;!&ndash; <excludeArtifactIds> spark-core_2.10, json, hbase-client, spark-streaming_2.10-->
+<!--                                </excludeArtifactIds> <excludeGroupIds> org.apache.hadoop </excludeGroupIds> &ndash;&gt;-->
+
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!-- 默认的打包工具 -->
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
