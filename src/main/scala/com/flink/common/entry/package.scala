@@ -8,7 +8,7 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedC
 
 package object entry extends EnvironmentalKey {
 
-  def getFlinkEnv(checkpointPath :String) = {
+  def getFlinkEnv(checkpointPath: String) = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     env.enableCheckpointing(6000) //更新offsets。每60s提交一次
@@ -17,9 +17,12 @@ package object entry extends EnvironmentalKey {
     // 同一时间只允许进行一个检查点
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1);
     // 表示一旦Flink处理程序被cancel后，会保留Checkpoint数据，以便根据实际需要恢复到指定的Checkpoint
-    env.getCheckpointConfig.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-    //env.setStateBackend(new FsStateBackend(("file:///C:\\Users\\Master\\Desktop\\fscheckpoint")))
-    env.setStateBackend((new RocksDBStateBackend(checkpointPath)))
+    env.getCheckpointConfig.enableExternalizedCheckpoints(
+      ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+    //env.setStateBackend(new FsStateBackend(checkpointPath))
+    val rocksDBStateBackend = new RocksDBStateBackend(checkpointPath)
+    rocksDBStateBackend.setDbStoragePath(checkpointPath+"/rocksdbstorage")
+    env.setStateBackend(rocksDBStateBackend)
     env
   }
 }
