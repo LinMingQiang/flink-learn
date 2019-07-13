@@ -8,6 +8,6 @@ import org.apache.flink.streaming.api.functions.sink.{
 
 class SystemPrintSink extends SinkFunction[AdlogBean] {
   override def invoke(value: AdlogBean): Unit = {
-    //println(value)
+    println("SystemPrintSink",value)
   }
 }

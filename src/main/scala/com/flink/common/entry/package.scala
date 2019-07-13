@@ -1,5 +1,7 @@
 package com.flink.common
 
+import java.util.Properties
+
 import com.flink.common.param.EnvironmentalKey
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
@@ -8,6 +10,11 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedC
 
 package object entry extends EnvironmentalKey {
 
+  /**
+    * @desc 获取env
+    * @param checkpointPath
+    * @return
+    */
   def getFlinkEnv(checkpointPath: String) = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
@@ -21,8 +28,23 @@ package object entry extends EnvironmentalKey {
       ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
     //env.setStateBackend(new FsStateBackend(checkpointPath))
     val rocksDBStateBackend = new RocksDBStateBackend(checkpointPath)
-    rocksDBStateBackend.setDbStoragePath(checkpointPath+"/rocksdbstorage")
+    rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
     env.setStateBackend(rocksDBStateBackend)
     env
   }
+
+  /**
+    *
+    */
+  def getKafkaParam() = {
+    val pro = new Properties()
+    pro.put("bootstrap.servers", BROKER)
+    pro.put("zookeeper.connect", KAFKA_ZOOKEEPER)
+    pro.put("group.id", "test")
+    pro.put("auto.commit.enable", "true") //kafka 0.8-
+    pro.put("enable.auto.commit", "true") //kafka 0.9+
+    pro.put("auto.commit.interval.ms", "60000")
+    pro
+  }
+
 }
