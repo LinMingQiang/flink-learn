@@ -10,7 +10,11 @@ import com.flink.common.richf.{
   AdlogPVRichFlatMapFunction,
   AdlogPVRichMapFunction
 }
-import com.flink.common.sink.{StateRecoverySinkCheckpointFunc, SystemPrintSink}
+import com.flink.common.sink.{
+  HbaseReportSink,
+  StateRecoverySinkCheckpointFunc,
+  SystemPrintSink
+}
 
 object LocalFlinkTest {
   val cp = "file:///C:\\Users\\Master\\Desktop\\rocksdbcheckpoint"
@@ -22,21 +26,14 @@ object LocalFlinkTest {
     */
   def main(args: Array[String]): Unit = {
     println("LocalFlinkTest ... ")
-    val pro = new Properties();
-    pro.put("bootstrap.servers", BROKER);
-    pro.put("zookeeper.connect", KAFKA_ZOOKEEPER);
-    pro.put("group.id", "test")
-    pro.put("auto.commit.enable", "true") //kafka 0.8-
-    pro.put("enable.auto.commit", "true") //kafka 0.9+
-    pro.put("auto.commit.interval.ms", "60000");
     val kafkasource = new FlinkKafkaConsumer08[(String, String)](
       TOPIC.split(",").toList,
       new TopicMessageDeserialize(),
-      pro)
+      getKafkaParam)
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
     val env = getFlinkEnv(cp)
-    env
+    val result = env
       .addSource(kafkasource)
       .map { x =>
         val datas = x._2.split(",")
@@ -52,10 +49,13 @@ object LocalFlinkTest {
       }
       .keyBy(_.key) //按key分组，可以把key相同的发往同一个slot处理
       .flatMap(new AdlogPVRichFlatMapFunction) //通常都是用的flatmap，功能类似 (filter + map)
-      .print
-    //.addSink(new StateRecoverySinkCheckpointFunc(100))
 
-    env.execute("lmq-flink-demo")
+    //result.addSink(new StateRecoverySinkCheckpointFunc(10))
+    //多个sink输出
+    result.addSink(new SystemPrintSink)
+    //result.addSink(new HbaseReportSink)
+
+    env.execute("lmq-flink-demo") //程序名
   }
 
 }
