@@ -51,7 +51,7 @@ object LocalFlinkTest {
       .flatMap(new AdlogPVRichFlatMapFunction) //通常都是用的flatmap，功能类似 (filter + map)
 
     //operate state。用于写hbase是吧恢复
-    result.addSink(new StateRecoverySinkCheckpointFunc(500))
+    result.addSink(new StateRecoverySinkCheckpointFunc(50))
     //多个sink输出
     //result.addSink(new SystemPrintSink)
     //result.addSink(new HbaseReportSink)
