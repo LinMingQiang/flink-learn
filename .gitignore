@@ -19,7 +19,7 @@ syntax: glob
 *.iml
 
 # building
-target
+#target
 build
 null
 tmp*
@@ -38,6 +38,5 @@ build.log
 #  ^\.pc/
 
 #SHITTY output not in target directory
-build.log
 /.cache-main
 /.cache-tests

@@ -29,10 +29,10 @@ object LocalFlinkTest {
     val kafkasource = new FlinkKafkaConsumer08[(String, String)](
       TOPIC.split(",").toList,
       new TopicMessageDeserialize(),
-      getKafkaParam)
+      getKafkaParam(BROKER))
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
-    val env = getFlinkEnv(cp)
+    val env = getFlinkEnv(cp,60000) // 1 min
     val result = env
       .addSource(kafkasource)
       .map { x =>
@@ -45,14 +45,15 @@ object LocalFlinkTest {
         } else null
       }
       .filter { x =>
-        x != null && x.plan.equals("J4hUm12U0mI")
+        x != null
       }
       .keyBy(_.key) //按key分组，可以把key相同的发往同一个slot处理
       .flatMap(new AdlogPVRichFlatMapFunction) //通常都是用的flatmap，功能类似 (filter + map)
 
-    //result.addSink(new StateRecoverySinkCheckpointFunc(10))
+    //operate state。用于写hbase是吧恢复
+    result.addSink(new StateRecoverySinkCheckpointFunc(500))
     //多个sink输出
-    result.addSink(new SystemPrintSink)
+    //result.addSink(new SystemPrintSink)
     //result.addSink(new HbaseReportSink)
 
     env.execute("lmq-flink-demo") //程序名
