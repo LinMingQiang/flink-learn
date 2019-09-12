@@ -1,20 +1,14 @@
 package com.flink.common.entry
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer08
+import org.apache.flink.streaming.connectors.kafka
 
 import scala.collection.JavaConversions._
 import java.util.Properties
 
 import com.flink.common.bean.{AdlogBean, StatisticalIndic}
-import com.flink.common.richf.{
-  AdlogPVRichFlatMapFunction,
-  AdlogPVRichMapFunction
-}
-import com.flink.common.sink.{
-  HbaseReportSink,
-  StateRecoverySinkCheckpointFunc,
-  SystemPrintSink
-}
+import com.flink.common.richf.{AdlogPVRichFlatMapFunction, AdlogPVRichMapFunction}
+import com.flink.common.sink.{HbaseReportSink, StateRecoverySinkCheckpointFunc, SystemPrintSink}
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 
 object LocalFlinkTest {
   val cp = "file:///C:\\Users\\Master\\Desktop\\rocksdbcheckpoint"
@@ -26,7 +20,7 @@ object LocalFlinkTest {
     */
   def main(args: Array[String]): Unit = {
     println("LocalFlinkTest ... ")
-    val kafkasource = new FlinkKafkaConsumer08[(String, String)](
+    val kafkasource = new FlinkKafkaConsumer010[(KafkaMessge)](
       TOPIC.split(",").toList,
       new TopicMessageDeserialize(),
       getKafkaParam(BROKER))
@@ -36,7 +30,7 @@ object LocalFlinkTest {
     val result = env
       .addSource(kafkasource)
       .map { x =>
-        val datas = x._2.split(",")
+        val datas = x.msg.split(",")
         val statdate = datas(0).substring(0, 10) //日期
         val hour = datas(0).substring(11, 13) //hour
         val plan = datas(25)

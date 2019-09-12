@@ -5,6 +5,7 @@ import java.util.Properties
 import com.flink.common.param.EnvironmentalKey
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
+import org.apache.flink.runtime.state.StateBackend
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 
@@ -29,7 +30,7 @@ package object entry extends EnvironmentalKey {
     //env.setStateBackend(new FsStateBackend(checkpointPath))
     val rocksDBStateBackend = new RocksDBStateBackend(checkpointPath)
     rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
-    env.setStateBackend(rocksDBStateBackend)
+    env.setStateBackend(rocksDBStateBackend.asInstanceOf[StateBackend])
     env
   }
 
@@ -47,4 +48,5 @@ package object entry extends EnvironmentalKey {
     pro
   }
 
+  case class KafkaMessge(topic : String, msg : String)
 }
