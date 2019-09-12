@@ -2,14 +2,19 @@ package com.flink.common.richf
 
 import com.flink.common.bean.{AdlogBean, StatisticalIndic}
 import org.apache.flink.api.common.functions.RichFlatMapFunction
-import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
+import org.apache.flink.api.common.state.{StateTtlConfig, ValueState, ValueStateDescriptor}
+import org.apache.flink.api.common.time.Time
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 
 class AdlogPVRichFlatMapFunction
     extends RichFlatMapFunction[AdlogBean, AdlogBean] {
   var lastState: ValueState[StatisticalIndic] = _
-
+  val ttlConfig = StateTtlConfig
+    .newBuilder(Time.seconds(100000))
+    .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
+    .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+    .build();
   /**
     * @author LMQ
     * @desc 每次一套
@@ -34,6 +39,7 @@ class AdlogPVRichFlatMapFunction
       "StatisticalIndic",
       classOf[(StatisticalIndic)],
       StatisticalIndic(0))
+    desc.enableTimeToLive(ttlConfig) // TTL
     //desc.setQueryable("StatisticalIndic")
     lastState = getRuntimeContext().getState(desc)
   }
