@@ -29,8 +29,8 @@ import org.apache.flink.util.Collector
 
 object KafkaWordCountTest {
   val BROKER =
-    "10.6.161.208:9092,10.6.161.209:9092,10.6.161.210:9092,10.6.161.211:9092,10.6.161.212:909"
-  val TOPIC = "mobdspbiddinglog"
+    "xxx"
+  val TOPIC = "xx"
   val cp =
     "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\rocksdbcheckpoint"
   def main(args: Array[String]): Unit = {
