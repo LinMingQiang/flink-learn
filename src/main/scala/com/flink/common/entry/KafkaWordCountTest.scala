@@ -28,8 +28,9 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import org.apache.flink.util.Collector
 
 object KafkaWordCountTest {
-  val BROKER = ""
-  val TOPIC = "testclick"
+  val BROKER =
+    "xxx"
+  val TOPIC = "xx"
   val cp =
     "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\rocksdbcheckpoint"
   def main(args: Array[String]): Unit = {
@@ -53,7 +54,7 @@ object KafkaWordCountTest {
     */
   def getImpressDStream(env: StreamExecutionEnvironment) = {
     val kafkasource2 = new FlinkKafkaConsumer010[(KafkaMessge)](
-      "testimpress".split(",").toList,
+      "mobdspconvlog".split(",").toList,
       new TopicMessageDeserialize(),
       getKafkaParam(BROKER))
     kafkasource2.setCommitOffsetsOnCheckpoints(true)
