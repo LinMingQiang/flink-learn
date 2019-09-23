@@ -19,3 +19,30 @@ class TopicMessageDeserialize
   }
 
 }
+
+
+/** flink 1.7.2 */
+//import org.apache.flink.api.common.typeinfo.TypeInformation
+//import org.apache.flink.streaming.util.serialization.KeyedDeserializationSchema
+//import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
+//import org.apache.flink.api.scala.typeutils.CaseClassTypeInfo
+//import org.apache.flink.streaming.api.scala.createTypeInformation
+//class KafkaKeyValueDeserializationSchema
+//  extends KeyedDeserializationSchema[KafkaKeyValue] {
+//  override def deserialize(messageKey: Array[Byte],
+//                           message: Array[Byte],
+//                           topic: String,
+//                           partition: Int,
+//                           offset: Long): KafkaKeyValue = {
+//    KafkaKeyValue(topic, new String(messageKey), new String(message))
+//  }
+//
+//  override def isEndOfStream(t: KafkaKeyValue): Boolean = false
+//
+//  override def getProducedType: TypeInformation[KafkaKeyValue] =
+//    createTypeInformation[KafkaKeyValue].asInstanceOf[CaseClassTypeInfo[KafkaKeyValue]]
+//}
+
+
+
+

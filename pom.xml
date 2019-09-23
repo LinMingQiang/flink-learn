@@ -21,7 +21,7 @@
         <encoding>UTF-8</encoding>
         <flink.version>1.9.0</flink.version>
         <scala.version>2.11.5</scala.version>
-        <scala.compat.version>2.11</scala.compat.version>
+        <scala.binary.version>2.11</scala.binary.version>
     </properties>
 
     <dependencies>
@@ -34,7 +34,7 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-scala_2.11</artifactId>
+            <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
         <dependency>
@@ -44,18 +44,18 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka-0.10_2.11</artifactId>
+            <artifactId>flink-connector-kafka-0.10_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-statebackend-rocksdb_2.11</artifactId>
+            <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka_2.10 -->
         <dependency>
             <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.11</artifactId>
+            <artifactId>kafka_${scala.binary.version}</artifactId>
             <version>0.8.2.2</version>
         </dependency>
 
