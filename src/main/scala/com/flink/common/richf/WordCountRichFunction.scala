@@ -9,18 +9,6 @@ import org.apache.flink.util.Collector
 
 class WordCountRichFunction  extends RichFlatMapFunction[(String, Int), (String, Int)] {
   var lastState: ValueState[Int] = _
-  val ttlConfig = StateTtlConfig
-    .newBuilder(Time.seconds(1000))
-    .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
-    .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
-    .build();
-
-  /**
-   * @author LMQ
-   * @desc 每次一套
-   * @param value
-   * @param out
-   */
   override def flatMap(value: (String, Int), out: Collector[(String, Int)]): Unit = {
     val ls = lastState.value()
     val nCount = ls + value._2
@@ -33,8 +21,6 @@ class WordCountRichFunction  extends RichFlatMapFunction[(String, Int), (String,
       "count",
       classOf[Int],
       0)
-    desc.enableTimeToLive(ttlConfig) // TTL
-    //desc.setQueryable("StatisticalIndic")
     lastState = getRuntimeContext().getState(desc)
   }
 }
