@@ -1,31 +1,11 @@
 package com.flink.common.entry
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
-
 import scala.collection.JavaConversions._
-import java.util.Properties
-
-import com.flink.common.bean.{AdlogBean, StatisticalIndic}
 import com.flink.common.richf.{
-  AdlogPVRichFlatMapFunction,
-  AdlogPVRichMapFunction,
   WordCountRichFunction
 }
-import com.flink.common.sink.{
-  HbaseReportSink,
-  StateRecoverySinkCheckpointFunc,
-  SystemPrintSink
-}
-import org.apache.flink.api.common.functions.RichFlatMapFunction
-import org.apache.flink.api.common.state.{
-  StateTtlConfig,
-  ValueState,
-  ValueStateDescriptor
-}
-import org.apache.flink.api.common.time.Time
-import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
-import org.apache.flink.util.Collector
 
 object KafkaWordCountTest {
   val BROKER = ""

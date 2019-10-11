@@ -108,32 +108,32 @@
             </plugin>
 
 <!--   jar包打进一个lib下         -->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
 
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>copy</id>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>copy-dependencies</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <outputDirectory>-->
-<!--                                ${project.build.directory}/lib-->
-<!--                            </outputDirectory>-->
-<!--                            <excludeArtifactIds>-->
-<!--                                spark-core_2.10,-->
-<!--                                spark-streaming_2.10-->
-<!--                            </excludeArtifactIds>-->
-<!--                            &lt;!&ndash; <excludeArtifactIds> spark-core_2.10, json, hbase-client, spark-streaming_2.10-->
-<!--                                </excludeArtifactIds> <excludeGroupIds> org.apache.hadoop </excludeGroupIds> &ndash;&gt;-->
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>
+                                ${project.build.directory}/lib
+                            </outputDirectory>
+                            <excludeArtifactIds>
+                                spark-core_2.10,
+                                spark-streaming_2.10
+                            </excludeArtifactIds>
+                            <!-- <excludeArtifactIds> spark-core_2.10, json, hbase-client, spark-streaming_2.10
+                                </excludeArtifactIds> <excludeGroupIds> org.apache.hadoop </excludeGroupIds> -->
 
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
