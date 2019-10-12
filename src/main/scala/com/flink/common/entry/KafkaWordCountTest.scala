@@ -1,6 +1,8 @@
 package com.flink.common.entry
+import com.flink.common.deserialize.TopicMessageDeserialize
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.api.scala._
+
 import scala.collection.JavaConversions._
 import com.flink.common.richf.WordCountRichFunction
 import org.apache.flink.streaming.api.functions.sink.SinkFunction

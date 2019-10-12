@@ -6,6 +6,7 @@ import scala.collection.JavaConversions._
 import java.util.Properties
 
 import com.flink.common.bean.{AdlogBean, StatisticalIndic}
+import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.richf.{AdlogPVRichFlatMapFunction, AdlogPVRichMapFunction}
 import com.flink.common.sink.{HbaseReportSink, StateRecoverySinkCheckpointFunc, SystemPrintSink}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
