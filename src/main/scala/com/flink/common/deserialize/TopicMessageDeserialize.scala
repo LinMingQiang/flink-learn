@@ -1,12 +1,11 @@
-package com.flink.common.entry
+package com.flink.common.deserialize
 
-
-import org.apache.flink.api.common.typeinfo.TypeInformation
+import com.flink.common.entry.KafkaMessge
 import org.apache.flink.api.scala.typeutils.CaseClassTypeInfo
+import org.apache.flink.api.scala.{createTypeInformation => _}
+import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.flink.streaming.api.scala._
-import org.apache.flink.api.scala.{createTypeInformation => _}
 
 class TopicMessageDeserialize
     extends KafkaDeserializationSchema[(KafkaMessge)] {
