@@ -1,15 +1,11 @@
 package com.flink.common.entry
-import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
+import org.apache.flink.streaming.api.scala._
 import scala.collection.JavaConversions._
-import com.flink.common.richf.{
-  WordCountRichFunction
-}
+import com.flink.common.richf.WordCountRichFunction
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
 
 object KafkaWordCountTest {
-  val BROKER = ""
-  val TOPIC = "testclick"
   val cp =
     "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\rocksdbcheckpoint"
   def main(args: Array[String]): Unit = {

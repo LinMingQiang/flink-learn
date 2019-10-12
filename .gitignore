@@ -40,3 +40,4 @@ build.log
 #SHITTY output not in target directory
 /.cache-main
 /.cache-tests
+!/src/main/scala/com/flink/common/param/EnvironmentalKey.scala
