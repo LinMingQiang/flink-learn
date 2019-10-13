@@ -7,7 +7,6 @@ import org.apache.flink.streaming.api.scala._
 object FlinkOperatorStateTest {
   val checkpointPath = "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\checkpoint\\FlinkOperatorStateTest"
   def main(args: Array[String]): Unit = {
-   println(">>>> start <<<<<<<< ")
     val env = getFlinkEnv(checkpointPath, 60000) // 1 min
     val kafkasource = getKafkaSource(TOPIC, BROKER,  new TopicOffsetMsgDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
@@ -17,7 +16,7 @@ object FlinkOperatorStateTest {
       .map(x => (JSON.parseObject(x.msg).getString("dist"), 1))
       .keyBy(0)
       .sum(1)
-      .addSink(new OperatorStateBufferingSink(2))
+      .addSink(new OperatorStateBufferingSink(1))
 
     env.execute("FlinkOperatorStateTest")
   }

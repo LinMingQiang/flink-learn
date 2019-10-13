@@ -10,20 +10,21 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
-class OperatorStateBufferingSink(threshold : Int = 3)
+class OperatorStateBufferingSink(threshold: Int = 3)
     extends SinkFunction[(String, Int)]
     with CheckpointedFunction {
 
   @transient
-  private var checkpointedState: ListState[(String, Int)] = _
-  private val bufferedElements = ListBuffer[(String, Int)]()
+  private var checkpointedState
+    : ListState[(String, Int)] = _ // checkpoint state
+  private val bufferedElements = ListBuffer[(String, Int)]() // buffer List
   /**
     *
     * @param value
     */
   override def invoke(value: (String, Int)): Unit = {
     bufferedElements += value
-    if (bufferedElements.size == threshold) {
+    if (bufferedElements.size >= threshold) {
       for (element <- bufferedElements) {
         // send it to the sink
       }
@@ -57,10 +58,10 @@ class OperatorStateBufferingSink(threshold : Int = 3)
     )
     checkpointedState = context.getOperatorStateStore.getListState(descriptor)
     if (context.isRestored) {
-      println("<<<< initializeState >>>>>>")
+      println("--- initializeState ---")
       for (element <- checkpointedState.get()) {
         bufferedElements += element
-        println("initializeState : "  , element)
+        println("operator state : ", element)
       }
     }
   }
