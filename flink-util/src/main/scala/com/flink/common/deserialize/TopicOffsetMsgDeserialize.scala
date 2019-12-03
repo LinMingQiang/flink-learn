@@ -1,6 +1,6 @@
 package com.flink.common.deserialize
 
-import com.flink.common.entry.{KafkaMessge, KafkaTopicOffsetMsg}
+import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
 import org.apache.flink.api.scala.typeutils.CaseClassTypeInfo
 import org.apache.flink.streaming.api.scala.createTypeInformation
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema
