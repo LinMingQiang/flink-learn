@@ -1,19 +1,16 @@
 package com.flink.common.entry
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.connectors.kafka
-
-import scala.collection.JavaConversions._
-import java.util.Properties
-
 import com.flink.common.bean.{AdlogBean, StatisticalIndic}
+import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.TopicMessageDeserialize
-import com.flink.common.richf.{AdlogPVRichFlatMapFunction, AdlogPVRichMapFunction}
-import com.flink.common.sink.{HbaseReportSink, StateRecoverySinkCheckpointFunc, SystemPrintSink}
+import com.flink.common.kafka.KafkaManager
+import com.flink.common.kafka.KafkaManager.KafkaMessge
+import com.flink.common.richf.{AdlogPVRichFlatMapFunction}
+import com.flink.common.sink.{ StateRecoverySinkCheckpointFunc}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
-
+import scala.collection.JavaConversions._
 object LocalFlinkTest {
   val cp = "file:///C:\\Users\\Master\\Desktop\\rocksdbcheckpoint"
-
   /**
     * @author LMQ
     * @version 1.8.0
@@ -21,13 +18,13 @@ object LocalFlinkTest {
     */
   def main(args: Array[String]): Unit = {
     println("LocalFlinkTest ... ")
-    val kafkasource = new FlinkKafkaConsumer010[(KafkaMessge)](
+    val kafkasource = new FlinkKafkaConsumer010[KafkaMessge](
       TOPIC.split(",").toList,
       new TopicMessageDeserialize(),
-      getKafkaParam(BROKER))
+      KafkaManager.getKafkaParam(BROKER))
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
-    val env = getFlinkEnv(cp,60000) // 1 min
+    val env = FlinkEvnBuilder.buildFlinkEnv(cp,60000) // 1 min
     val result = env
       .addSource(kafkasource)
       .map { x =>
