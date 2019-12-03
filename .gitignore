@@ -41,3 +41,4 @@ build.log
 /.cache-main
 /.cache-tests
 !/src/main/scala/com/flink/common/param/EnvironmentalKey.scala
+!/checkpoint/
