@@ -1,5 +1,8 @@
 package com.flink.common.entry
+import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.TopicMessageDeserialize
+import com.flink.common.kafka.KafkaManager
+import com.flink.common.kafka.KafkaManager.KafkaMessge
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.api.scala._
 
@@ -11,7 +14,7 @@ object KafkaWordCountTest {
   val cp =
     "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\rocksdbcheckpoint"
   def main(args: Array[String]): Unit = {
-    val env = getFlinkEnv(cp, 300000) // 1 min
+    val env = FlinkEvnBuilder.buildFlinkEnv(cp, 300000) // 1 min
     // 同时支持多个流地运行
     val impressDstream = getImpressDStream(env)
     val clickDStream = getClickDStream(env)
@@ -33,7 +36,7 @@ object KafkaWordCountTest {
     val kafkasource2 = new FlinkKafkaConsumer010[(KafkaMessge)](
       "testimpress".split(",").toList,
       new TopicMessageDeserialize(),
-      getKafkaParam(BROKER))
+      KafkaManager.getKafkaParam(BROKER))
     kafkasource2.setCommitOffsetsOnCheckpoints(true)
     kafkasource2.setStartFromEarliest() //不加这个默认是从上次消费
     env
@@ -53,7 +56,7 @@ object KafkaWordCountTest {
     val kafkasource = new FlinkKafkaConsumer010[(KafkaMessge)](
       TOPIC.split(",").toList,
       new TopicMessageDeserialize(),
-      getKafkaParam(BROKER))
+      KafkaManager.getKafkaParam(BROKER))
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
     env

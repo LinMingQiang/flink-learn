@@ -1,7 +1,9 @@
 package com.flink.common.entry
 
 import com.alibaba.fastjson.JSON
+import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.TopicMessageDeserialize
+import com.flink.common.kafka.KafkaManager
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows
 import org.apache.flink.streaming.api.windowing.time.Time
@@ -10,8 +12,8 @@ object FlinkWindowTest {
   val checkpointPath =
     "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\checkpoint\\FlinkWindowTest"
   def main(args: Array[String]): Unit = {
-    val env = getFlinkEnv(checkpointPath, 3000) // 1 min
-    val kafkasource = getKafkaSource(TOPIC, BROKER,  new TopicMessageDeserialize())
+    val env = FlinkEvnBuilder.buildFlinkEnv(checkpointPath, 3000) // 1 min
+    val kafkasource = KafkaManager.getKafkaSource(TOPIC, BROKER,  new TopicMessageDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
     val result = env
