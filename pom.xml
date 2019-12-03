@@ -1,9 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>flink-kafka</groupId>
-    <artifactId>flink-kafka</artifactId>
+    <groupId>com.flink.learn</groupId>
+    <artifactId>flink-learn</artifactId>
+    <packaging>pom</packaging>
     <version>1.0.0</version>
+    <modules>
+        <module>flink-cep</module>
+        <module>flink-demo</module>
+        <module>resources</module>
+        <module>assembly</module>
+    </modules>
     <name>${project.artifactId}</name>
     <description>My wonderfull scala app</description>
     <inceptionYear>2015</inceptionYear>
@@ -25,6 +32,9 @@
         <fastjson.version>1.2.39</fastjson.version>
 
     </properties>
+
+
+            <dependencyManagement>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.hbase/hbase-client -->
@@ -67,10 +77,55 @@
         </dependency>
 
     </dependencies>
+     </dependencyManagement>
+
+    <profiles>
+        <!--���Ի���-->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <env>dev</env>
+                <scope.value>provided</scope.value>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <!--���ػ���-->
+        <profile>
+            <id>local</id>
+            <properties>
+                <env>local</env>
+                <scope.value>compile</scope.value>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+
+        <!--Ԥ��������-->
+        <profile>
+            <id>pre</id>
+            <properties>
+                <env>pre</env>
+                <scope.value>provided</scope.value>
+            </properties>
+        </profile>
+
+        <!--������ʽ����-->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <env>prod</env>
+                <scope.value>provided</scope.value>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
+        <pluginManagement>
         <plugins>
             <plugin>
                 <!-- 这个是必须的 -->
@@ -142,5 +197,6 @@
                 </executions>
             </plugin>
         </plugins>
+         </pluginManagement>        
     </build>
 </project>
