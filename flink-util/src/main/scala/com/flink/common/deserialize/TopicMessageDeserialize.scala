@@ -1,6 +1,6 @@
 package com.flink.common.deserialize
 
-import com.flink.common.entry.KafkaMessge
+import com.flink.common.kafka.KafkaManager.KafkaMessge
 import org.apache.flink.api.scala.typeutils.CaseClassTypeInfo
 import org.apache.flink.api.scala.{createTypeInformation => _}
 import org.apache.flink.streaming.api.scala._
@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 class TopicMessageDeserialize
     extends KafkaDeserializationSchema[(KafkaMessge)] {
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]) = {
+    println(">>>>>ssdddd")
     (KafkaMessge(new String(record.topic()), new String(record.value())))
   }
   override def isEndOfStream(nextElement: (KafkaMessge)) = {
