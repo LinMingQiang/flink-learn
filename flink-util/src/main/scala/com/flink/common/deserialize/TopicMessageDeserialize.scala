@@ -10,7 +10,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 class TopicMessageDeserialize
     extends KafkaDeserializationSchema[(KafkaMessge)] {
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]) = {
-    println(">>>>>ssdddd")
     (KafkaMessge(new String(record.topic()), new String(record.value())))
   }
   override def isEndOfStream(nextElement: (KafkaMessge)) = {
