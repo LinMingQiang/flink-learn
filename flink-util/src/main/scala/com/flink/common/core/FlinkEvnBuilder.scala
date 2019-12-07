@@ -6,14 +6,15 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedC
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 
 object FlinkEvnBuilder {
+
   /**
-   * @desc 获取env
-   * @param checkpointPath
-   * @return
-   */
+    * @desc 获取env
+    * @param checkpointPath
+    * @return
+    */
   def buildFlinkEnv(checkpointPath: String, checkPointInterval: Long = 6000) = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-
+    env.setParallelism(3)
     env.enableCheckpointing(checkPointInterval) //更新offsets。每60s提交一次
     //超时
     //env.getCheckpointConfig.setCheckpointTimeout(5000)
@@ -24,7 +25,7 @@ object FlinkEvnBuilder {
       ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
     //env.setStateBackend(new FsStateBackend(checkpointPath))
     val rocksDBStateBackend = new RocksDBStateBackend(checkpointPath)
-    rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
+    // rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
     env.setStateBackend(rocksDBStateBackend.asInstanceOf[StateBackend])
     env
   }
