@@ -5,12 +5,15 @@ import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
-import com.flink.common.richf.{AdlogPVRichFlatMapFunction}
-import com.flink.common.sink.{ StateRecoverySinkCheckpointFunc}
+import com.flink.common.richf.AdlogPVRichFlatMapFunction
+import com.flink.common.sink.StateRecoverySinkCheckpointFunc
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
+import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
+
 import scala.collection.JavaConversions._
 object LocalFlinkTest {
   val cp = "file:///C:\\Users\\Master\\Desktop\\rocksdbcheckpoint"
+
   /**
     * @author LMQ
     * @version 1.8.0
@@ -24,7 +27,10 @@ object LocalFlinkTest {
       KafkaManager.getKafkaParam(BROKER))
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
-    val env = FlinkEvnBuilder.buildFlinkEnv(cp,60000) // 1 min
+//    kafkasource.setStartFromSpecificOffsets(
+//      Map(new KafkaTopicPartition("maxwell_new", 0) -> 1L.asInstanceOf[java.lang.Long]));
+
+    val env = FlinkEvnBuilder.buildFlinkEnv(cp, 60000) // 1 min
     val result = env
       .addSource(kafkasource)
       .map { x =>

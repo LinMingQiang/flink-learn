@@ -19,7 +19,7 @@ class OperatorStateBufferingSink(threshold: Int = 3)
     : ListState[(String, Int)] = _ // checkpoint state
   private val bufferedElements = ListBuffer[(String, Int)]() // buffer List
   /**
-    *
+    * 可做批量写出数据，但是有问题就是如果没有数据，那这个缓冲数据会一直不写出来
     * @param value
     */
   override def invoke(value: (String, Int)): Unit = {

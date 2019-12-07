@@ -23,6 +23,7 @@ class AdlogPVRichFlatMapFunction
     */
   override def flatMap(value: AdlogBean, out: Collector[AdlogBean]): Unit = {
     val ls = lastState.value()
+    if(ls == null) StatisticalIndic(0)
     val news = StatisticalIndic(ls.pv + value.pv.pv)
     lastState.update(news)
     value.pv = news
@@ -35,10 +36,10 @@ class AdlogPVRichFlatMapFunction
     * @param parameters
     */
   override def open(parameters: Configuration): Unit = {
+    import org.apache.flink.streaming.api.scala._
     val desc = new ValueStateDescriptor[(StatisticalIndic)](
       "StatisticalIndic",
-      classOf[(StatisticalIndic)],
-      StatisticalIndic(0))
+      createTypeInformation[(StatisticalIndic)])
     desc.enableTimeToLive(ttlConfig) // TTL
     //desc.setQueryable("StatisticalIndic")
     lastState = getRuntimeContext().getState(desc)
