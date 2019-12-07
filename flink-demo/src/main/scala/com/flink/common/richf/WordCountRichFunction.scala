@@ -23,4 +23,5 @@ class WordCountRichFunction  extends RichFlatMapFunction[(String, Int), (String,
       0)
     lastState = getRuntimeContext().getState(desc)
   }
+
 }

@@ -10,20 +10,24 @@ import org.apache.flink.streaming.api.windowing.time.Time
 object FlinkWindowTest {
   // 类似于分批。统计每个窗口内的数据
   val checkpointPath =
-    "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\checkpoint\\FlinkWindowTest"
+    "file:///Users/eminem/workspace/flink/flink-learn/checkpoint"
   def main(args: Array[String]): Unit = {
     val env = FlinkEvnBuilder.buildFlinkEnv(checkpointPath, 3000) // 1 min
-    val kafkasource = KafkaManager.getKafkaSource(TOPIC, BROKER,  new TopicMessageDeserialize())
+    val kafkasource =
+      KafkaManager.getKafkaSource(TOPIC, BROKER, new TopicMessageDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromLatest() //不加这个默认是从上次消费
+    kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
     val result = env
       .addSource(kafkasource)
-       .map(x => (JSON.parseObject(x.msg).getString("dist"), 1))
-       .keyBy(0)
-      // .window(ProcessingTimeSessionWindows.withGap(Time.seconds(10)))
-      .window(TumblingProcessingTimeWindows.of(Time.seconds(10))) // = .timeWindow(Time.seconds(60))
-       .sum(1)
+      .map(x => (x.msg.split("|")(7), 1))
+      .setParallelism(1)
+      .keyBy(0)
+      // .window(ProcessingTimeSessionWindows.withGap(Time.seconds(10))) // 算session
+      .window(TumblingProcessingTimeWindows.of(Time.seconds(4))) // = .timeWindow(Time.seconds(60))
+      .sum(1) // 10s窗口的数据
       .print
+      // .setParallelism(2)
+
     env.execute("jobname")
   }
 }
