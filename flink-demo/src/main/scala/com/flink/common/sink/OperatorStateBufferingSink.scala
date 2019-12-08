@@ -33,7 +33,7 @@ class OperatorStateBufferingSink(threshold: Int = 3)
   }
 
   /**
-    *
+    * 要实现，否则报Rocksdb not find libary
     * @param functionSnapshotContext
     */
   override def snapshotState(
