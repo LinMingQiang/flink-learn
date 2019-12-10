@@ -5,6 +5,7 @@ import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
+import com.flink.common.param.PropertiesUtil
 import com.flink.common.richf.AdlogPVRichFlatMapFunction
 import com.flink.common.sink.StateRecoverySinkCheckpointFunc
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
@@ -21,6 +22,8 @@ object LocalFlinkTest {
     */
   def main(args: Array[String]): Unit = {
     println("LocalFlinkTest ... ")
+    val proPath = args(0)
+    PropertiesUtil.init(proPath);
     val kafkasource = new FlinkKafkaConsumer010[KafkaMessge](
       TOPIC.split(",").toList,
       new TopicMessageDeserialize(),
@@ -30,7 +33,7 @@ object LocalFlinkTest {
 //    kafkasource.setStartFromSpecificOffsets(
 //      Map(new KafkaTopicPartition("maxwell_new", 0) -> 1L.asInstanceOf[java.lang.Long]));
 
-    val env = FlinkEvnBuilder.buildFlinkEnv(cp, 60000) // 1 min
+    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000) // 1 min
     val result = env
       .addSource(kafkasource)
       .map { x =>

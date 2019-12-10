@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON
 import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.{TopicMessageDeserialize, TopicOffsetMsgDeserialize}
 import com.flink.common.kafka.KafkaManager
+import com.flink.common.param.PropertiesUtil
 import com.flink.common.sink.OperatorStateBufferingSink
 import org.apache.flink.streaming.api.scala._
 object FlinkOperatorStateTest {
   val checkpointPath = "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\checkpoint\\FlinkOperatorStateTest"
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(checkpointPath, 60000) // 1 min
+    PropertiesUtil.init("proPath");
+    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, checkpointPath, 60000) // 1 min
     val kafkasource = KafkaManager.getKafkaSource(TOPIC, BROKER,  new TopicOffsetMsgDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费

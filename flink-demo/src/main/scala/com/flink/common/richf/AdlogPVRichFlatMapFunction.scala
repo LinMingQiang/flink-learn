@@ -11,7 +11,8 @@ class AdlogPVRichFlatMapFunction
     extends RichFlatMapFunction[AdlogBean, AdlogBean] {
   var lastState: ValueState[StatisticalIndic] = _
   val ttlConfig = StateTtlConfig
-    .newBuilder(Time.seconds(100000))
+    .newBuilder(Time.seconds(7200)) // 2个小时
+    .cleanupInRocksdbCompactFilter(10000)
     .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
     .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
     .build();
