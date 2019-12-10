@@ -9,9 +9,9 @@
         <module>flink-cep</module>
         <module>flink-demo</module>
         <module>flink-util</module>
+        <module>es-shade</module>
         <module>resources</module>
         <module>assembly</module>
-        <module>es-shade</module>
     </modules>
     <name>${project.artifactId}</name>
     <description>My wonderfull scala app</description>
