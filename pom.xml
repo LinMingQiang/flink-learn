@@ -11,6 +11,7 @@
         <module>flink-util</module>
         <module>resources</module>
         <module>assembly</module>
+        <module>es-shade</module>
     </modules>
     <name>${project.artifactId}</name>
     <description>My wonderfull scala app</description>

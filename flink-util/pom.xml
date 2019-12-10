@@ -10,6 +10,11 @@
 
   <dependencies>
       <dependency>
+          <artifactId>es-shade</artifactId>
+          <groupId>com.flink.learn</groupId>
+          <version>1.0.0</version>
+      </dependency>
+      <dependency>
           <groupId>org.apache.hbase</groupId>
           <artifactId>hbase-client</artifactId>
           <version>1.2.0</version>
