@@ -6,12 +6,15 @@ import org.apache.flink.cep.scala.CEP
 import org.apache.flink.cep.scala.pattern.Pattern
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 object CEPTest {
   val cp = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint"
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(cp, 60000)
+    PropertiesUtil.init("proPath");
+
+    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000)
     val loginEventStream = env.fromCollection(
       List(
         LoginEvent(1, "192.168.0.1", "fail", 1),
