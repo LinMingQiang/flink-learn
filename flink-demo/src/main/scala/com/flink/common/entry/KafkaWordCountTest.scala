@@ -3,6 +3,7 @@ import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
+import com.flink.common.param.PropertiesUtil
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.api.scala._
 
@@ -11,10 +12,11 @@ import com.flink.common.richf.WordCountRichFunction
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
 
 object KafkaWordCountTest {
+  PropertiesUtil.init("proPath");
   val cp =
     "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\rocksdbcheckpoint"
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(cp, 300000) // 1 min
+    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 300000) // 1 min
     // 同时支持多个流地运行
     val impressDstream = getImpressDStream(env)
     val clickDStream = getClickDStream(env)

@@ -4,15 +4,18 @@ import com.alibaba.fastjson.JSON
 import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
+import com.flink.common.param.PropertiesUtil
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows
 import org.apache.flink.streaming.api.windowing.time.Time
 object FlinkWindowTest {
   // 类似于分批。统计每个窗口内的数据
+  PropertiesUtil.init("proPath");
+
   val checkpointPath =
     "file:///Users/eminem/workspace/flink/flink-learn/checkpoint"
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(checkpointPath, 3000) // 1 min
+    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, checkpointPath, 3000) // 1 min
     val kafkasource =
       KafkaManager.getKafkaSource(TOPIC, BROKER, new TopicMessageDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
