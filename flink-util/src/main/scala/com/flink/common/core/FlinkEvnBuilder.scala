@@ -20,7 +20,6 @@ object FlinkEvnBuilder {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.getConfig.setGlobalJobParameters(parameters) // 广播配置
     env.enableCheckpointing(checkPointInterval) //更新offsets。每60s提交一次
-    env.setParallelism(2)
     //超时
     //env.getCheckpointConfig.setCheckpointTimeout(5000)
     // 同一时间只允许进行一个检查点
@@ -34,7 +33,7 @@ object FlinkEvnBuilder {
     // state.backend.rocksdb.ttl.compaction.filter.enabled
     // 说是存储在hdfs，看代码好像不支持 hdfs
     // rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
-    env.setStateBackend(rocksDBStateBackend.asInstanceOf[StateBackend])
+    env.setStateBackend(rocksDBStateBackend)
     env
   }
 }
