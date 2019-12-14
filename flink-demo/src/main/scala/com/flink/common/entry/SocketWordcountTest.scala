@@ -19,7 +19,7 @@ object SocketWordcountTest {
   val cp = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint"
   case class Wordcount(w: String, var c: java.lang.Long)
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 10000) // 1 min
+    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 5000) // 1 min
     val source = env.socketTextStream("localhost", 9876)
     source
       .map(x => Wordcount(x, 1L))
