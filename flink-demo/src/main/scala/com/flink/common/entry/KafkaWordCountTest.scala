@@ -16,7 +16,7 @@ object KafkaWordCountTest {
   val cp =
     "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\rocksdbcheckpoint"
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 300000) // 1 min
+    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 10000) // 1 min
     // 同时支持多个流地运行
     val impressDstream = getImpressDStream(env)
     val clickDStream = getClickDStream(env)

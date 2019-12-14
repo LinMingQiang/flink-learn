@@ -13,7 +13,7 @@ import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
 
 import scala.collection.JavaConversions._
 object LocalFlinkTest {
-  val cp = "file:///C:\\Users\\Master\\Desktop\\rocksdbcheckpoint"
+  val cp = "/Users/eminem/workspace/flink/flink-learn/checkpoint"
 
   /**
     * @author LMQ
