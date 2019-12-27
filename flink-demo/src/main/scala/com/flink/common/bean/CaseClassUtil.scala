@@ -19,4 +19,8 @@ object CaseClassUtil {
       s"""req->${bidReqNum},fill->$fillNum,im->${impressionNum},click->${clickNum}"""
     }
   }
+
+
+  case class Wordcount(w: java.lang.String, var c: java.lang.Long)
+
 }
