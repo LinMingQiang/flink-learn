@@ -21,6 +21,6 @@ object CaseClassUtil {
   }
 
 
-  case class Wordcount(w: java.lang.String, var c: java.lang.Long)
+  case class Wordcount(w: java.lang.String, var c: java.lang.Long, timestamp: Long)
 
 }
