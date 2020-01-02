@@ -1,5 +1,7 @@
 package com.flink.learn.entry
 
+import java.util.Date
+
 import com.flink.learn.bean.CaseClassUtil.Wordcount
 import com.flink.learn.bean.{AdlogBean, StatisticalIndic}
 import com.flink.common.core.FlinkEvnBuilder
@@ -17,7 +19,7 @@ object SocketWordcountTest {
     val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000) // 1 min
     val source = env.socketTextStream("localhost", 9876)
     source
-      .map(x => Wordcount(x, 1L))
+      .map(x => Wordcount(x, 1L, new Date().getTime))
       .keyBy("w")
       .flatMap(new RichFlatMapFunction[Wordcount, Wordcount] {
         var lastState: ValueState[java.lang.Long] = _
