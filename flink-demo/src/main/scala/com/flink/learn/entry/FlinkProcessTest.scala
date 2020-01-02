@@ -1,10 +1,13 @@
 package com.flink.learn.entry
 
+import java.util.Date
+
 import com.alibaba.fastjson.JSON
 import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
-import com.flink.learn.richf.CountWithTimeoutProcessFunction
+import com.flink.learn.bean.CaseClassUtil
+import com.flink.learn.richf.SessiontProcessFunction
 import com.flink.learn.param.PropertiesUtil
 import com.flink.learn.sink.OperatorStateBufferingSink
 import org.apache.flink.streaming.api.TimeCharacteristic
@@ -13,21 +16,24 @@ import org.apache.flink.streaming.api.scala._
 import scala.collection.JavaConversions._
 
 object FlinkProcessTest {
-  PropertiesUtil.init("proPath");
-
-  // 可以实现类似于 session 的功能， 某个key在某个session里面的访问次数。例如 session的间隔为 60s
-  val checkpointPath = "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\checkpoint\\FlinkProcess"
+  // PropertiesUtil.init("proPath");
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, checkpointPath, 60000) // 1 min
+    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000) // 1 min
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-    val kafkasource = KafkaManager.getKafkaSource(TOPIC, BROKER,  new TopicOffsetMsgDeserialize())
-    kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromLatest() //不加这个默认是从上次消费
-   env
-      .addSource(kafkasource)
-      .map(x => (JSON.parseObject(x.msg).getString("dist"),""))
-      .keyBy(0)
-      .process(new CountWithTimeoutProcessFunction)
+
+    //    val source = KafkaManager.getKafkaSource(
+//      TOPIC,
+//      BROKER,
+//      new TopicOffsetMsgDeserialize())
+//    kafkasource.setCommitOffsetsOnCheckpoints(true)
+//    kafkasource.setStartFromLatest() //不加这个默认是从上次消费
+    // env
+    //      .addSource(source)
+    env
+      .socketTextStream("localhost", 9876)
+      .map(x => CaseClassUtil.SessionLogInfo(x, new Date().getTime))
+      .keyBy(_.sessionId)
+      .process(new SessiontProcessFunction)
       .print
     env.execute("FlinkOperatorStateTest")
   }
