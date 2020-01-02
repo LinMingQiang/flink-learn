@@ -5,6 +5,7 @@ import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
 import org.apache.flink.runtime.state.StateBackend
+import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 
@@ -22,8 +23,11 @@ object FlinkEvnBuilder {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.getConfig.setGlobalJobParameters(parameters) // 广播配置
     env.enableCheckpointing(checkPointInterval) //更新offsets。每60s提交一次
+    env.getCheckpointConfig.setMinPauseBetweenCheckpoints(checkPointInterval) // 两个chk最小间隔
     //超时
-    //env.getCheckpointConfig.setCheckpointTimeout(5000)
+    //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
+    // env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
+
     // 同一时间只允许进行一个检查点
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1);
     // 表示一旦Flink处理程序被cancel后，会保留Checkpoint数据，以便根据实际需要恢复到指定的Checkpoint
