@@ -24,9 +24,11 @@ object FlinkEvnBuilder {
     env.getConfig.setGlobalJobParameters(parameters) // 广播配置
     env.enableCheckpointing(checkPointInterval) //更新offsets。每60s提交一次
     env.getCheckpointConfig.setMinPauseBetweenCheckpoints(checkPointInterval) // 两个chk最小间隔
+
     //超时
     //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
-    // env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
+     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+     env.getConfig.setAutoWatermarkInterval(5000L) // 设置 触发水位计算 间隔
 
     // 同一时间只允许进行一个检查点
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1);
@@ -36,8 +38,8 @@ object FlinkEvnBuilder {
     //env.setStateBackend(new FsStateBackend(checkpointPath))
     val rocksDBStateBackend = new RocksDBStateBackend(checkpointPath, true)
     rocksDBStateBackend.enableTtlCompactionFilter() // 启用ttl后台增量清除功能
-    println(rocksDBStateBackend.isIncrementalCheckpointsEnabled)
-    println(rocksDBStateBackend.isTtlCompactionFilterEnabled)
+    // println(rocksDBStateBackend.isIncrementalCheckpointsEnabled)
+    // println(rocksDBStateBackend.isTtlCompactionFilterEnabled)
     // state.backend.rocksdb.ttl.compaction.filter.enabled
     // 说是存储在hdfs，看代码好像不支持 hdfs
     // rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
