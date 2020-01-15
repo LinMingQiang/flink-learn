@@ -12,6 +12,7 @@
         <module>es-shade</module>
         <module>resources</module>
         <module>assembly</module>
+        <module>flink-sql</module>
     </modules>
     <name>${project.artifactId}</name>
     <description>My wonderfull scala app</description>
