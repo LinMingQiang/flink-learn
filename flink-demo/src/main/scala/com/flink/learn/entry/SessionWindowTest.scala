@@ -16,7 +16,7 @@ object SessionWindowTest {
 
   def main(args: Array[String]): Unit = {
 
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000) // 1 min
+    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, cp, 60000) // 1 min
     env.setParallelism(1)
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime) // 时间设为eventime
     env.getConfig.setAutoWatermarkInterval(5000L)

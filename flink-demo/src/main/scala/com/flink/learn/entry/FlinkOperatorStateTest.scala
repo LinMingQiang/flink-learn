@@ -11,7 +11,7 @@ object FlinkOperatorStateTest {
   val checkpointPath = "file:///C:\\Users\\mqlin\\Desktop\\testdata\\flink\\checkpoint\\FlinkOperatorStateTest"
   def main(args: Array[String]): Unit = {
     PropertiesUtil.init("proPath");
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, checkpointPath, 60000) // 1 min
+    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, checkpointPath, 60000) // 1 min
     val kafkasource = KafkaManager.getKafkaSource(TOPIC, BROKER,  new TopicOffsetMsgDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
