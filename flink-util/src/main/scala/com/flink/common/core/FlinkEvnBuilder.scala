@@ -3,6 +3,7 @@ package com.flink.common.core
 import org.apache.flink.api.common.state.StateTtlConfig
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
 import org.apache.flink.runtime.state.StateBackend
 import org.apache.flink.streaming.api.TimeCharacteristic
@@ -27,8 +28,8 @@ object FlinkEvnBuilder {
 
     //超时
     //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
-     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
-     env.getConfig.setAutoWatermarkInterval(5000L) // 设置 触发水位计算 间隔
+    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+    env.getConfig.setAutoWatermarkInterval(5000L) // 设置 触发水位计算 间隔
 
     // 同一时间只允许进行一个检查点
     env.getCheckpointConfig.setMaxConcurrentCheckpoints(1);
@@ -47,10 +48,12 @@ object FlinkEvnBuilder {
     env
   }
 
-
-
-  def buildEnv(cp: String): Unit = {
-
+  /**
+    *
+    * @return
+    */
+  def buildEnv(): ExecutionEnvironment = {
+    ExecutionEnvironment.getExecutionEnvironment
   }
 
   /**

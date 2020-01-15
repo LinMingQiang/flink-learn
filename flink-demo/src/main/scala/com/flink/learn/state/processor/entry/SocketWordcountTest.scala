@@ -15,7 +15,7 @@ import org.apache.flink.streaming.api.scala._
 object SocketWordcountTest {
 
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000) // 1 min
+    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, cp, 60000) // 1 min
     val source = env.socketTextStream("localhost", 9876)
     source
       .map(x => Wordcount(x, 1L, new Date().getTime))
