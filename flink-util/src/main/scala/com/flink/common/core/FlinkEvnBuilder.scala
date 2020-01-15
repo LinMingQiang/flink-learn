@@ -16,7 +16,7 @@ object FlinkEvnBuilder {
     * @param checkpointPath
     * @return
     */
-  def buildFlinkEnv(
+  def buildStreamingEnv(
       parameters: ParameterTool,
       checkpointPath: String,
       checkPointInterval: Long = 6000): StreamExecutionEnvironment = {
@@ -45,6 +45,12 @@ object FlinkEvnBuilder {
     // rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
     env.setStateBackend(rocksDBStateBackend)
     env
+  }
+
+
+
+  def buildEnv(cp: String): Unit = {
+
   }
 
   /**
