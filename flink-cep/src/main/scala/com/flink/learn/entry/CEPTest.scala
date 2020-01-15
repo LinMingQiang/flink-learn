@@ -14,7 +14,7 @@ object CEPTest {
   def main(args: Array[String]): Unit = {
     PropertiesUtil.init("proPath");
 
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000)
+    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, cp, 60000)
     val loginEventStream = env.fromCollection(
       List(
         LoginEvent(1, "192.168.0.1", "fail", 1),
