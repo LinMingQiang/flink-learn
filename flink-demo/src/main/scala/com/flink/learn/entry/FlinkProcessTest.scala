@@ -18,7 +18,7 @@ import scala.collection.JavaConversions._
 object FlinkProcessTest {
   // PropertiesUtil.init("proPath");
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000) // 1 min
+    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, cp, 60000) // 1 min
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
     //    val source = KafkaManager.getKafkaSource(

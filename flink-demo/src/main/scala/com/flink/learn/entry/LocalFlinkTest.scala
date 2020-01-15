@@ -34,7 +34,7 @@ object LocalFlinkTest {
 //    kafkasource.setStartFromSpecificOffsets(
 //      Map(new KafkaTopicPartition("maxwell_new", 0) -> 1L.asInstanceOf[java.lang.Long]));
 
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, cp, 60000) // 1 min
+    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, cp, 60000) // 1 min
     val result = env
       .addSource(kafkasource)
       .map { x =>

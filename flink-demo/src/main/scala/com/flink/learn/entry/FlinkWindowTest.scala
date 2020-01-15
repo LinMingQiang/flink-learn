@@ -15,7 +15,7 @@ object FlinkWindowTest {
   val checkpointPath =
     "file:///Users/eminem/workspace/flink/flink-learn/checkpoint"
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildFlinkEnv(PropertiesUtil.param, checkpointPath, 3000) // 1 min
+    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, checkpointPath, 3000) // 1 min
     val kafkasource =
       KafkaManager.getKafkaSource(TOPIC, BROKER, new TopicMessageDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
