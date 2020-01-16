@@ -4,6 +4,7 @@ import java.util.Date
 
 import com.flink.common.core.FlinkEvnBuilder
 import com.flink.learn.bean.CaseClassUtil.Wordcount
+import com.flink.learn.bean.WordCountPoJo
 import com.flink.learn.entry.cp
 import com.flink.learn.param.PropertiesUtil
 import org.apache.flink.api.common.functions.RichFlatMapFunction
@@ -16,14 +17,18 @@ object SocketWordcountTest {
 
   def main(args: Array[String]): Unit = {
     val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, cp, 60000) // 1 min
-    val source = env.socketTextStream("localhost", 9876)
+    val source = env.socketTextStream("localhost", 9877)
     source
-      .map(x => Wordcount(x, 1L, new Date().getTime))
+      .map(x => {
+        val s = new WordCountPoJo()
+        s.w = x;s.c = 1L; s.timestamp = new Date().getTime
+        s
+      })
       .keyBy(_.w)
-      .flatMap(new RichFlatMapFunction[Wordcount, Wordcount] {
-        var lastState: ValueState[Wordcount] = _
-        override def flatMap(value: Wordcount,
-                             out: Collector[Wordcount]): Unit = {
+      .flatMap(new RichFlatMapFunction[WordCountPoJo, WordCountPoJo] {
+        var lastState: ValueState[WordCountPoJo] = _
+        override def flatMap(value: WordCountPoJo,
+                             out: Collector[WordCountPoJo]): Unit = {
           var ls = lastState.value()
           if (ls == null) {
             ls = value
@@ -35,9 +40,9 @@ object SocketWordcountTest {
         }
         override def open(parameters: Configuration): Unit = {
           try {
-            val desc = new ValueStateDescriptor[Wordcount](
+            val desc = new ValueStateDescriptor[WordCountPoJo](
               "wordcountState",
-              createTypeInformation[Wordcount])
+              createTypeInformation[WordCountPoJo])
             lastState = getRuntimeContext().getState(desc)
           } catch {
             case e: Throwable => e.printStackTrace()

@@ -20,6 +20,8 @@ object CaseClassUtil {
     }
   }
 
+  case class WordCountScalaPoJo(word: String, var count: Long, var lastTime: String)
+
   case class Wordcount(w: java.lang.String,
                        var c: java.lang.Long,
                        timestamp: Long)
