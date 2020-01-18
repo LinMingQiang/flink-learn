@@ -10,11 +10,12 @@ object FlinkLearnBatchSQLEntry {
     val env = ExecutionEnvironment.getExecutionEnvironment
     val tEnv = BatchTableEnvironment.create(env)
     wordCount(env, tEnv)
-
   }
 
   /**
     *
+    * @param env
+    * @param tEnv
     */
   def wordCount(env: ExecutionEnvironment,
                 tEnv: BatchTableEnvironment): Unit = {
