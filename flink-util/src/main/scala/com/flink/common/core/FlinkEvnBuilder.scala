@@ -63,6 +63,7 @@ object FlinkEvnBuilder {
   def getStateTTLConf(timeOut: Long = 120): StateTtlConfig = {
     StateTtlConfig
       .newBuilder(Time.minutes(timeOut)) // 2个小时
+      .updateTtlOnReadAndWrite() // 每次读取或者更新这个key的值的时候都对ttl做更新，所以清理的时间是 lastpdatetime + outtime
       .cleanupFullSnapshot() // 创建完整快照时清理
       .cleanupInBackground()
       .cleanupInRocksdbCompactFilter() // 达到100个过期就清理？
