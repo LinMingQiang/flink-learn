@@ -7,7 +7,7 @@ object FlinkSQLSourceKafka {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     val tEnv = StreamTableEnvironment.create(env)
-    tEnv.sqlUpdate(createFromMysql)
+    tEnv.sqlUpdate(createFromkafkasql)
     tEnv
       .sqlQuery(s"""select * from ssp_sdk_report""")
       .toAppendStream[Row]
@@ -16,19 +16,24 @@ object FlinkSQLSourceKafka {
     tEnv.execute("sql test")
   }
 
-  val sql = s"""CREATE TABLE pvuv_sink (
-               |    dt VARCHAR,
-               |    pv BIGINT,
-               |    uv BIGINT
+
+
+
+  val createFromkafkasql = s"""CREATE TABLE ssp_sdk_report (
+               |    lon VARCHAR,
+               |    rideTime VARCHAR
                |) WITH (
                |    'connector.type' = 'kafka',
-               |    'connector.topic' = 'user_behavior',
+               |    'connector.topic' = 'mobssprequestlog',
                |    'connector.startup-mode' = 'earliest-offset',
                |    'connector.properties.1.key' = 'bootstrap.servers',
-               |    'connector.properties.1.value' = 'localhost:9092',
+               |    'connector.properties.1.value' = '10.21.33.28:9092,10.21.33.29:9092',
                |    'update-mode' = 'append',
-               |    'format.type' = 'json',
-               |    'format.derive-schema' = 'true'
+               |    'format.type' = 'csv',
+               |    'format.fields.0.name' = 'lon',
+               |  'format.fields.0.type' = 'string',
+               |  'format.fields.1.name' = 'rideTime',
+               |  'format.fields.1.type' = 'string'
                |)""".stripMargin
 
   val createFromMysql = s"""CREATE TABLE ssp_sdk_report (
