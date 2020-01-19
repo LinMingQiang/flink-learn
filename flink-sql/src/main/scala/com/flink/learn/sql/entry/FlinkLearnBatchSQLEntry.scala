@@ -4,6 +4,7 @@ import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.table.api.scala.BatchTableEnvironment
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api.scala._
+import org.apache.flink.types.Row
 object FlinkLearnBatchSQLEntry {
   def main(args: Array[String]): Unit = {
     // set up execution environment
@@ -31,7 +32,9 @@ object FlinkLearnBatchSQLEntry {
     val table =
       tEnv.sqlQuery("SELECT word, SUM(frequency) FROM WordCount GROUP BY word")
 
-    table.toDataSet[WC].print()
+   // table.toDataSet[WC].print()
+    table.toDataSet[Row].print()
+
   }
   // *************************************************************************
   //     USER DATA TYPES

@@ -34,6 +34,11 @@
       <version>${flink.version}</version>
       <scope>${scope.value}</scope>
     </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.30</version>
+    </dependency>
 <!--    <dependency>-->
 <!--      <groupId>org.apache.flink</groupId>-->
 <!--      <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>-->
@@ -46,6 +51,11 @@
       <version>${flink.version}</version>
       <scope>${scope.value}</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-jdbc_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -54,17 +64,25 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.6.1</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-          <encoding>UTF-8</encoding>
-          <maxmem>1024m</maxmem>
-          <fork>true</fork>
-        </configuration>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>flink-learn</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <finalName>flink-learn</finalName>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>com.lmq.flink.learn.sql</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
-
       <plugin>
         <!-- 这个是必须的 -->
         <groupId>net.alchim31.maven</groupId>
@@ -106,6 +124,7 @@
           </execution>
         </executions>
       </plugin>
+
     </plugins>
   </build>
 </project>

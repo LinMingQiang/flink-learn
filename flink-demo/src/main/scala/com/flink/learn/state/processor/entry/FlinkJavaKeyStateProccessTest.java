@@ -4,7 +4,6 @@ import com.flink.learn.bean.WordCountPoJo;
 import com.flink.learn.reader.WordCountKeyreader;
 import com.flink.learn.reader.WordCountPoJoKeyreader;
 import com.flink.learn.trans.AccountJavaKeyedStateBootstrapFunction;
-import com.flink.learn.trans.AccountKeyedStateBootstrapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
