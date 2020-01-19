@@ -67,13 +67,11 @@
         <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
-            <id>flink-learn</id>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
             <configuration>
-              <finalName>flink-learn</finalName>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>com.lmq.flink.learn.sql</mainClass>
