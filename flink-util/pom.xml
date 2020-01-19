@@ -12,7 +12,7 @@
       <dependency>
           <artifactId>es-shade</artifactId>
           <groupId>com.flink.learn</groupId>
-          <version>1.0.0</version>
+          <version>${project.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.hbase</groupId>
