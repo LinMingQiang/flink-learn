@@ -6,9 +6,9 @@
     <packaging>pom</packaging>
     <version>1.0.0</version>
     <modules>
+        <module>flink-util</module>
         <module>flink-cep</module>
         <module>flink-demo</module>
-        <module>flink-util</module>
         <module>es-shade</module>
         <module>resources</module>
         <module>flink-sql</module>
