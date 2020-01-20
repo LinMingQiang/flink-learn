@@ -1,5 +1,7 @@
 package com.flink.learn.sql.common
 
+import com.flink.common.core.FlinkLearnPropertiesUtil
+
 object SQLManager {
 
   val createFromkafkasql = s"""CREATE TABLE ssp_sdk_report (
@@ -48,15 +50,15 @@ object SQLManager {
                               |    'format.ignore-parse-errors' = 'true'
                               |)""".stripMargin
 
-  val createFromMysql = s"""CREATE TABLE ssp_sdk_report (
+  def createFromMysql(tablename: String) = s"""CREATE TABLE ${tablename} (
                            |    bid_req_num BIGINT,
                            |    md_key VARCHAR
                            |) WITH (
                            |    'connector.type' = 'jdbc',
-                           |    'connector.url' = 'jdbc:mysql://ip:3306/databases',
-                           |    'connector.table' = 'table',
-                           |    'connector.username' = 'root',
-                           |    'connector.password' = '123456',
+                           |    'connector.url' = '${FlinkLearnPropertiesUtil.MYSQL_HOST}',
+                           |    'connector.table' = '${tablename}',
+                           |    'connector.username' = '${FlinkLearnPropertiesUtil.MYSQL_USER}',
+                           |    'connector.password' = '${FlinkLearnPropertiesUtil.MYSQL_PASSW}',
                            |    'connector.write.flush.max-rows' = '1'
                            |)""".stripMargin
 
@@ -74,7 +76,7 @@ object SQLManager {
   //                              |    'connector.topic' = 'kafka-flink-sql',  -- kafka topic
   //                              |    'connector.startup-mode' = 'earliest-offset', -- 从起始 offset 开始读取.optional: valid modes are "earliest-offset", "latest-offset", "group-offsets", or "specific-offsets"
   //                              |    'connector.properties.0.key' = 'bootstrap.servers',
-  //                              |    'connector.properties.0.value' = '10.21.33.28:9092,10.21.33.29:9092,10.21.131.11:9092',
+  //                              |    'connector.properties.0.value' = 'localhost:9092',
   //                              |    'connector.properties.1.key' = 'group.id',
   //                              |    'connector.properties.1.value' = 'testGroup',
   //                              |    'update-mode' = 'append',
