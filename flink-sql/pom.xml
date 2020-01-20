@@ -15,12 +15,12 @@
       <version>${flink.version}</version>
       <scope>${scope.value}</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
-      <version>${flink.version}</version>
-      <scope>${scope.value}</scope>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.apache.flink</groupId>-->
+<!--      <artifactId>flink-table-planner_${scala.binary.version}</artifactId>-->
+<!--      <version>${flink.version}</version>-->
+<!--      <scope>${scope.value}</scope>-->
+<!--    </dependency>-->
 
     <dependency>
       <groupId>org.apache.flink</groupId>
@@ -39,17 +39,34 @@
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.30</version>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.apache.flink</groupId>-->
-<!--      <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>-->
-<!--      <version>${flink.version}</version>-->
-<!--      <scope>${scope.value}</scope>-->
-<!--    </dependency>-->
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+      <scope>${scope.value}</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-csv</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-json</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-connector-kafka-0.10_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+      <scope>${scope.value}</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-table-common</artifactId>
       <version>${flink.version}</version>
-      <scope>${scope.value}</scope>
+        <scope>${scope.value}</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
@@ -74,7 +91,10 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.lmq.flink.learn.sql</mainClass>
+                  <mainClass>com.flink.learn.sql.entry.FlinkSQLSourceKafka</mainClass>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/services/org.apache.flink.table.factories.TableFactory</resource>
                 </transformer>
               </transformers>
             </configuration>
