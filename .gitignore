@@ -41,3 +41,17 @@ build.log
 /.cache-main
 /.cache-tests
 /checkpoint/
+/flink-demo/dependency-reduced-pom.xml
+/flink-util/dependency-reduced-pom.xml
+/resources/target/
+/flink-util/target/
+/flink-sql/target/
+/flink-sql/dependency-reduced-pom.xml
+/flink-demo/target/
+/flink-cep/target/
+/flink-cep/dependency-reduced-pom.xml
+/flink-batch/target/
+/es-shade/target/
+/es-shade/dependency-reduced-pom.xml
+/assembly/target/
+/savepoint/
