@@ -40,7 +40,7 @@ object SQLManager {
                               |    'connector.type' = 'kafka',
                               |    'connector.version' = '0.10',
                               |    'connector.topic' = 'impresslog',
-                              |    'connector.startup-mode' = 'latest-offset', -- earliest-offset
+                              |    'connector.startup-mode' = 'latest-offset', -- earliest-offset /  group-offsets
                               |    'connector.properties.0.key' = 'bootstrap.servers',
                               |    'connector.properties.0.value' = 'localhost:9092',
                               |    'update-mode' = 'append',
