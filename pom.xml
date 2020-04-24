@@ -93,7 +93,6 @@
      </dependencyManagement>
 
     <profiles>
-        <!--���Ի���-->
         <profile>
             <id>dev</id>
             <properties>
@@ -104,7 +103,6 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
         </profile>
-        <!--���ػ���-->
         <profile>
             <id>local</id>
             <properties>
@@ -116,7 +114,6 @@
             </activation>
         </profile>
 
-        <!--Ԥ��������-->
         <profile>
             <id>pre</id>
             <properties>
@@ -125,7 +122,6 @@
             </properties>
         </profile>
 
-        <!--������ʽ����-->
         <profile>
             <id>prod</id>
             <properties>
