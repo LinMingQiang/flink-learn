@@ -5,4 +5,4 @@
 #-s file:///Users/eminem/workspace/flink/flink-learn/savepoint/savepoint-c4fb21-d0e5d7045b40 \
 
 echo "start ........"
-flink run -c com.flink.learn.sql.entry.FlinkSQLConnectEntry /Users/eminem/workspace/flink/flink-learn/flink-sql/target/flink-sql-1.0.0.jar
+flink run -c com.flink.learn.entry.KafkaWordCountTest /Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
