@@ -13,6 +13,12 @@ object FlinkLearnPropertiesUtil extends PropertiesTrait{
   lazy val KAFKA_REQ_LOG_TOPIC = getProperties("")
 
 
+  lazy val TOPIC = getProperties("kafka.source.topics")
+  lazy val BROKER = getProperties("kafka.brokers")
+  lazy val CHECKPOINT_PATH = getProperties("flink.checkpoint.path")+ s"/${DateFormatUtils.format(new Date(), "yyyyMMddHHMM")}"
+  lazy val CHECKPOINT_INTERVAL = getProperties("flink.checkpoint.interval").toLong
+  lazy val ES_HOSTS = getProperties("es.hosts")
+  lazy val ES_CLUSTERNAME = getProperties("es.clustername")
 
   lazy val MYSQL_HOST = getProperties("mysql.host")
   lazy val MYSQL_USER = getProperties("mysql.user")
