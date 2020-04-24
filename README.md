@@ -1,9 +1,7 @@
-# flink-demo 
-flink 1.9.0 <br>
+# Flink Learn
+flink 1.10.0 <br>
 kafka 0.10 <br>
 scala 2.11 <br>
-整体流程示意 <br>
-kafka ->  flink (state管理) -> hbase(redis, es ) <br>
 
 idea 创建 maven 模板 <br>
 https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/jar.html <br>
