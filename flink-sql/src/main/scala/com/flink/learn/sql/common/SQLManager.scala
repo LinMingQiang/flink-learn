@@ -4,7 +4,7 @@ import com.flink.common.core.FlinkLearnPropertiesUtil
 
 object SQLManager {
 
-  val createFromkafkasql = s"""CREATE TABLE ssp_sdk_report (
+  val createFromkafkasql = s"""CREATE TABLE reportTbl (
                               |    lon VARCHAR,
                               |    rideTime VARCHAR,
                               |    a VARCHAR,
@@ -13,34 +13,12 @@ object SQLManager {
                               |    f VARCHAR,
                               |    g VARCHAR,
                               |    h VARCHAR,
-                              |    j VARCHAR,
-                              |    k VARCHAR,
-                              |    i VARCHAR,
-                              |    l VARCHAR,
-                              |     q VARCHAR,
-                              |      w VARCHAR,
-                              |       e VARCHAR,
-                              |        r VARCHAR,
-                              |         t VARCHAR,
-                              |          y VARCHAR,
-                              |           zz VARCHAR,
-                              |            la VARCHAR,
-                              |             ss VARCHAR,
-                              |             dd VARCHAR,
-                              |              ff VARCHAR,
-                              |               gg VARCHAR,
-                              |                dada VARCHAR,
-                              |                dadaa VARCHAR,
-                              |                er VARCHAR,
-                              |                aa VARCHAR,
-                              |                nn VARCHAR,
-                              |                mm VARCHAR
-                              |
+                              |    j VARCHAR
                               |) WITH (
                               |    'connector.type' = 'kafka',
                               |    'connector.version' = '0.10',
-                              |    'connector.topic' = 'impresslog',
-                              |    'connector.startup-mode' = 'latest-offset', -- earliest-offset /  group-offsets
+                              |    'connector.topic' = 'requestlog',
+                              |    'connector.startup-mode' = 'earliest-offset', -- earliest-offset /  group-offsets
                               |    'connector.properties.0.key' = 'bootstrap.servers',
                               |    'connector.properties.0.value' = 'localhost:9092',
                               |    'update-mode' = 'append',
@@ -50,19 +28,59 @@ object SQLManager {
                               |    'format.ignore-parse-errors' = 'true'
                               |)""".stripMargin
 
-  def createFromMysql(tablename: String) = s"""CREATE TABLE ${tablename} (
+  // -- earliest-offset /  group-offsets
+  def createStreamFromKafka(topic: String, tableName: String): String = {
+    s"""CREATE TABLE $tableName (
+       |    id VARCHAR,
+       |    name VARCHAR,
+       |    age INT
+       |) WITH (
+       |    'connector.type' = 'kafka',
+       |    'connector.version' = '0.10',
+       |    'connector.topic' = '$topic',
+       |    'connector.startup-mode' = 'latest-offset',
+       |    'connector.properties.zookeeper.connect' = 'localhost:2181',
+       |    'connector.properties.bootstrap.servers' = 'localhost:9092',
+       |    'connector.properties.group.id' = 'testGroup',
+       |    'update-mode' = 'append',
+       |    'format.type' = 'json',
+       |    'format.derive-schema' = 'true'
+       |)""".stripMargin
+  }
+//  def createStreamFromKafka(topic: String, tableName: String): String = {
+//    s"""CREATE TABLE $tableName (
+//       |    id VARCHAR,
+//       |    name VARCHAR,
+//       |    age INT
+//       |) WITH (
+//       |    'connector.type' = 'kafka',
+//       |    'connector.version' = '0.10',
+//       |    'connector.topic' = '$topic',
+//       |    'connector.startup-mode' = 'latest-offset',
+//       |    'connector.properties.zookeeper.connect' = 'localhost:2181',
+//       |    'connector.properties.bootstrap.servers' = 'localhost:9092',
+//       |    'connector.properties.group.id' = 'testGroup',
+//       |    'update-mode' = 'append',
+//       |    'format.type' = 'csv',
+//       |    'format.field-delimiter' = ',',
+//       |    'format.derive-schema' = 'true',
+//       |    'format.ignore-parse-errors' = 'true'
+//       |)""".stripMargin
+//  }
+
+
+  def createFromMysql(sourceTbl: String, targetTbl: String) =
+    s"""CREATE TABLE ${targetTbl} (
                            |    bid_req_num BIGINT,
                            |    md_key VARCHAR
                            |) WITH (
                            |    'connector.type' = 'jdbc',
                            |    'connector.url' = '${FlinkLearnPropertiesUtil.MYSQL_HOST}',
-                           |    'connector.table' = '${tablename}',
+                           |    'connector.table' = '${sourceTbl}',
                            |    'connector.username' = '${FlinkLearnPropertiesUtil.MYSQL_USER}',
                            |    'connector.password' = '${FlinkLearnPropertiesUtil.MYSQL_PASSW}',
                            |    'connector.write.flush.max-rows' = '1'
                            |)""".stripMargin
-
-
   //  val createFromkafkasql = s"""-- source表
   //                              |CREATE TABLE user_log (
   //                              |    user_id VARCHAR,
@@ -83,6 +101,5 @@ object SQLManager {
   //                              |    'format.type' = 'json',  -- 数据源格式为 json
   //                              |    'format.derive-schema' = 'true' -- 从 DDL schema 确定 json 解析规则
   //                              |)""".stripMargin
-
 
 }
