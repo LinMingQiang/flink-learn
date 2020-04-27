@@ -16,11 +16,17 @@ import org.apache.flink.types.Row
 
 object FlinkLearnStreamDDLSQLEntry {
 
+  /**
+    * 使用sql的方式连接source
+    * @param args
+    */
   def main(args: Array[String]): Unit = {
     FlinkLearnPropertiesUtil.init(
       "/Users/eminem/workspace/flink/flink-learn/dist/conf/application.properties",
       "test")
-    val env = FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param,FlinkLearnPropertiesUtil.CHECKPOINT_PATH,
+    val env = FlinkEvnBuilder.buildStreamingEnv(
+      FlinkLearnPropertiesUtil.param,
+      FlinkLearnPropertiesUtil.CHECKPOINT_PATH,
       10000) // 1 min
     val sett =
       EnvironmentSettings.newInstance.useBlinkPlanner.inStreamingMode.build

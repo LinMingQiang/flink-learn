@@ -1,23 +1,28 @@
-package com.flink.learn.sql.entry
+package com.flink.learn.sql.stream.entry
+
 import com.flink.common.core.{FlinkEvnBuilder, FlinkLearnPropertiesUtil}
 import org.apache.flink.api.common.typeinfo.Types
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.EnvironmentSettings
-import org.apache.flink.table.api.scala.{StreamTableEnvironment, _}
+import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.table.descriptors.{Csv, Json, Kafka, Schema}
 import org.apache.flink.types.Row
 import org.apache.flink.api.scala._
-import org.apache.flink.table.factories.{DeserializationSchemaFactory, TableSourceFactory}
-import org.codehaus.commons.compiler.ICompilerFactory
-import org.codehaus.janino.CompilerFactory
-object FlinkSQLConnectEntry {
+import org.apache.flink.table.api.scala._
+object FlinkLearnStreamConnectEntry {
+
+  /**
+    * 使用api的方式连接source
+    * @param args
+    */
   def main(args: Array[String]): Unit = {
     FlinkLearnPropertiesUtil.init(
       "/Users/eminem/workspace/flink/flink-learn/dist/conf/application.properties",
       "test")
     // val env = StreamExecutionEnvironment.getExecutionEnvironment
-    val env = FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param,
-      FlinkLearnPropertiesUtil.CHECKPOINT_PATH, 10000) // 1 min
+    val env = FlinkEvnBuilder.buildStreamingEnv(
+      FlinkLearnPropertiesUtil.param,
+      FlinkLearnPropertiesUtil.CHECKPOINT_PATH,
+      10000) // 1 min
     val sett =
       EnvironmentSettings.newInstance.useBlinkPlanner.inStreamingMode.build
     val streamTableEnv = StreamTableEnvironment.create(env, sett)
@@ -28,9 +33,9 @@ object FlinkSQLConnectEntry {
       .property("group.id", "test2")
       .property("zookeeper.connect", "localhost:2181")
       .startFromLatest()
-   // kafkaConnector.startFromEarliest()
+    // kafkaConnector.startFromEarliest()
     csvFormat(streamTableEnv, kafkaConnector)
-   // jsonFormat(streamTableEnv, kafkaConnector)
+    // jsonFormat(streamTableEnv, kafkaConnector)
     streamTableEnv.execute("sql test")
 
   }
@@ -62,7 +67,8 @@ object FlinkSQLConnectEntry {
 //      .sqlQuery("select * from test")
 //      .toAppendStream[Row]
 //      .print()
-    streamTableEnv.sqlQuery(s"""select id,count(distinct age) from test group by id""")
+    streamTableEnv
+      .sqlQuery(s"""select id,count(distinct age) from test group by id""")
       .toRetractStream[Row]
       .filter(_._1)
       .map(_._2)
@@ -76,7 +82,8 @@ object FlinkSQLConnectEntry {
     */
   def jsonFormat(streamTableEnv: StreamTableEnvironment,
                  kafkaConnector: Kafka): Unit = {
-    val jsonFormat = new Json().deriveSchema()
+    val jsonFormat = new Json()
+      .deriveSchema()
       .failOnMissingField(false)
 
     val schema = new Schema()
