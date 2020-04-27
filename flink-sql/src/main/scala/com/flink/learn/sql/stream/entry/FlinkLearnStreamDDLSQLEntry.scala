@@ -5,16 +5,8 @@ import com.flink.common.core.{FlinkEvnBuilder, FlinkLearnPropertiesUtil}
 import com.flink.learn.sql.common.{SQLManager, TableSinkManager}
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
-import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
 import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.table.api.{
-  EnvironmentSettings,
-  PlannerConfig,
-  StreamQueryConfig,
-  TableConfig
-}
+import org.apache.flink.table.api.{StreamQueryConfig}
 import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.table.sinks.CsvTableSink
 import org.apache.flink.types.Row
@@ -31,14 +23,14 @@ object FlinkLearnStreamDDLSQLEntry {
       "test")
     val tEnv = FlinkEvnBuilder.buildStreamTableEnv(param,
                                                    CHECKPOINT_PATH,
-                                                   10000) // 1 min
+                                                   10000,
+                                                   Time.minutes(1),
+                                                   Time.minutes(6))
     // 创建source 表
     tEnv.sqlUpdate(SQLManager.createStreamFromKafka("test", "test"))
     tEnv
-      .sqlQuery(s"""select id,count(*) from test group by id""")
-      .toRetractStream[Row](
-        new StreamQueryConfig(Time.minutes(1).toMilliseconds,
-                              Time.minutes(6).toMilliseconds))
+      .sqlQuery(s"""select id,count(*) num from test group by id""")
+      .toRetractStream[Row]
       .filter(_._1)
       .map(_._2)
       .print
@@ -61,8 +53,7 @@ object FlinkLearnStreamDDLSQLEntry {
       1, // optional: write to a single file
       WriteMode.OVERWRITE
     )
-    tEnv.sqlUpdate(
-      s"""insert into csvSinkTbl select * from ssp_sdk_report""")
-    // tEnv.sqlQuery(s"""select * from test""").insertInto("csvSinkTbl")
+    tEnv.sqlUpdate(s"""insert into csvSinkTbl select * from ssp_sdk_report""")
+    // tEnv.sqlQuery(s"""select id,count(*) num from test group by id""").insertInto("csvSinkTbl")
   }
 }

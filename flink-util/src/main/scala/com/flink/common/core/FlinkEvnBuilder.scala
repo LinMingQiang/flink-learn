@@ -56,15 +56,18 @@ object FlinkEvnBuilder {
     * @param checkpointPath
     * @param checkPointInterval
     */
-  def buildStreamTableEnv(
-      parameters: ParameterTool,
-      checkpointPath: String,
-      checkPointInterval: Long = 6000): StreamTableEnvironment = {
+  def buildStreamTableEnv(parameters: ParameterTool,
+                          checkpointPath: String,
+                          checkPointInterval: Long = 6000,
+                          stateMinT: Time,
+                          stateMaxT: Time): StreamTableEnvironment = {
     val streamEnv =
       buildStreamingEnv(parameters, checkpointPath, checkPointInterval)
     val sett =
       EnvironmentSettings.newInstance.useBlinkPlanner.inStreamingMode.build
     val streamTableEnv = StreamTableEnvironment.create(streamEnv, sett)
+    streamTableEnv.getConfig
+      .setIdleStateRetentionTime(stateMinT, stateMaxT)
     streamTableEnv
   }
 

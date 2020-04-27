@@ -28,13 +28,14 @@ object FlinkLearnStreamConnectEntry {
       "/Users/eminem/workspace/flink/flink-learn/dist/conf/application.properties",
       "test")
     // val env = StreamExecutionEnvironment.getExecutionEnvironment
-    val streamTableEnv = FlinkEvnBuilder.buildStreamTableEnv(param,
-                                                             CHECKPOINT_PATH,
-                                                             10000) // 1 min
+    val streamTableEnv = FlinkEvnBuilder.buildStreamTableEnv(
+      param,
+      CHECKPOINT_PATH,
+      10000,
+      Time.minutes(1),
+      Time.minutes(6)) // 1 min
     createTestTbl(streamTableEnv)
     createTest2Tbl(streamTableEnv)
-
-
 
     streamTableEnv.execute("FlinkLearnStreamConnectEntry")
   }
