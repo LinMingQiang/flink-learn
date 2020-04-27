@@ -1,4 +1,5 @@
 package com.flink.common.core
+import org.apache.flink.table.api.scala.StreamTableEnvironment
 
 import org.apache.flink.api.common.state.StateTtlConfig
 import org.apache.flink.api.common.time.Time
@@ -9,6 +10,7 @@ import org.apache.flink.runtime.state.StateBackend
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.table.api.EnvironmentSettings
 
 object FlinkEvnBuilder {
 
@@ -46,6 +48,24 @@ object FlinkEvnBuilder {
     // rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
     env.setStateBackend(rocksDBStateBackend)
     env
+  }
+
+  /**
+    *
+    * @param parameters
+    * @param checkpointPath
+    * @param checkPointInterval
+    */
+  def buildStreamTableEnv(
+      parameters: ParameterTool,
+      checkpointPath: String,
+      checkPointInterval: Long = 6000): StreamTableEnvironment = {
+    val streamEnv =
+      buildStreamingEnv(parameters, checkpointPath, checkPointInterval)
+    val sett =
+      EnvironmentSettings.newInstance.useBlinkPlanner.inStreamingMode.build
+    val streamTableEnv = StreamTableEnvironment.create(streamEnv, sett)
+    streamTableEnv
   }
 
   /**
