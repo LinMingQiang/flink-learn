@@ -9,12 +9,8 @@ import org.apache.commons.lang3.time.DateFormatUtils
   */
 object FlinkLearnPropertiesUtil extends PropertiesTrait{
   def getProperties(key: String): String = param.get(key)
-  lazy val KAFKA_BROKER = getProperties("kafka.broker")
-  lazy val KAFKA_REQ_LOG_TOPIC = getProperties("")
-
-
   lazy val TOPIC = getProperties("kafka.source.topics")
-  lazy val BROKER = getProperties("kafka.brokers")
+  lazy val BROKER = getProperties("kafka.broker")
   lazy val CHECKPOINT_PATH = getProperties("flink.checkpoint.path")+ s"/${DateFormatUtils.format(new Date(), "yyyyMMddHHMM")}"
   lazy val CHECKPOINT_INTERVAL = getProperties("flink.checkpoint.interval").toLong
   lazy val ES_HOSTS = getProperties("es.hosts")
