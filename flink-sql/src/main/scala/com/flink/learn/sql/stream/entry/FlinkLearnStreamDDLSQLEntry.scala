@@ -15,6 +15,7 @@ import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.table.sinks.CsvTableSink
 import org.apache.flink.types.Row
 import FlinkLearnPropertiesUtil._
+import com.flink.learn.sql.func.DdlTableFunction.Split
 object FlinkLearnStreamDDLSQLEntry {
 
   /**
@@ -32,8 +33,28 @@ object FlinkLearnStreamDDLSQLEntry {
                                                    Time.minutes(6))
     // 创建source 表
     //ddlSample(tEnv)
-    ddlEventTimeWatermark(tEnv)
+    // ddlEventTimeWatermark(tEnv)
+    lateralTbl(tEnv)
     tEnv.execute("FlinkLearnStreamDDLSQLEntry")
+  }
+
+  /**
+    * 一行转多行多列 Tablefunction
+    * @param tEnv
+    */
+  def lateralTbl(tEnv: StreamTableEnvironment): Unit = {
+    // {"username":"1","url":"1,22,333","tt": 1588144690402}
+    tEnv.registerFunction("split", new Split(","))
+    tEnv.sqlUpdate(DDLSourceSQLManager.ddlTumbleWindow("test", "test"))
+    tEnv
+      .sqlQuery(
+        s"""SELECT username, url,splita,word_size FROM test,
+           | LATERAL TABLE(split(url)) as T(splita, word_size)""".stripMargin)
+      .toRetractStream[Row]
+      .filter(_._1)
+      .map(_._2)
+      .print
+
   }
 
   /**
@@ -43,17 +64,18 @@ object FlinkLearnStreamDDLSQLEntry {
   def ddlEventTimeWatermark(tEnv: StreamTableEnvironment): Unit = {
     //      {"username":"1","url":"111","tt": 1588131008676}
     tEnv.sqlUpdate(DDLSourceSQLManager.ddlTumbleWindow("test", "test"))
-//    tEnv
-//      .sqlQuery(s"""select * from test""")
-//      .toRetractStream[Row]
-//      .filter(_._1)
-//      .map(_._2)
-//      .print
-    // 窗口统计，统计2分钟的窗口
     tEnv
-      .sqlQuery(DDLQueryOrSinkSQLManager.tumbleWindowSink("test"))
+      .sqlQuery(
+        s"""select username,Row(count(1)) from test group by username""")
       .toRetractStream[Row]
+      .filter(_._1)
+      .map(_._2)
       .print
+    // 窗口统计，统计2分钟的窗口
+//    tEnv
+//      .sqlQuery(DDLQueryOrSinkSQLManager.tumbleWindowSink("test"))
+//      .toRetractStream[Row]
+//      .print
   }
 
   /**

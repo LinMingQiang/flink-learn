@@ -16,5 +16,11 @@ object DDLQueryOrSinkSQLManager {
        |GROUP BY TUMBLE(ts, INTERVAL '1' MINUTE),username""".stripMargin
   }
 
+
+
+  def rowSink(): Unit = {
+    s"""inc ROW<newAuthUserCount VARCHAR>"""
+  }
+
 }
 

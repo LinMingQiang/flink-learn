@@ -28,11 +28,11 @@ object KafkaDataProducerTest {
       i += 1
       val s = new ProducerRecord[String, String](
         "test",
-        s"""{"username":"1","url":"111","tt": ${new Date().getTime}}"""
+        s"""{"username":"1","url":"1,22,333","tt": ${new Date().getTime}}"""
       )
       println(i, s)
       producer.send(s)
-      Thread.sleep(500)
+      Thread.sleep(20000)
     }
   }
 }
