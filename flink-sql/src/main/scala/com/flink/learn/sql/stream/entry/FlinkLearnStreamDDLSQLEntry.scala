@@ -16,6 +16,11 @@ import org.apache.flink.table.sinks.CsvTableSink
 import org.apache.flink.types.Row
 import FlinkLearnPropertiesUtil._
 import com.flink.learn.sql.func.DdlTableFunction.Split
+import com.flink.learn.sql.func.{
+  StrToLowOrUpScalarFunction,
+  WeightedAvgAggregateFunction
+}
+import org.apache.flink.configuration.Configuration
 object FlinkLearnStreamDDLSQLEntry {
 
   /**
@@ -34,8 +39,45 @@ object FlinkLearnStreamDDLSQLEntry {
     // 创建source 表
     //ddlSample(tEnv)
     // ddlEventTimeWatermark(tEnv)
-    lateralTbl(tEnv)
+    // lateralTbl(tEnv)
+    // scalarFunc(tEnv)
+    aggFunc(tEnv)
     tEnv.execute("FlinkLearnStreamDDLSQLEntry")
+  }
+
+  /**
+    * 自定义聚合类
+    * @param tEnv
+    */
+  def aggFunc(tEnv: StreamTableEnvironment): Unit = {
+    tEnv.sqlUpdate(DDLSourceSQLManager.ddlTumbleWindow("test", "test"))
+    tEnv.registerFunction("split", new Split(","))
+    tEnv.registerFunction("wAvg", new WeightedAvgAggregateFunction())
+    tEnv
+      .sqlQuery(
+        s"""SELECT username,wAvg(cast(splita as bigint), cast(splita as int)) FROM test,
+                   | LATERAL TABLE(split(url)) as T(splita, word_size)
+                   | group by username """.stripMargin)
+      .toRetractStream[Row]
+      .filter(_._1)
+      .map(_._2)
+      .print
+  }
+
+  /**
+    * 简单的自定义函数
+    * @param tEnv
+    */
+  def scalarFunc(tEnv: StreamTableEnvironment): Unit = {
+
+    tEnv.sqlUpdate(DDLSourceSQLManager.ddlTumbleWindow("test", "test"))
+    tEnv.registerFunction("strtouporlow", StrToLowOrUpScalarFunction)
+    tEnv
+      .sqlQuery(s"""SELECT username,strtouporlow(url) FROM test""".stripMargin)
+      .toRetractStream[Row]
+      .filter(_._1)
+      .map(_._2)
+      .print
   }
 
   /**
@@ -47,8 +89,7 @@ object FlinkLearnStreamDDLSQLEntry {
     tEnv.registerFunction("split", new Split(","))
     tEnv.sqlUpdate(DDLSourceSQLManager.ddlTumbleWindow("test", "test"))
     tEnv
-      .sqlQuery(
-        s"""SELECT username, url,splita,word_size FROM test,
+      .sqlQuery(s"""SELECT username, url,splita,word_size FROM test,
            | LATERAL TABLE(split(url)) as T(splita, word_size)""".stripMargin)
       .toRetractStream[Row]
       .filter(_._1)
