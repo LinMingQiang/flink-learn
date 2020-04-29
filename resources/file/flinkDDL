@@ -1,0 +1,18 @@
+-- 复杂的json结构。
+appkey VARCHAR,
+    apps ARRAY<ROW<firstInstallTime BIGINT, name VARCHAR, pkg VARCHAR, version VARCHAR>>,
+    datetime BIGINT,
+    device ROW<carrier VARCHAR, dataStorage INT, deviceType VARCHAR, factory VARCHAR, pad BOOLEAN, ram INT, screensize VARCHAR, sdcardStorage INT, sysver VARCHAR>,
+    duid VARCHAR,
+    idInfo ROW<adsid VARCHAR, androidid VARCHAR, imeiarray ARRAY<VARCHAR>, imsiarray ARRAY<VARCHAR>, oaid VARCHAR>,
+    imei VARCHAR,
+    ip VARCHAR,
+    mac VARCHAR,
+    networktype VARCHAR,
+    openid VARCHAR,
+    plat INT,
+    sdkver VARCHAR,
+    serialno VARCHAR,
+    simulator ROW<baseband INT, bluetooth INT, board INT, cgroup INT, commonapp INT, cpuinfo INT, flavor INT, imei INT, platform INT, sensor INT>,
+    userAgent VARCHAR,
+    proctime AS PROCTIME()
