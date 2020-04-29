@@ -2,7 +2,7 @@ package com.flink.learn.sql.common
 
 import com.flink.common.core.FlinkLearnPropertiesUtil
 
-object SQLManager {
+object DDLSourceSQLManager {
 
   val createFromkafkasql = s"""CREATE TABLE reportTbl (
                               |    lon VARCHAR,
@@ -47,6 +47,34 @@ object SQLManager {
        |    'format.derive-schema' = 'true'
        |)""".stripMargin
   }
+
+  def ddlKafkaWithWartermark(): Unit = {}
+
+  /**
+    * 窗口
+    */
+  def ddlTumbleWindow(topic: String, tableName: String): String = {
+    s"""CREATE TABLE $tableName (
+       |    username VARCHAR,
+       |    url VARCHAR,
+       |    tt bigint,
+       |    ts AS TO_TIMESTAMP(FROM_UNIXTIME(tt / 1000, 'yyyy-MM-dd HH:mm:ss')),
+       |    proctime as PROCTIME(),
+       |     WATERMARK FOR ts AS ts - INTERVAL '20' SECOND
+       |) WITH (
+       |    'connector.type' = 'kafka',
+       |    'connector.version' = '0.10',
+       |    'connector.topic' = '$topic',
+       |    'connector.startup-mode' = 'latest-offset',
+       |    'connector.properties.zookeeper.connect' = 'localhost:2181',
+       |    'connector.properties.bootstrap.servers' = 'localhost:9092',
+       |    'connector.properties.group.id' = 'testGroup',
+       |    'update-mode' = 'append',
+       |    'format.type' = 'json',
+       |    'format.derive-schema' = 'true'
+       |)""".stripMargin
+
+  }
 //  def createStreamFromKafka(topic: String, tableName: String): String = {
 //    s"""CREATE TABLE $tableName (
 //       |    id VARCHAR,
@@ -67,7 +95,6 @@ object SQLManager {
 //       |    'format.ignore-parse-errors' = 'true'
 //       |)""".stripMargin
 //  }
-
 
   def createFromMysql(sourceTbl: String, targetTbl: String) =
     s"""CREATE TABLE ${targetTbl} (

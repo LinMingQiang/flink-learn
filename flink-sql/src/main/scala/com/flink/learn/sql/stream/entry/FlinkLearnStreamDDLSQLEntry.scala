@@ -2,11 +2,15 @@ package com.flink.learn.sql.stream.entry
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api.scala._
 import com.flink.common.core.{FlinkEvnBuilder, FlinkLearnPropertiesUtil}
-import com.flink.learn.sql.common.{SQLManager, TableSinkManager}
+import com.flink.learn.sql.common.{
+  DDLQueryOrSinkSQLManager,
+  DDLSourceSQLManager,
+  TableSinkManager
+}
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
 import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.table.api.{StreamQueryConfig}
+import org.apache.flink.table.api.StreamQueryConfig
 import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.table.sinks.CsvTableSink
 import org.apache.flink.types.Row
@@ -27,15 +31,44 @@ object FlinkLearnStreamDDLSQLEntry {
                                                    Time.minutes(1),
                                                    Time.minutes(6))
     // 创建source 表
-    tEnv.sqlUpdate(SQLManager.createStreamFromKafka("test", "test"))
+    //ddlSample(tEnv)
+    ddlEventTimeWatermark(tEnv)
+    tEnv.execute("FlinkLearnStreamDDLSQLEntry")
+  }
+
+  /**
+    * 窗口设置。2分钟一个窗口，只有2分钟到了才会有输出
+    * @param tEnv
+    */
+  def ddlEventTimeWatermark(tEnv: StreamTableEnvironment): Unit = {
+    //      {"username":"1","url":"111","tt": 1588131008676}
+    tEnv.sqlUpdate(DDLSourceSQLManager.ddlTumbleWindow("test", "test"))
+//    tEnv
+//      .sqlQuery(s"""select * from test""")
+//      .toRetractStream[Row]
+//      .filter(_._1)
+//      .map(_._2)
+//      .print
+    // 窗口统计，统计2分钟的窗口
+    tEnv
+      .sqlQuery(DDLQueryOrSinkSQLManager.tumbleWindowSink("test"))
+      .toRetractStream[Row]
+      .print
+  }
+
+  /**
+    * 简单示例
+    * @param tEnv
+    */
+  def ddlSample(tEnv: StreamTableEnvironment): Unit = {
+    tEnv.sqlUpdate(DDLSourceSQLManager.createStreamFromKafka("test", "test"))
     tEnv
       .sqlQuery(s"""select id,count(*) num from test group by id""")
       .toRetractStream[Row]
       .filter(_._1)
       .map(_._2)
       .print
-    insertIntoCsvTbl(tEnv)
-    tEnv.execute("FlinkLearnStreamDDLSQLEntry")
+    // insertIntoCsvTbl(tEnv)
   }
 
   /**
