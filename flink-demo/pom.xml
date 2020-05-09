@@ -18,6 +18,22 @@
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
+      <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+      <scope>${scope.value}</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>janino</artifactId>
+          <groupId>org.codehaus.janino</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-compiler</artifactId>
+          <groupId>org.codehaus.janino</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
       <artifactId>flink-state-processor-api_${scala.binary.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>

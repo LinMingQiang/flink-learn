@@ -8,7 +8,6 @@ import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 object CEPTest {
   val cp = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint"
   def main(args: Array[String]): Unit = {
@@ -36,7 +35,7 @@ object CEPTest {
         .begin[LoginEvent]("start").where(_.eventType == "fail")
         .next("next").where(_.eventType == "fail")
         .within(Time.seconds(5))
-
+    FlinkEvnBuilder
     CEP
       .pattern(loginEventStream.keyBy("userId"), loginFailPattern)
       .select(new LoginFailDetect)

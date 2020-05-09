@@ -6,7 +6,6 @@ import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
-import org.apache.flink.runtime.state.StateBackend
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
