@@ -47,7 +47,7 @@ object LocalFlinkTest {
         val hour = datas(0).substring(11, 13) //hour
         val plan = datas(25)
         if (plan.nonEmpty) {
-          new AdlogBean(plan, statdate, hour, StatisticalIndic(1))
+          AdlogBean(plan, statdate, hour, StatisticalIndic(1))
         } else null
       }
       .filter { x =>

@@ -48,7 +48,7 @@ object KafkaWordCountTest {
     kafkasource2.setStartFromEarliest() //不加这个默认是从上次消费
     env
       .addSource(kafkasource2)
-      .flatMap(_.topic.split("\\|", -1))
+      .flatMap(_.msg.split("\\|", -1))
       .map(x => (x, 1))
       .keyBy(0)
       .flatMap(new WordCountRichFunction)
@@ -61,14 +61,14 @@ object KafkaWordCountTest {
     */
   def getClickDStream(env: StreamExecutionEnvironment) = {
     val kafkasource = new FlinkKafkaConsumer010[(KafkaMessge)](
-      TOPIC.split(",").toList,
+      TEST_TOPIC.split(",").toList,
       new TopicMessageDeserialize(),
       KafkaManager.getKafkaParam(BROKER))
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
     env
       .addSource(kafkasource)
-      .flatMap(_.topic.split("\\|", -1))
+      .flatMap(_.msg.split("\\|", -1))
       .map(x => (x, 1))
       .keyBy(0)
       .flatMap(new WordCountRichFunction)
