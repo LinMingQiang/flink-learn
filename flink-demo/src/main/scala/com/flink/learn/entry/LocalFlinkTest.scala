@@ -2,19 +2,21 @@ package com.flink.learn.entry
 
 import org.apache.flink.streaming.api.scala._
 import com.flink.learn.bean.{AdlogBean, StatisticalIndic}
-import com.flink.common.core.FlinkEvnBuilder
+import com.flink.common.core.{
+  EnvironmentalKey,
+  FlinkEvnBuilder,
+  FlinkLearnPropertiesUtil
+}
+import com.flink.common.core.FlinkLearnPropertiesUtil._
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
 import com.flink.learn.richf.AdlogPVRichFlatMapFunction
-import com.flink.learn.param.PropertiesUtil
 import com.flink.learn.sink.StateRecoverySinkCheckpointFunc
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
-import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
 
 import scala.collection.JavaConversions._
 object LocalFlinkTest {
-  val cp = "/Users/eminem/workspace/flink/flink-learn/checkpoint"
 
   /**
     * @author LMQ
@@ -22,19 +24,21 @@ object LocalFlinkTest {
     * @param args
     */
   def main(args: Array[String]): Unit = {
-    println("LocalFlinkTest ... ")
-    val proPath = args(0)
-    PropertiesUtil.init(proPath);
+    FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
+                                  "LocalFlinkTest")
     val kafkasource = new FlinkKafkaConsumer010[KafkaMessge](
-      TOPIC.split(",").toList,
+      TEST_TOPIC.split(",").toList,
       new TopicMessageDeserialize(),
       KafkaManager.getKafkaParam(BROKER))
+
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromLatest() //不加这个默认是从上次消费
 //    kafkasource.setStartFromSpecificOffsets(
 //      Map(new KafkaTopicPartition("maxwell_new", 0) -> 1L.asInstanceOf[java.lang.Long]));
 
-    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, cp, 60000) // 1 min
+    val env = FlinkEvnBuilder.buildStreamingEnv(param,
+                                                FLINK_DEMO_CHECKPOINT_PATH,
+                                                60000) // 1 min
     val result = env
       .addSource(kafkasource)
       .map { x =>

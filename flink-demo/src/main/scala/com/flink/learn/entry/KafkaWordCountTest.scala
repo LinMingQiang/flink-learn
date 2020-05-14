@@ -1,6 +1,11 @@
 package com.flink.learn.entry
 
-import com.flink.common.core.FlinkEvnBuilder
+import com.flink.common.core.{
+  EnvironmentalKey,
+  FlinkEvnBuilder,
+  FlinkLearnPropertiesUtil
+}
+import com.flink.common.core.FlinkLearnPropertiesUtil._
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
@@ -9,13 +14,14 @@ import org.apache.flink.streaming.api.scala._
 
 import scala.collection.JavaConversions._
 import com.flink.learn.richf.WordCountRichFunction
-import com.flink.learn.param.PropertiesUtil
-import org.apache.flink.streaming.api.functions.sink.SinkFunction
 
 object KafkaWordCountTest {
-  PropertiesUtil.init("/Users/eminem/workspace/flink/flink-learn/dist/conf/application.properties");
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, PropertiesUtil.CHECKPOINT_PATH, 10000) // 1 min
+    FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
+                                  "KafkaWordCountTest")
+    val env = FlinkEvnBuilder.buildStreamingEnv(param,
+                                                FLINK_DEMO_CHECKPOINT_PATH,
+                                                10000) // 1 min
     // 同时支持多个流地运行
     val impressDstream = getImpressDStream(env)
     val clickDStream = getClickDStream(env)
