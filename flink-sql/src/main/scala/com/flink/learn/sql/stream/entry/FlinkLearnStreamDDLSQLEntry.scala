@@ -1,8 +1,16 @@
 package com.flink.learn.sql.stream.entry
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api.scala._
-import com.flink.common.core.{FlinkEvnBuilder, FlinkLearnPropertiesUtil}
-import com.flink.learn.sql.common.{DDLQueryOrSinkSQLManager, DDLSourceSQLManager, TableSinkManager}
+import com.flink.common.core.{
+  EnvironmentalKey,
+  FlinkEvnBuilder,
+  FlinkLearnPropertiesUtil
+}
+import com.flink.learn.sql.common.{
+  DDLQueryOrSinkSQLManager,
+  DDLSourceSQLManager,
+  TableSinkManager
+}
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
 import org.apache.flink.core.fs.FileSystem.WriteMode
@@ -10,7 +18,10 @@ import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.types.Row
 import FlinkLearnPropertiesUtil._
 import com.flink.learn.sql.func.DdlTableFunction.Split
-import com.flink.learn.sql.func.{StrToLowOrUpScalarFunction, WeightedAvgAggregateFunction}
+import com.flink.learn.sql.func.{
+  StrToLowOrUpScalarFunction,
+  WeightedAvgAggregateFunction
+}
 object FlinkLearnStreamDDLSQLEntry {
 
   /**
@@ -18,9 +29,8 @@ object FlinkLearnStreamDDLSQLEntry {
     * @param args
     */
   def main(args: Array[String]): Unit = {
-    FlinkLearnPropertiesUtil.init(
-      "/Users/eminem/workspace/flink/flink-learn/dist/conf/application.properties",
-      "test")
+    FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
+                                  "FlinkLearnStreamDDLSQLEntry")
     val tEnv = FlinkEvnBuilder.buildStreamTableEnv(param,
                                                    CHECKPOINT_PATH,
                                                    10000,

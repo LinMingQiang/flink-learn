@@ -1,7 +1,11 @@
 package com.flink.learn.sql.stream.entry
 
 import com.flink.common.core.FlinkLearnPropertiesUtil.BROKER
-import com.flink.common.core.{FlinkEvnBuilder, FlinkLearnPropertiesUtil}
+import com.flink.common.core.{
+  EnvironmentalKey,
+  FlinkEvnBuilder,
+  FlinkLearnPropertiesUtil
+}
 import com.flink.learn.sql.common.{
   DataFormatUril,
   SchemaManager,
@@ -16,7 +20,7 @@ import org.apache.flink.types.Row
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api.scala._
 import FlinkLearnPropertiesUtil._
-
+import com.flink.common.core.EnvironmentalKey._
 object FlinkLearnStreamConnectEntry {
 
   /**
@@ -24,9 +28,8 @@ object FlinkLearnStreamConnectEntry {
     * @param args
     */
   def main(args: Array[String]): Unit = {
-    FlinkLearnPropertiesUtil.init(
-      "/Users/eminem/workspace/flink/flink-learn/dist/conf/application.properties",
-      "test")
+    FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
+                                  "test")
     // val env = StreamExecutionEnvironment.getExecutionEnvironment
     val streamTableEnv = FlinkEvnBuilder.buildStreamTableEnv(
       param,
