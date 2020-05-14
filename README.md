@@ -1,13 +1,16 @@
 # Flink Learn
-flink 1.10.0 <br>
-kafka 0.10 <br>
-scala 2.11 <br>
+---
+|                    | scala version      |Kafka version   |
+|:------------------:|:------------------:|:------------------:|
+| **Flink 1.10.0**    | 2.12              | 0.10+               |
+---
 
 idea 创建 maven 模板 <br>
 https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/jar.html <br>
 注意 ： 当在idea上调试时，先将 es-shade install。然后 ignore Project：es-shade ；否则有冲突问题
 ```
 flink 提交 <br>
+
 * ./yarn-session.sh -n 5 -jm 1024 -tm 1024 -s 2 // 在yarn提前开辟一个资源空间。 <br>
 * flink run ../examples/batch/WordCount.jar <br>
   或者 <br>
