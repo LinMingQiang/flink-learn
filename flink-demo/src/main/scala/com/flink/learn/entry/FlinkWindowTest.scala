@@ -1,23 +1,24 @@
 package com.flink.learn.entry
 
 import com.alibaba.fastjson.JSON
-import com.flink.common.core.FlinkEvnBuilder
+import com.flink.common.core.FlinkLearnPropertiesUtil.{FLINK_DEMO_CHECKPOINT_PATH, param}
+import com.flink.common.core.{EnvironmentalKey, FlinkEvnBuilder, FlinkLearnPropertiesUtil}
+import com.flink.common.core.FlinkLearnPropertiesUtil._
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
-import com.flink.learn.param.PropertiesUtil
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows
 import org.apache.flink.streaming.api.windowing.time.Time
 object FlinkWindowTest {
   // 类似于分批。统计每个窗口内的数据
-  PropertiesUtil.init("proPath");
-
-  val checkpointPath =
-    "file:///Users/eminem/workspace/flink/flink-learn/checkpoint"
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, checkpointPath, 3000) // 1 min
+    FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
+      "KafkaWordCountTest")
+    val env = FlinkEvnBuilder.buildStreamingEnv(param,
+      FLINK_DEMO_CHECKPOINT_PATH,
+      10000) // 1 min
     val kafkasource =
-      KafkaManager.getKafkaSource(TOPIC, BROKER, new TopicMessageDeserialize())
+      KafkaManager.getKafkaSource(TEST_TOPIC, BROKER, new TopicMessageDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
     kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
     val result = env

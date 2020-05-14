@@ -3,7 +3,15 @@ package com.flink.learn.entry
 import java.util.Date
 
 import com.alibaba.fastjson.JSON
-import com.flink.common.core.FlinkEvnBuilder
+import com.flink.common.core.{
+  EnvironmentalKey,
+  FlinkEvnBuilder,
+  FlinkLearnPropertiesUtil
+}
+import com.flink.common.core.FlinkLearnPropertiesUtil.{
+  FLINK_DEMO_CHECKPOINT_PATH,
+  param
+}
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.learn.bean.CaseClassUtil
@@ -18,7 +26,11 @@ import scala.collection.JavaConversions._
 object FlinkProcessTest {
   // PropertiesUtil.init("proPath");
   def main(args: Array[String]): Unit = {
-    val env = FlinkEvnBuilder.buildStreamingEnv(PropertiesUtil.param, cp, 60000) // 1 min
+    FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
+                                  "KafkaWordCountTest")
+    val env = FlinkEvnBuilder.buildStreamingEnv(param,
+                                                FLINK_DEMO_CHECKPOINT_PATH,
+                                                10000) // 1 min
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
     //    val source = KafkaManager.getKafkaSource(
