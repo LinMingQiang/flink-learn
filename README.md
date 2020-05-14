@@ -1,13 +1,12 @@
 # Flink Learn
 ---
-|                    | scala version      |Kafka version   |
+|   Flink                 | scala version      |Kafka version   |
 |:------------------:|:------------------:|:------------------:|
-| **Flink 1.10.0**    | 2.12              | 0.10+               |
+| **1.10.0**    | 2.11+             | 0.10+               |
 ---
 
-idea 创建 maven 模板 <br>
-https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/jar.html <br>
-注意 ： 当在idea上调试时，先将 es-shade install。然后 ignore Project：es-shade ；否则有冲突问题
+* Maven 模板 : https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/jar.html <br>
+* 注意 ： 当在idea上调试时，先将 es-shade install。然后 ignore Project：es-shade ；否则有冲突问题
 ```
 flink 提交 <br>
 
