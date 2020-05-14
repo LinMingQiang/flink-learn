@@ -2,25 +2,15 @@ package com.flink.learn.sql.stream.entry
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api.scala._
 import com.flink.common.core.{FlinkEvnBuilder, FlinkLearnPropertiesUtil}
-import com.flink.learn.sql.common.{
-  DDLQueryOrSinkSQLManager,
-  DDLSourceSQLManager,
-  TableSinkManager
-}
+import com.flink.learn.sql.common.{DDLQueryOrSinkSQLManager, DDLSourceSQLManager, TableSinkManager}
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
 import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.table.api.StreamQueryConfig
 import org.apache.flink.table.api.scala.StreamTableEnvironment
-import org.apache.flink.table.sinks.CsvTableSink
 import org.apache.flink.types.Row
 import FlinkLearnPropertiesUtil._
 import com.flink.learn.sql.func.DdlTableFunction.Split
-import com.flink.learn.sql.func.{
-  StrToLowOrUpScalarFunction,
-  WeightedAvgAggregateFunction
-}
-import org.apache.flink.configuration.Configuration
+import com.flink.learn.sql.func.{StrToLowOrUpScalarFunction, WeightedAvgAggregateFunction}
 object FlinkLearnStreamDDLSQLEntry {
 
   /**
@@ -113,10 +103,10 @@ object FlinkLearnStreamDDLSQLEntry {
       .map(_._2)
       .print
     // 窗口统计，统计2分钟的窗口
-//    tEnv
-//      .sqlQuery(DDLQueryOrSinkSQLManager.tumbleWindowSink("test"))
-//      .toRetractStream[Row]
-//      .print
+    tEnv
+      .sqlQuery(DDLQueryOrSinkSQLManager.tumbleWindowSink("test"))
+      .toRetractStream[Row]
+      .print
   }
 
   /**
