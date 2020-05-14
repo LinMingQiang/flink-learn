@@ -5,6 +5,7 @@ import org.apache.flink.api.java.utils.ParameterTool
 trait PropertiesTrait {
   var proName = ""
   var param: ParameterTool = null
+  def getProperties(key: String): String = param.get(key)
   /**
    * 用于driver端初始化
    */
