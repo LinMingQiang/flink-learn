@@ -4,18 +4,20 @@
 |:------------------:|:------------------:|:------------------:|
 | **1.10.0**    | 2.11+             | 0.10+               |
 ---
-
-* Maven 模板 : https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/jar.html <br>
-* 注意 ： 当在idea上调试时，先将 es-shade install。然后 ignore Project：es-shade ；否则有冲突问题
-
+```
+Maven 模板 : https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/jar.html <br>
+注意 ： 当在idea上调试时，先将 es-shade install。然后 ignore Project：es-shade ；否则有冲突问题
+```
 ---
 **Flink Submit**
 ```
 1：单独资源： flink run -m yarn-cluster --yarnname _wc -p 5 -yn 4 -yjm 1024 -ytm 1024 -ys 2 WordCount.jar
 2：共享空间： yarn-session.sh -n 5 -jm 1024 -tm 1024 -s 2 // 在yarn提前开辟一个资源空间 application_1567318548013_0001。 <br>
 在开辟的空间上提交任务： flink run -m yarn-cluster --yarnname flink_wc -p 5 -yn 4 -yjm 1024 -ytm 1024 -ys 2 -yid application_1567318548013_0001 WordCount.jar <br>
-
-3：关于状态的TTL
+```
+**State Manager**
+```
+关于状态的TTL
   RocksDB ：rocksDBStateBackend.enableTtlCompactionFilter() // 启用ttl后台增量清除功能
   或者 ：flink-conf :  state.backend.rocksdb.ttl.compaction.filter.enabled: true
 在 RichMapFunction中
