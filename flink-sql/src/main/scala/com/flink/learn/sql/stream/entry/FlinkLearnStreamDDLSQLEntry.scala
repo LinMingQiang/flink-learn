@@ -37,7 +37,7 @@ object FlinkLearnStreamDDLSQLEntry {
                                                    Time.minutes(1),
                                                    Time.minutes(6))
     // 创建source 表
-    //ddlSample(tEnv)
+    // ddlSample(tEnv)
     // ddlEventTimeWatermark(tEnv)
     // lateralTbl(tEnv)
     // scalarFunc(tEnv)
