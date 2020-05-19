@@ -44,7 +44,6 @@ object FlinkJoinWatermarkTest {
 //      .equalTo(_.w)
 //      .window()
 //      .print()
-
     env.execute("SocketWordcountTest")
   }
 
