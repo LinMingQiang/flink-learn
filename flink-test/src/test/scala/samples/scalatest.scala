@@ -85,7 +85,6 @@ A Map
 - should report its size as the number of key/value pairs it contains
 */
 import org.scalatest.FunSpec
-
 class ExampleSpec extends FunSpec {
 
   describe("An ArrayStack") {

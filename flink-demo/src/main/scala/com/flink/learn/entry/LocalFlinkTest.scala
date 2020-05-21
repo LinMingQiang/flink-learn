@@ -28,6 +28,7 @@ import com.flink.learn.sink.{
   OperatorStateBufferingSink,
   StateRecoverySinkCheckpointFunc
 }
+import com.flink.learn.test.common.FlinkStreamCommonSuit
 import com.flink.learn.time.MyTimestampsAndWatermarks2
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
@@ -39,33 +40,12 @@ import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 
 import scala.collection.JavaConversions._
-object LocalFlinkTest {
+class LocalFlinkTest extends FlinkStreamCommonSuit {
   case class UserDefinedKey(name: String, age: Int)
-  def main(args: Array[String]): Unit = {
-    FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
-                                  "LocalFlinkTest")
-//    kafkasource.setStartFromSpecificOffsets(
-//      Map(new KafkaTopicPartition("maxwell_new", 0) -> 1L.asInstanceOf[java.lang.Long]));
-    val env = FlinkEvnBuilder.buildStreamingEnv(param,
-                                                FLINK_DEMO_CHECKPOINT_PATH,
-                                                60000) // 1 min
-    // wordCount(env)
-    sessionWindowWatermark(env)
-  }
 
-  /**
-    *  wordcount
-    * @param env
-    */
-  def wordCount(env: StreamExecutionEnvironment): Unit = {
-    val kafkasource = KafkaManager.getKafkaSource(
-      TEST_TOPIC,
-      BROKER,
-      new TopicOffsetMsgDeserialize())
-    kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
+  test("wordCount") {
     env
-      .addSource(kafkasource)
+      .addSource(kafkaSource(TEST_TOPIC, BROKER))
       .flatMap(_.msg.split("\\|", -1))
       .map(x => (x, 1))
       .keyBy(0)
@@ -78,20 +58,13 @@ object LocalFlinkTest {
     * session; 注意： 只有下一条数据来了，才会打印上一个窗口的结果。
     * 因为下一条数据的时间会更新wartermark，
     * 当wartermark更新后，才能确定某个窗口的数据永远不再更新了才会打印出来，否则一直等。
-    * @param env
     */
-  def sessionWindowWatermark(env: StreamExecutionEnvironment): Unit = {
+  test("sessionWindowWatermark") {
     env.setParallelism(1)
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime) // 时间设为eventime
     env.getConfig.setAutoWatermarkInterval(5000L) // 每5s更新一次wartermark
-    val kafkasource = KafkaManager.getKafkaSource(
-      TEST_TOPIC,
-      BROKER,
-      new TopicOffsetMsgDeserialize())
-    kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
     env
-      .addSource(kafkasource)
+      .addSource(kafkaSource(TEST_TOPIC, BROKER))
       .map(x => {
         SessionLogInfo(x.msg, new Date().getTime)
       })
@@ -100,22 +73,15 @@ object LocalFlinkTest {
       .window(EventTimeSessionWindows.withGap(Time.seconds(6)))
       .apply(new SessionWindowRichF)
       .print()
-    env.execute("test")
+    env.execute("sessionWindowWatermark")
   }
 
   /**
     * 翻转窗口
-    * @param env
     */
-  def tumblingWindows(env: StreamExecutionEnvironment): Unit = {
-    val kafkasource =
-      KafkaManager.getKafkaSource(TEST_TOPIC,
-                                  BROKER,
-                                  new TopicMessageDeserialize())
-    kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
+  test ("tumblingWindows"){
     env
-      .addSource(kafkasource)
+      .addSource(kafkaSource(TEST_TOPIC, BROKER))
       .map(x => (x.msg.split("|")(7), 1))
       .setParallelism(1)
       .keyBy(0)
@@ -133,12 +99,8 @@ object LocalFlinkTest {
     * @param env
     */
   def StateRecoverySink(env: StreamExecutionEnvironment): Unit = {
-    val kafkasource = KafkaManager.getKafkaSource(
-      TEST_TOPIC,
-      BROKER,
-      new TopicOffsetMsgDeserialize())
     val result = env
-      .addSource(kafkasource)
+      .addSource(kafkaSource(TEST_TOPIC, BROKER))
       .map { x =>
         val datas = x.msg.split(",")
         val statdate = datas(0).substring(0, 10) //日期
@@ -165,14 +127,8 @@ object LocalFlinkTest {
     * @param env
     */
   def operateState(env: StreamExecutionEnvironment): Unit = {
-    val kafkasource = KafkaManager.getKafkaSource(
-      TEST_TOPIC,
-      BROKER,
-      new TopicOffsetMsgDeserialize())
-    kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromLatest() //不加这个默认是从上次消费
     env
-      .addSource(kafkasource)
+      .addSource(kafkaSource(TEST_TOPIC, BROKER))
       .map(x => (JSON.parseObject(x.msg).getString("dist"), 1))
       .keyBy(0)
       .sum(1)
