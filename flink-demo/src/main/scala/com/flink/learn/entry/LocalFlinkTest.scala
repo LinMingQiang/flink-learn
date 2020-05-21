@@ -49,7 +49,8 @@ object LocalFlinkTest {
     val env = FlinkEvnBuilder.buildStreamingEnv(param,
                                                 FLINK_DEMO_CHECKPOINT_PATH,
                                                 60000) // 1 min
-    wordCount(env)
+    // wordCount(env)
+    sessionWindowWatermark(env)
   }
 
   /**
@@ -74,22 +75,31 @@ object LocalFlinkTest {
   }
 
   /**
-    * session
+    * session; 注意： 只有下一条数据来了，才会打印上一个窗口的结果。
+    * 因为下一条数据的时间会更新wartermark，
+    * 当wartermark更新后，才能确定某个窗口的数据永远不再更新了才会打印出来，否则一直等。
     * @param env
     */
-  def sessionWindow(env: StreamExecutionEnvironment): Unit = {
+  def sessionWindowWatermark(env: StreamExecutionEnvironment): Unit = {
     env.setParallelism(1)
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime) // 时间设为eventime
     env.getConfig.setAutoWatermarkInterval(5000L) // 每5s更新一次wartermark
+    val kafkasource = KafkaManager.getKafkaSource(
+      TEST_TOPIC,
+      BROKER,
+      new TopicOffsetMsgDeserialize())
+    kafkasource.setCommitOffsetsOnCheckpoints(true)
+    kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
     env
-      .socketTextStream("localhost", 9876)
-      .map(x => SessionLogInfo(x, new Date().getTime))
+      .addSource(kafkasource)
+      .map(x => {
+        SessionLogInfo(x.msg, new Date().getTime)
+      })
       .assignTimestampsAndWatermarks(new MyTimestampsAndWatermarks2(0))
       .keyBy(x => x.sessionId)
       .window(EventTimeSessionWindows.withGap(Time.seconds(6)))
       .apply(new SessionWindowRichF)
       .print()
-
     env.execute("test")
   }
 
