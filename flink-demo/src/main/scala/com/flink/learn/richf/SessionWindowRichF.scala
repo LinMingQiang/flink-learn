@@ -31,12 +31,20 @@ class SessionWindowRichF
 
   }
 
+  /**
+   * 统计每个key - 窗口里面的数据。计算session 在间隔gap时间里有多少次访问，时间间隔是多少
+   * @param key
+   * @param window
+   * @param input
+   * @param out
+   */
   override def apply(key: String,
                      window: TimeWindow,
                      input: Iterable[SessionLogInfo],
                      out: Collector[SessionWindowResult]): Unit = {
-    println(">>", key, window.toString)
-    input.foreach(println)
+    val list = input.toList
+    val internalTime = list.maxBy(_.timeStamp).timeStamp - list.minBy(_.timeStamp).timeStamp
+    out.collect(SessionWindowResult(key, list.size, internalTime))
   }
 
 }
