@@ -13,6 +13,11 @@
   <dependencies>
     <dependency>
       <groupId>com.flink.learn</groupId>
+      <artifactId>flink-test</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.flink.learn</groupId>
       <artifactId>flink-util</artifactId>
       <version>${parent.version}</version>
     </dependency>

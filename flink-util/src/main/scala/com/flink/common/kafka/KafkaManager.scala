@@ -32,7 +32,7 @@ object KafkaManager {
    */
   def getKafkaSource[T](topic: String,
                         broker: String,
-                        deserialize: KafkaDeserializationSchema[T]) = {
+                        deserialize: KafkaDeserializationSchema[T]): FlinkKafkaConsumer010[T] = {
     new FlinkKafkaConsumer010[T](topic.split(",").toList,
       deserialize,
       getKafkaParam(broker))

@@ -10,34 +10,14 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-java</artifactId>
-      <version>${flink.version}</version>
-      <scope>${scope.value}</scope>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.11</artifactId>
+      <version>3.0.5</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
-      <version>${flink.version}</version>
-      <scope>${scope.value}</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
-      <version>${flink.version}</version>
-      <scope>${scope.value}</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-scala_${scala.binary.version}</artifactId>
-      <version>${flink.version}</version>
-      <scope>${scope.value}</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
-      <version>${flink.version}</version>
-      <scope>${scope.value}</scope>
+      <groupId>com.flink.learn</groupId>
+      <artifactId>flink-util</artifactId>
+      <version>${parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
@@ -55,36 +35,38 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-table-common</artifactId>
+      <artifactId>flink-state-processor-api_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+      <scope>${scope.value}</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-clients_2.11</artifactId>
       <version>${flink.version}</version>
       <scope>${scope.value}</scope>
     </dependency>
 
-
-    <!--.................-->
     <dependency>
       <groupId>org.apache.flink</groupId>
-      <artifactId>flink-csv</artifactId>
+      <artifactId>flink-connector-kafka-0.10_${scala.binary.version}</artifactId>
       <version>${flink.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-json</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-connector-kafka-0.11_${scala.binary.version}</artifactId>
-      <version>${flink.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
       <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-cep-scala_${scala.binary.version}</artifactId>
+      <scope>${scope.value}</scope>
     </dependency>
 
     <!-- Test -->
@@ -94,24 +76,6 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.binary.version}</artifactId>
-      <version>3.0.0</version>
-      <scope>test</scope>
-    </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.specs2</groupId>-->
-<!--      <artifactId>specs2-core_${scala.binary.version}</artifactId>-->
-<!--      <version>${spec2.version}</version>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
-<!--    <dependency>-->
-<!--      <groupId>org.specs2</groupId>-->
-<!--      <artifactId>specs2-junit_${scala.binary.version}</artifactId>-->
-<!--      <version>${spec2.version}</version>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
   </dependencies>
 
   <build>
