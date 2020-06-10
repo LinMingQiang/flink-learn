@@ -2,9 +2,9 @@ package com.flink.learn.sink
 
 import java.util.Date
 
+import com.flink.common.core.FlinkLearnPropertiesUtil
 import com.flink.learn.bean.CaseClassUtil.ReportInfo
 import com.flink.learn.dbutil.ElasticsearchHandler
-import com.flink.learn.param.PropertiesUtil
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.{TypeHint, TypeInformation}
 import org.apache.flink.api.java.utils.ParameterTool
@@ -36,9 +36,9 @@ class ElasticReportSink(size: Int, interval: Long)
       .getExecutionConfig()
       .getGlobalJobParameters()
       .asInstanceOf[ParameterTool]
-    PropertiesUtil.init(parame)
-    client = ElasticsearchHandler.getEsClient(PropertiesUtil.ES_HOSTS,
-                                              PropertiesUtil.ES_CLUSTERNAME)
+    FlinkLearnPropertiesUtil.init(parame)
+    client = ElasticsearchHandler.getEsClient(FlinkLearnPropertiesUtil.ES_HOSTS,
+      FlinkLearnPropertiesUtil.ES_CLUSTERNAME)
   }
   // (day, hour, buyerId, appid, adslot_id, policyId)
   /**
