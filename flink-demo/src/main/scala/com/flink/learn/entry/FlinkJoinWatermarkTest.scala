@@ -12,7 +12,6 @@ import com.flink.common.core.FlinkLearnPropertiesUtil.{
   param
 }
 import com.flink.learn.bean.CaseClassUtil.Wordcount
-import com.flink.learn.param.PropertiesUtil
 import com.flink.learn.time.MyTimestampsAndWatermarks
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction

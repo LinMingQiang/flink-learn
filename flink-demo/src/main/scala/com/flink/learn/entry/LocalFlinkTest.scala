@@ -37,9 +37,7 @@ import org.apache.flink.streaming.api.windowing.assigners.{
   TumblingProcessingTimeWindows
 }
 import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 
-import scala.collection.JavaConversions._
 class LocalFlinkTest extends FlinkStreamCommonSuit {
   case class UserDefinedKey(name: String, age: Int)
 
