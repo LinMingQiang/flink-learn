@@ -16,6 +16,9 @@ import com.flink.learn.sql.func.{
 }
 import com.flink.learn.test.common.{FlinkStreamTableCommonSuit}
 class FlinkLearnStreamDDLSQLEntry extends FlinkStreamTableCommonSuit {
+
+
+
   test("aggFunc") {
     tableEnv.sqlUpdate(DDLSourceSQLManager.ddlTumbleWindow("test", "test"))
     tableEnv.registerFunction("split", new Split(","))
@@ -90,7 +93,12 @@ class FlinkLearnStreamDDLSQLEntry extends FlinkStreamTableCommonSuit {
     */
   test("ddlSample") {
     tableEnv.sqlUpdate(
-      DDLSourceSQLManager.createStreamFromKafka("test", "test"))
+      DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
+                                                    "localhost:2181",
+                                                    "test",
+                                                    "test",
+                                                    ",",
+                                                    "test"))
     tableEnv
       .sqlQuery(s"""select id,count(*) num from test group by id""")
       .toRetractStream[Row]
