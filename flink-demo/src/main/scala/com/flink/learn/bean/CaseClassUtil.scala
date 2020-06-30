@@ -20,10 +20,19 @@ object CaseClassUtil {
     }
   }
 
-  case class WordCountScalaPoJo(word: String, var count: Long, var lastTime: String)
+  // 这样是不行的，This type (GenericType<com.flink.learn.bean.CaseClassUtil.TransWordCount>) cannot be used as key.
+  // 需要有一个无参的构造函数
+  // case class TransWordCount(var word: String = "", var count: Long = 0L, var lastTime: String = "")
+  // 这样是可以的
+  case class TransWordCount(){
+    var word: java.lang.String = ""
+    var count: java.lang.Long = 0L
+    var timestamp: java.lang.Long = 0L
+    override def toString: String = s"""TransWordCount($word,$count,$timestamp)"""
+  }
 
-  case class Wordcount(w: java.lang.String,
-                       var c: java.lang.Long,
+  case class Wordcount(word: String,
+                       var count: Long,
                        timestamp: Long)
 
   case class SessionLogInfo(sessionId: String, timeStamp: Long)
