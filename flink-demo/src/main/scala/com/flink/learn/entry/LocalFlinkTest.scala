@@ -5,16 +5,9 @@ import java.util.Date
 import com.alibaba.fastjson.JSON
 import org.apache.flink.streaming.api.scala._
 import com.flink.learn.bean.{AdlogBean, CaseClassUtil, StatisticalIndic}
-import com.flink.common.core.{
-  EnvironmentalKey,
-  FlinkEvnBuilder,
-  FlinkLearnPropertiesUtil
-}
+
 import com.flink.common.core.FlinkLearnPropertiesUtil._
-import com.flink.common.deserialize.{
-  TopicMessageDeserialize,
-  TopicOffsetMsgDeserialize
-}
+import com.flink.common.deserialize.{TopicMessageDeserialize}
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
 import com.flink.learn.bean.CaseClassUtil.SessionLogInfo
@@ -77,7 +70,7 @@ class LocalFlinkTest extends FlinkStreamCommonSuit {
   /**
     * 翻转窗口
     */
-  test ("tumblingWindows"){
+  test("tumblingWindows") {
     env
       .addSource(kafkaSource(TEST_TOPIC, BROKER))
       .map(x => (x.msg.split("|")(7), 1))

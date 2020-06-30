@@ -20,14 +20,13 @@ import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.util.Collector
 
 object FlinkStreamJoinTest {
   var env: StreamExecutionEnvironment = null
 
   /**
-    * 三个流的join，其中两个流是维表，将维表数据固定在state中等待join
+    * 三个流的join，其中两个流是维表，将维表数据固定在state中等待join。
     * @param args
     */
   def main(args: Array[String]): Unit = {
@@ -38,23 +37,26 @@ object FlinkStreamJoinTest {
 
     // 只输出test2的数据，
     env
-      .addSource(kafkaSource("test1,test2", BROKER))
+      .addSource(KafkaManager.kafkaSource("test1,test2", BROKER))
       .map { x =>
         val arr = x.msg.split(",", -1)
-        MsgInfo(x.topic, arr(1).toDouble, arr(0))
+        val uid = arr(0)
+        val price = arr(1).toDouble
+        MsgInfo(x.topic, uid = uid, price = price)
       }
-      .keyBy("key")
+      .keyBy("uid")
       .flatMap(new RichFlatMapFunction[MsgInfo, MsgInfo] {
         var lastState: ValueState[MsgInfo] = _
         override def flatMap(value: MsgInfo, out: Collector[MsgInfo]): Unit = {
-          if (value.topic == "test1") {
+          if (value.topic == "test1") { // 维表
             lastState.update(value)
-            println("test1 : ", lastState.value())
-          } else {
-             val v = lastState.value()
-            println("test2 : ", v)
-             if (v != null)
+          } else { // 主数据
+            val v = lastState.value()
+            if (v != null) { // 没join到
               out.collect(value.copy(price = value.price * v.price))
+            } else {
+              out.collect(value)
+            }
           }
         }
         override def open(parameters: Configuration): Unit = {
@@ -69,23 +71,5 @@ object FlinkStreamJoinTest {
 
     env.execute()
   }
-
-  /**
-    *
-    * @param topic
-    * @param broker
-    * @return
-    */
-  def kafkaSource(
-      topic: String,
-      broker: String): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
-    val kafkasource = KafkaManager.getKafkaSource(
-      topic,
-      broker,
-      new TopicOffsetMsgDeserialize())
-    kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromLatest() //不加这个默认是从上次消费
-    kafkasource
-  }
-  case class MsgInfo(topic: String, price: Double, key: String)
+  case class MsgInfo(topic: String, price: Double, uid: String)
 }

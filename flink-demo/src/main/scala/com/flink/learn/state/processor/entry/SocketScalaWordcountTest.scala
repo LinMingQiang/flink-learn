@@ -10,53 +10,52 @@ import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.flink.streaming.api.scala._
+import com.flink.learn.bean.CaseClassUtil.Wordcount
 
-object SocketWordcountTest {
-
+object SocketScalaWordcountTest {
+// nc -l 9877
   def main(args: Array[String]): Unit = {
     FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
-      "KafkaWordCountTest")
+      "SocketScalaWordcountTest")
     val env = FlinkEvnBuilder.buildStreamingEnv(param,
       FLINK_DEMO_CHECKPOINT_PATH,
-      10000) // 1 min
+      10000)
    val source = env.socketTextStream("localhost", 9877)
     source
       .map(x => {
-        val s = new WordCountPoJo()
-        s.w = x;s.c = 1L; s.timestamp = new Date().getTime
-        s
+        Wordcount(x, 1L, new Date().getTime)
       })
-      .keyBy(_.w)
-      .flatMap(new RichFlatMapFunction[WordCountPoJo, WordCountPoJo] {
-        var lastState: ValueState[WordCountPoJo] = _
-        override def flatMap(value: WordCountPoJo,
-                             out: Collector[WordCountPoJo]): Unit = {
+      .keyBy(_.word)
+      .flatMap(
+        // -----------
+        new RichFlatMapFunction[Wordcount, Wordcount] {
+        var lastState: ValueState[Wordcount] = _
+        override def flatMap(value: Wordcount,
+                             out: Collector[Wordcount]): Unit = {
           var ls = lastState.value()
           if (ls == null) {
             ls = value
           } else {
-            ls.c += value.c
+            ls.count += value.count
           }
           lastState.update(ls)
           out.collect(ls)
         }
         override def open(parameters: Configuration): Unit = {
           try {
-            val desc = new ValueStateDescriptor[WordCountPoJo](
+            val desc = new ValueStateDescriptor[Wordcount](
               "wordcountState",
-              createTypeInformation[WordCountPoJo])
+              createTypeInformation[Wordcount])
             lastState = getRuntimeContext().getState(desc)
           } catch {
             case e: Throwable => e.printStackTrace()
           }
         }
-      })
-      .name("wordcountUID")
+      }
+      // ----------------
+      )
       .uid("wordcountUID")
       .print()
-
-
-
     env.execute("SocketWordcountTest")
   }
 }
