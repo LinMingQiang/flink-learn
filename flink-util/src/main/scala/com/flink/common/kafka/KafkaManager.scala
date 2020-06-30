@@ -2,6 +2,7 @@ package com.flink.common.kafka
 
 import java.util.Properties
 
+import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010, KafkaDeserializationSchema}
 
 import scala.collection.JavaConversions._
@@ -36,5 +37,24 @@ object KafkaManager {
     new FlinkKafkaConsumer010[T](topic.split(",").toList,
       deserialize,
       getKafkaParam(broker))
+  }
+
+
+  /**
+   *
+   * @param topic
+   * @param broker
+   * @return
+   */
+  def kafkaSource(
+                   topic: String,
+                   broker: String): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
+    val kafkasource = KafkaManager.getKafkaSource(
+      topic,
+      broker,
+      new TopicOffsetMsgDeserialize())
+    kafkasource.setCommitOffsetsOnCheckpoints(true)
+    kafkasource.setStartFromLatest() //不加这个默认是从上次消费
+    kafkasource
   }
 }

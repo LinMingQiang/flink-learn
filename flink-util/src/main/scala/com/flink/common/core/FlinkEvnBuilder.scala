@@ -14,8 +14,10 @@ import org.apache.flink.table.api.EnvironmentSettings
 object FlinkEvnBuilder {
 
   /**
-    * @desc 获取env
-    * @param checkpointPath
+    *
+    * @param parameters global参数
+    * @param checkpointPath cp的路径
+    * @param checkPointInterval cp的间隔
     * @return
     */
   def buildStreamingEnv(
@@ -39,6 +41,7 @@ object FlinkEvnBuilder {
       ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
     //env.setStateBackend(new FsStateBackend(checkpointPath))
     val rocksDBStateBackend = new RocksDBStateBackend(checkpointPath, true)
+    // rocksDBStateBackend.setDbStoragePath("") // rocksdb本地路径，默认在tm临时路径下
     rocksDBStateBackend.enableTtlCompactionFilter() // 启用ttl后台增量清除功能
     // println(rocksDBStateBackend.isIncrementalCheckpointsEnabled)
     // println(rocksDBStateBackend.isTtlCompactionFilterEnabled)
