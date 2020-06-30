@@ -32,7 +32,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <java.version>1.8</java.version>
         <encoding>UTF-8</encoding>
-        <flink.version>1.10.0</flink.version>
+        <flink.version>1.10.1</flink.version>
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <fastjson.version>1.2.39</fastjson.version>

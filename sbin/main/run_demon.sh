@@ -3,6 +3,7 @@
 #-s file:///Users/eminem/workspace/flink/flink-learn/savepoint/savepoint-ff6acb-37823a69f146
 #http://localhost:8081/#/overview
 #-s file:///Users/eminem/workspace/flink/flink-learn/savepoint/savepoint-c4fb21-d0e5d7045b40 \
-
+#flink savepoint b530724c897463ace25054491c67d085 file:///Users/eminem/workspace/flink/flink-learn/checkpoint/savepoint/
 echo "start ........"
-flink run -c com.flink.learn.entry.KafkaWordCountTest /Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
+flink run -c com.flink.learn.state.processor.entry.SocketWordcountTest /Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
+#flink run -c com.flink.learn.entry.KafkaWordCountTest /Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
