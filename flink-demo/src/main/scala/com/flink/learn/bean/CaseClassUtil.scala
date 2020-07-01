@@ -28,9 +28,6 @@ object CaseClassUtil {
     var word: java.lang.String = ""
     var count: java.lang.Long = 0L
     var timestamp: java.lang.Long = 0L
-    def setCount(count:  java.lang.Long): Unit ={
-      this.count = count
-    }
     override def toString: String = s"""TransWordCount($word,$count,$timestamp)"""
   }
 

@@ -25,7 +25,7 @@ object SocketScalaWordcountTest {
       .map(x => {
         Wordcount(x, 1L, new Date().getTime)
       })
-      .keyBy(_.word)
+      .keyBy(b => b.word)  // keyBy("word") 的话用string读不出来
       .flatMap(
         // -----------
         new RichFlatMapFunction[Wordcount, Wordcount] {
