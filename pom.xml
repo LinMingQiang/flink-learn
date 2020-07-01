@@ -132,9 +132,6 @@
     </profiles>
 
     <build>
-        <sourceDirectory>src/main/scala</sourceDirectory>
-        <testSourceDirectory>src/test/scala</testSourceDirectory>
-
         <plugins>
             <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -145,6 +142,8 @@
                 <artifactId>maven-scala-plugin</artifactId>
             </plugin>
         </plugins>
+
+
         <pluginManagement>
         <plugins>
             <plugin>
