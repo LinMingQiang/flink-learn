@@ -12,11 +12,16 @@ import org.apache.flink.streaming.api.scala.createTypeInformation
 
 class AccountKeyedStateBootstrapFunction()
     extends KeyedStateBootstrapFunction[Tuple, TranWordCountPoJo] {
+
+  /**
+    *
+    */
   var lastState: ValueState[TranWordCountPoJo] = _
   override def open(parameters: Configuration): Unit = {
-    val desc = new ValueStateDescriptor[TranWordCountPoJo](
+    val desc = new ValueStateDescriptor(
       "wordcountState",
-      createTypeInformation[TranWordCountPoJo])
+      classOf[TranWordCountPoJo] // createTypeInformation[TransWordCount]
+    )
     lastState = getRuntimeContext().getState(desc)
   }
 

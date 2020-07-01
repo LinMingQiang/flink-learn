@@ -17,7 +17,7 @@ import java.io.IOException;
 
 /**
  * scala 的 case class 无法存储后再读出来，因为序列号不一致
- * 但是 java pojo放在scala代码里面也不行。。。（怀疑scala的序列化问题，建议还是用java写flink吧。）
+ * 但是 java pojo放在scala代码里面也不行。。。（怀疑scala的序列化问题，建议还是用java写state processor，同时不用 cass class）
  * state processor例子都正常执行，修改后重新跑没问题。
  * java代码和scala分两个source包写，所以打包的时候需要maven-jar-plugin
  */
