@@ -1,23 +1,13 @@
-package com.flink.learn.state.processor.entry
+package com.flink.learn.stateprocessor
+
 import java.util.Date
 
-import com.flink.learn.bean.CaseClassUtil.TransWordCount
-import com.flink.learn.bean.TranWordCountPoJo
-import com.flink.learn.reader.{
-  TranWordCountKeyreader,
-  TranWordCountPoJoKeyreader,
-  WordCounKeyreader
-}
-import com.flink.learn.trans.AccountKeyedStateBootstrapFunction
-import org.apache.flink.api.common.functions.MapFunction
-import org.apache.flink.api.java.ExecutionEnvironment
+import com.flink.learn.bean.{TranWordCountPoJo}
+import com.flink.learn.reader.{TranWordCountPoJoKeyreader, WordCountPoJoKeyreader}
+import com.flink.learn.trans.{AccountKeyedStateBootstrapFunction}
+import org.apache.flink.api.java.{DataSet, ExecutionEnvironment}
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
-import org.apache.flink.state.api.{
-  ExistingSavepoint,
-  OperatorTransformation,
-  Savepoint
-}
-import org.apache.flink.api.scala._
+import org.apache.flink.state.api.{ExistingSavepoint, OperatorTransformation, Savepoint}
 
 /**
   * 遇到 ： The new state serializer cannot be incompatible.
@@ -29,7 +19,7 @@ import org.apache.flink.api.scala._
 object FlinkKeyStateProccessTest {
   var uid = "wordcountUID"
   val ckpPath = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint"
-  val srcCkpPath = ckpPath + "/SocketScalaWordcountTest/202006301606/48b300d2fd5b88b6f42116624ce619bd/chk-5"
+  val srcCkpPath = ckpPath + "/SocketJavaPoJoWordcountTest/202006301706/bf677b47d89cb2b0302ab1fec6552445/chk-1"
   val newPath = ckpPath + "/tanssavepoint"
   val bEnv = ExecutionEnvironment.getExecutionEnvironment
   def main(args: Array[String]): Unit = {
@@ -41,9 +31,8 @@ object FlinkKeyStateProccessTest {
 //     transKeystateAndWritebak(existSp, newPath)
 
     // 当写caseclass 回去后就 读不出来，报 The new state serializer cannot be incompatible.
-//    val existSp =
-//      Savepoint.load(bEnv, newPath, new RocksDBStateBackend(ckpPath))
-//    readTransKeyState(existSp, uid).print()
+
+   readTransKeyState(uid).print()
 
     // bEnv.execute("FlinkKeyStateProccessTest") // print 会自动调用execute ，所以注释掉，否则报错
   }
@@ -58,17 +47,18 @@ object FlinkKeyStateProccessTest {
     existSp
       .readKeyedState(
         uid,
-        new WordCounKeyreader("wordcountState")
+        new WordCountPoJoKeyreader("wordcountState")
       )
   }
 
   /**
     * 读取 state数据
-    * @param existSp
     * @param uid
     * @return
     */
-  def readTransKeyState(existSp: ExistingSavepoint, uid: String) = {
+  def readTransKeyState(uid: String) = {
+    val existSp =
+      Savepoint.load(bEnv, newPath, new RocksDBStateBackend(ckpPath))
     existSp
       .readKeyedState(
         uid,
@@ -83,7 +73,7 @@ object FlinkKeyStateProccessTest {
     */
   def transKeystateAndWritebak(existSp: ExistingSavepoint,
                                newPath: String): Unit = {
-    val oldState = readKeyState(existSp, uid)
+    val oldState: DataSet[TranWordCountPoJo] = readKeyState(existSp, uid)
 //      .map(
 //      new MapFunction[TransWordCount, TranWordCountPoJo] {
 //        override def map(value: TransWordCount): TranWordCountPoJo = {
