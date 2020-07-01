@@ -1,4 +1,4 @@
-package com.flink.learn.state.processor.entry;
+package com.flink.learn.stateprocessor;
 
 import com.flink.learn.bean.TranWordCountPoJo;
 import com.flink.learn.reader.TranWordCountPoJoKeyreader;
@@ -15,23 +15,24 @@ import org.apache.flink.state.api.Savepoint;
 
 import java.io.IOException;
 
+/**
+ * scala 的 case class 无法存储后再读出来，因为序列号不一致
+ * 但是 java pojo放在scala代码里面也不行。。。（怀疑scala的序列化问题，建议还是用java写flink吧。）
+ * state processor例子都正常执行，修改后重新跑没问题。
+ * java代码和scala分两个source包写，所以打包的时候需要maven-jar-plugin
+ */
 public class FlinkJavaKeyStateProccessTest {
     public static String uid = "wordcountUID";
     public static String path = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint";
-    public static String sourcePath  = path + "/SocketJavaPoJoWordcountTest/202006301706/bf677b47d89cb2b0302ab1fec6552445/chk-1";
+    public static String sourcePath  = path + "/SocketJavaPoJoWordcountTest/202007011607/fbcebbb548986ed453ca5a8a85554c9b/chk-7";
     public static String newPath = path + "/tanssavepoint";
     public static ExecutionEnvironment bEnv = ExecutionEnvironment.getExecutionEnvironment();
 
     public static void main(String[] args) throws Exception {
-//	  ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath , new RocksDBStateBackend(path));
-//	 readKeyState(existSp, uid).print();
-
-//		ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath , new RocksDBStateBackend(path));
-//		transKeystateAndWritebak(existSp, newPath);
-
-		 ExistingSavepoint existSp = Savepoint.load(bEnv, newPath , new RocksDBStateBackend(path));
-		 readTransKeyState(existSp, uid).print();
-
+     ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath , new RocksDBStateBackend(path));
+    readKeyState(existSp, uid).print();
+	// transKeystateAndWritebak(existSp, newPath);
+		// readTransKeyState(uid).print();
 
 	}
 
@@ -54,8 +55,8 @@ public class FlinkJavaKeyStateProccessTest {
 	 * @return
 	 * @throws IOException
 	 */
-	public static DataSet<TranWordCountPoJo> readTransKeyState(ExistingSavepoint existSp, String uid) throws IOException {
-
+	public static DataSet<TranWordCountPoJo> readTransKeyState( String uid) throws IOException {
+		ExistingSavepoint existSp = Savepoint.load(bEnv, newPath , new RocksDBStateBackend(path));
 		return existSp.readKeyedState(
 				uid,
 				new TranWordCountPoJoKeyreader("wordcountState")
