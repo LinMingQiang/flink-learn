@@ -19,14 +19,14 @@ object SocketJavaPoJoWordcountTest {
     val env = FlinkEvnBuilder.buildStreamingEnv(param,
       FLINK_DEMO_CHECKPOINT_PATH,
       10000)
-   val source = env.socketTextStream("localhost", 9877)
+    val source = env.socketTextStream("localhost", 9877)
     source
       .map(x => {
         val s = new WordCountPoJo()
         s.word = x;s.count = 1L; s.timestamp = new Date().getTime
         s
       })
-      .keyBy(_.word)
+      .keyBy(x => new org.apache.flink.api.java.tuple.Tuple2(x.word, x.word))
       .flatMap(new RichFlatMapFunction[WordCountPoJo, WordCountPoJo] {
         var lastState: ValueState[WordCountPoJo] = _
         override def flatMap(value: WordCountPoJo,

@@ -1,18 +1,14 @@
 package com.flink.learn.reader
 
-import java.util.Date
-
-import com.flink.learn.bean.CaseClassUtil.Wordcount
-import com.flink.learn.bean.CaseClassUtil.TransWordCount
+import com.flink.learn.bean.CaseClassUtil.{TransWordCount, Wordcount}
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
-import org.apache.flink.api.java.tuple.Tuple
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.state.api.functions.KeyedStateReaderFunction
 import org.apache.flink.streaming.api.scala.createTypeInformation
 import org.apache.flink.util.Collector
 
-class WordCounKeyreader(stateName: String)
-    extends KeyedStateReaderFunction[String, TransWordCount] {
+class WordCounTuple2Keyreader(stateName: String)
+    extends KeyedStateReaderFunction[(String, String), TransWordCount] {
   // 状态
   var lastState: ValueState[Wordcount] = _;
 
@@ -33,7 +29,7 @@ class WordCounKeyreader(stateName: String)
     * @param context
     * @param collector
     */
-  override def readKey(key: String,
+  override def readKey(key: (String, String),
                        context: KeyedStateReaderFunction.Context,
                        collector: Collector[TransWordCount]): Unit = {
     val v = lastState.value()
