@@ -1,5 +1,7 @@
 package com.flink.learn.bean
 
+import org.apache.flink.api.common.typeinfo.TypeInformation
+
 object CaseClassUtil {
   case class ReportInfo(var indexName: String = "",
                         var keybyKey: String = "",
@@ -24,16 +26,14 @@ object CaseClassUtil {
   // 需要有一个无参的构造函数
   // case class TransWordCount(var word: String = "", var count: Long = 0L, var lastTime: String = "")
   // 这样是可以的
-  case class TransWordCount(){
-    var word: java.lang.String = ""
-    var count: java.lang.Long = 0L
-    var timestamp: java.lang.Long = 0L
-    override def toString: String = s"""TransWordCount($word,$count,$timestamp)"""
+  case class TransWordCount(var word: String,
+                            var count: Long,
+                            var timestamp: Long) {
+    override def toString: String =
+      s"""TransWordCount($word,$count,$timestamp)"""
   }
 
-  case class Wordcount(word: String,
-                       var count: Long,
-                       timestamp: Long)
+  case class Wordcount(word: String, var count: Long, timestamp: Long)  extends Serializable
 
   case class SessionLogInfo(sessionId: String, timeStamp: Long)
 

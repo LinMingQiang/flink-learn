@@ -1,10 +1,17 @@
 package com.flink.learn.bean;
 
 
-public class WordCountPoJo {
+import java.io.Serializable;
+
+public class WordCountPoJo implements Serializable {
     public String word = "ss";
     public Long count = 2L;
     public Long timestamp = 2L;
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
 
 	@Override
 	public String toString() {

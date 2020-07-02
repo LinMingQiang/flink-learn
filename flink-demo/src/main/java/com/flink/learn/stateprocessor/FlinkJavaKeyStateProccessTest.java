@@ -3,15 +3,17 @@ package com.flink.learn.stateprocessor;
 import com.flink.learn.bean.TranWordCountPoJo;
 import com.flink.learn.reader.TranWordCountPoJoKeyreader;
 import com.flink.learn.reader.WordCountPoJoKeyreader;
+import com.flink.learn.reader.WordCountPoJoTuple2Keyreader;
 import com.flink.learn.trans.AccountJavaKeyedStateBootstrapFunction;
+import com.flink.learn.trans.AccountJavaTuple2KeyedStateBootstrapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
-import org.apache.flink.state.api.BootstrapTransformation;
-import org.apache.flink.state.api.ExistingSavepoint;
-import org.apache.flink.state.api.OperatorTransformation;
-import org.apache.flink.state.api.Savepoint;
+import org.apache.flink.state.api.*;
 
 import java.io.IOException;
 
@@ -24,15 +26,18 @@ import java.io.IOException;
 public class FlinkJavaKeyStateProccessTest {
     public static String uid = "wordcountUID";
     public static String path = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint";
-    public static String sourcePath  = path + "/SocketJavaPoJoWordcountTest/202007011607/fbcebbb548986ed453ca5a8a85554c9b/chk-7";
-    public static String newPath = path + "/tanssavepoint";
+    public static String sourcePath  = path + "/SocketJavaPoJoWordcountTest/202007021707/0312b091d910666aa9425325aed37592/chk-2";
+    public static String newPath = path + "/javatanssavepoint";
     public static ExecutionEnvironment bEnv = ExecutionEnvironment.getExecutionEnvironment();
 
     public static void main(String[] args) throws Exception {
-     ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath , new RocksDBStateBackend(path));
-    readKeyState(existSp, uid).print();
-	// transKeystateAndWritebak(existSp, newPath);
-		// readTransKeyState(uid).print();
+     ExistingSavepoint existSp = Savepoint.load(bEnv, newPath , new RocksDBStateBackend(path));
+
+        readTuple2KeyState(existSp, uid).print();
+		// transTuple2KeystateAndWritebak(existSp,  newPath);
+
+		//readKeyState(existSp, uid).print();
+		// transKeystateAndWritebak(existSp, newPath);
 
 	}
 
@@ -50,19 +55,20 @@ public class FlinkJavaKeyStateProccessTest {
 			new WordCountPoJoKeyreader("wordcountState")
 		);
 	}
+
 	/**
+	 * 读取历史状态
+	 * @param existSp
 	 * @param uid
 	 * @return
 	 * @throws IOException
 	 */
-	public static DataSet<TranWordCountPoJo> readTransKeyState( String uid) throws IOException {
-		ExistingSavepoint existSp = Savepoint.load(bEnv, newPath , new RocksDBStateBackend(path));
+	public static DataSet<TranWordCountPoJo> readTuple2KeyState(ExistingSavepoint existSp, String uid) throws IOException {
 		return existSp.readKeyedState(
 				uid,
-				new TranWordCountPoJoKeyreader("wordcountState")
+				new WordCountPoJoTuple2Keyreader("wordcountState")
 		);
 	}
-
     /**
      *
      * @param existSp
@@ -85,4 +91,33 @@ public class FlinkJavaKeyStateProccessTest {
                 .write(newPath);
 		bEnv.execute("jel");
     }
+
+	/**
+	 *
+	 * @param existSp
+	 * @param newPath
+	 * @throws Exception
+	 */
+	public static void transTuple2KeystateAndWritebak(ExistingSavepoint existSp, String newPath) throws Exception {
+		// 读取原始state数据
+		DataSet<TranWordCountPoJo> oldState1 = readTuple2KeyState(existSp, "wordcountUID");
+		oldState1.print();
+		// 对原始state做转换
+		BootstrapTransformation<TranWordCountPoJo> transformation = OperatorTransformation
+				.bootstrapWith(oldState1)
+				// 必须要用 KeySelector 否则报 The generic type parameters of 'Tuple2' are missin
+				.keyBy(new KeySelector<TranWordCountPoJo, Tuple2<String, String>>() {
+					@Override
+					public Tuple2<String, String> getKey(TranWordCountPoJo value) throws Exception {
+						return new Tuple2<String, String>(value.word, value.word);
+					}
+				})// 确认状态的key
+				.transform(new AccountJavaTuple2KeyedStateBootstrapFunction()); // 对数据做修改
+       //转换后的数据写入新的savepoint path
+		existSp
+				.removeOperator(uid)
+				.withOperator(uid, transformation)
+				.write(newPath);
+		bEnv.execute("jel");
+	}
 }
