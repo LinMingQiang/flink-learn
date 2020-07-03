@@ -2,9 +2,9 @@ package com.flink.learn.stateprocessor;
 
 import com.flink.learn.bean.TranWordCountPoJo;
 import com.flink.learn.bean.WordCountGroupByKey;
-import com.flink.learn.reader.WordCountPojoKeyreader;
+import com.flink.learn.reader.WordCountJavaPojoKeyreader;
 import com.flink.learn.reader.WordCountSringKeyreader;
-import com.flink.learn.reader.WordCountTuple2Keyreader;
+import com.flink.learn.reader.WordCountJavaTuple2Keyreader;
 import com.flink.learn.trans.AccountJavaKeyedStateBootstrapFunction;
 import com.flink.learn.trans.AccountJavaPojoKeyedStateBootstrapFunction;
 import com.flink.learn.trans.AccountJavaTuple2KeyedStateBootstrapFunction;
@@ -69,7 +69,7 @@ public class FlinkJavaKeyStateProccessTest {
 	public static DataSet<TranWordCountPoJo> readPojoKeyState(ExistingSavepoint existSp, String uid) throws IOException {
 		return existSp.readKeyedState(
 				uid,
-				new WordCountPojoKeyreader("wordcountState")
+				new WordCountJavaPojoKeyreader("wordcountState")
 		);
 	}
 	/**
@@ -82,7 +82,7 @@ public class FlinkJavaKeyStateProccessTest {
 	public static DataSet<TranWordCountPoJo> readTuple2KeyState(ExistingSavepoint existSp, String uid) throws IOException {
 		return existSp.readKeyedState(
 				uid,
-				new WordCountTuple2Keyreader("wordcountState")
+				new WordCountJavaTuple2Keyreader("wordcountState")
 		);
 	}
     /**

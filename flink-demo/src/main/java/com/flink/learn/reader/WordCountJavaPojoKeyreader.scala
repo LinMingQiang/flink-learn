@@ -11,7 +11,7 @@ import org.apache.flink.state.api.functions.KeyedStateReaderFunction
 import org.apache.flink.streaming.api.scala.createTypeInformation
 import org.apache.flink.util.Collector
 
-class WordCountPojoKeyreader(stateName: String)
+class WordCountJavaPojoKeyreader(stateName: String)
     extends KeyedStateReaderFunction[WordCountGroupByKey, TranWordCountPoJo] {
   var lastState: ValueState[WordCountPoJo] = _
   override def open(parameters: Configuration): Unit = {

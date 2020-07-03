@@ -6,10 +6,10 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.state.api.functions.KeyedStateReaderFunction
 import org.apache.flink.streaming.api.scala.createTypeInformation
 import org.apache.flink.util.Collector
-
-class WordCountTuple2Keyreader(stateName: String)
+import org.apache.flink.api.java.tuple.Tuple2
+class WordCountJavaTuple2Keyreader(stateName: String)
     extends KeyedStateReaderFunction[
-      org.apache.flink.api.java.tuple.Tuple2[String, String],
+      Tuple2[String, String],
       TranWordCountPoJo] {
   var lastState: ValueState[WordCountPoJo] = _
   override def open(parameters: Configuration): Unit = {
@@ -20,7 +20,7 @@ class WordCountTuple2Keyreader(stateName: String)
   }
 
   override def readKey(
-      key: org.apache.flink.api.java.tuple.Tuple2[String, String],
+      key: Tuple2[String, String],
       context: KeyedStateReaderFunction.Context,
       collector: Collector[TranWordCountPoJo]): Unit = {
     val w = new TranWordCountPoJo()
