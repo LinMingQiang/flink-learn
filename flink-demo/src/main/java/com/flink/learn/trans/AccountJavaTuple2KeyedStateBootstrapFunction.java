@@ -21,11 +21,6 @@ public class AccountJavaTuple2KeyedStateBootstrapFunction
 
     @Override
     public void processElement(TranWordCountPoJo value, Context ctx) throws Exception {
-        value.count = 10L;
-        WordCountPoJo w = new WordCountPoJo();
-        w.word = value.word;
-        w.count = 1000L;
-        w.timestamp = value.timestamp;
-        lastState.update(w);
+        lastState.update(new WordCountPoJo(value.word, 1000L+ value.count, value.timestamp));
     }
 }
