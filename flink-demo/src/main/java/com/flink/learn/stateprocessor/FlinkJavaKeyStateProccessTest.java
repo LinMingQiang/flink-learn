@@ -31,7 +31,7 @@ public class FlinkJavaKeyStateProccessTest {
     public static ExecutionEnvironment bEnv = ExecutionEnvironment.getExecutionEnvironment();
 
     public static void main(String[] args) throws Exception {
-     ExistingSavepoint existSp = Savepoint.load(bEnv, newPath , new RocksDBStateBackend(path));
+     ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath , new RocksDBStateBackend(path));
 
         // readTuple2KeyState(existSp, uid).print();
 		// transTuple2KeystateAndWritebak(existSp,  newPath);
@@ -40,8 +40,8 @@ public class FlinkJavaKeyStateProccessTest {
 		// transKeystateAndWritebak(existSp, newPath);
 
 
-		 // readPojoKeyState(existSp, uid).print();
-		// transPojoKeystateAndWritebak(existSp, newPath);
+		  readPojoKeyState(existSp, uid).print();
+		  // transPojoKeystateAndWritebak(existSp, newPath);
 	}
 
 
