@@ -12,6 +12,12 @@
   <artifactId>flink-demo</artifactId>
   <dependencies>
     <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-test-utils_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+      <scope>${scope.value}</scope>
+    </dependency>
+    <dependency>
       <groupId>com.flink.learn</groupId>
       <artifactId>flink-test</artifactId>
       <version>${parent.version}</version>
