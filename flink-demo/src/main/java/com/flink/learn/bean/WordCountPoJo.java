@@ -13,10 +13,37 @@ public class WordCountPoJo implements Serializable {
 		return super.equals(obj);
 	}
 
+	public String getWord() {
+		return word;
+	}
+
+	public void setCount(Long count) {
+		this.count = count;
+	}
+
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public void setWord(String word) {
+		this.word = word;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(word, count, timestamp);
 	}
+
+	public WordCountPoJo(){
+
+	}
+
+	public WordCountPoJo(String word, Long count, Long timestamp){
+setWord(word);
+setCount(count);
+setTimestamp(timestamp);
+	}
+
 
 	@Override
 	public String toString() {

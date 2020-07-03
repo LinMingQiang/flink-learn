@@ -2,6 +2,9 @@ package com.flink.learn.bean;
 
 import java.util.Objects;
 
+/**
+ * hashCode 和 equals是必须的，否则无法做key
+ */
 public class WordCountGroupByKey {
     public String getKey() {
         return key;
@@ -13,6 +16,12 @@ public class WordCountGroupByKey {
 
     public String key = "";
 
+    public WordCountGroupByKey(){
+
+    }
+    public WordCountGroupByKey(String key){
+      this.key = key;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

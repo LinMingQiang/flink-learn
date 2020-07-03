@@ -43,19 +43,14 @@ public class SocketJavaWordcountTest {
 
         DataStream<String> source = env.socketTextStream("localhost", 9877);
         source
-                .map(x -> {
-                    WordCountPoJo s = new WordCountPoJo();
-                s.word = x; s.count = 1L;  s.timestamp = new Date().getTime();
-        return s;
-      }).keyBy(new KeySelector<WordCountPoJo, WordCountGroupByKey>() {
+                .map(x -> new WordCountPoJo(x, 1L, new Date().getTime()))
+                .keyBy(new KeySelector<WordCountPoJo, Tuple2<String, String>>() {
           // tuple2 和 WordCountGroupByKey 是类似的，tuple2不需要自己去实现hashcode和equal方法
                     @Override
-                    public WordCountGroupByKey getKey(WordCountPoJo value) throws Exception {
-                        WordCountGroupByKey k = new WordCountGroupByKey();
-                        k.setKey(value.word);
-                        // return new Tuple2<String, String>(value.word, value.word);
+                    public Tuple2<String, String> getKey(WordCountPoJo value) throws Exception {
+                        return new Tuple2<String, String>(value.word, value.word);
                         // return value.word;
-                        return k;
+                        // return new WordCountGroupByKey(value.word);
                     }
                 })
              .flatMap(new RichFlatMapFunction<WordCountPoJo, WordCountPoJo>() {
