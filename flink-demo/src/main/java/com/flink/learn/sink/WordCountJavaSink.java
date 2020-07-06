@@ -20,6 +20,7 @@ public class WordCountJavaSink extends RichSinkFunction<WordCountPoJo> implement
         checkpointedState.clear();
         for(WordCountPoJo tmp : buffer){
             checkpointedState.add(tmp);
+            System.out.println(">> " + tmp);
         }
         buffer.clear();
     }
