@@ -1,31 +1,27 @@
 package com.flink.learn.reader
 
-import com.flink.learn.bean.{
-  TranWordCountPoJo,
-  WordCountGroupByKey,
-  WordCountPoJo
-}
-import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
+import java.util.function.Consumer
+
+import com.flink.learn.bean.{WordCountGroupByKey, WordCountPoJo}
+import org.apache.flink.api.common.state.{ListState, ListStateDescriptor, ValueState, ValueStateDescriptor}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.state.api.functions.KeyedStateReaderFunction
 import org.apache.flink.streaming.api.scala.createTypeInformation
 import org.apache.flink.util.Collector
-
-class WordCountJavaPojoKeyreader(stateName: String)
+import scala.collection.JavaConverters._
+class WordCountJavaPojoOpearateKeyreader(stateName: String)
     extends KeyedStateReaderFunction[WordCountGroupByKey, WordCountPoJo] {
-  var lastState: ValueState[WordCountPoJo] = _
+  var lastState: ListState[WordCountPoJo] = _
   override def open(parameters: Configuration): Unit = {
-    val desc = new ValueStateDescriptor[WordCountPoJo](
+    val desc = new ListStateDescriptor[WordCountPoJo](
       stateName,
       createTypeInformation[WordCountPoJo])
-    lastState = getRuntimeContext().getState(desc)
+    lastState = getRuntimeContext().getListState(desc)
   }
 
   override def readKey(key: WordCountGroupByKey,
                        context: KeyedStateReaderFunction.Context,
                        collector: Collector[WordCountPoJo]): Unit = {
-    val v = lastState.value()
-
-    collector.collect(v)
+   lastState.get().asScala.foreach(collector.collect(_))
   }
 }
