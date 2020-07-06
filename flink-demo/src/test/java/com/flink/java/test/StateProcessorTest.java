@@ -41,7 +41,7 @@ public class StateProcessorTest extends AbstractTestBase implements Serializable
 
     public static String uid = "wordcountUID";
     public static String path = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint";
-    public static String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007061807/fbd51959983968a76dfa7b167e01e33a/chk-2";
+    public static String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007061807/e10174e03999d77fb7655a6e9c4f64b4/chk-3";
     public static String newPath = path + "/javatanssavepoint";
 
 
@@ -90,7 +90,7 @@ public class StateProcessorTest extends AbstractTestBase implements Serializable
         DataSet<WordCountPoJo> oldState1 = existSp.readListState(
                 "wordcountsink",
                 "opearatorstate",
-                new ListTypeInfo(WordCountPoJo.class));
+                Types.POJO(WordCountPoJo.class));
         oldState1.print();
     }
 //    @Test
