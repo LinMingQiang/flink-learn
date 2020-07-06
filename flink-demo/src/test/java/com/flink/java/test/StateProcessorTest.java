@@ -1,15 +1,15 @@
 package com.flink.java.test;
 
-import com.flink.learn.bean.TranWordCountPoJo;
 import com.flink.learn.bean.WordCountGroupByKey;
+import com.flink.learn.bean.WordCountPoJo;
 import com.flink.learn.reader.WordCountJavaPojoKeyreader;
-import com.flink.learn.reader.WordCountJavaTuple2Keyreader;
+import com.flink.learn.reader.WordCountJavaPojoOpearateKeyreader;
 import com.flink.learn.trans.AccountJavaPojoKeyedStateBootstrapFunction;
-import com.flink.learn.trans.AccountJavaTuple2KeyedStateBootstrapFunction;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.typeutils.ListTypeInfo;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.state.api.BootstrapTransformation;
 import org.apache.flink.state.api.ExistingSavepoint;
@@ -19,32 +19,51 @@ import org.apache.flink.test.util.AbstractTestBase;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 
-public class StateProcessorTest  extends AbstractTestBase implements Serializable {
+
+/**
+ * 当 state 使用 ttlconfig的时候，readKeyedState的时候里面也要一样配
+ */
+public class StateProcessorTest extends AbstractTestBase implements Serializable {
+    public static ExecutionEnvironment bEnv = null;
+
+    static {
+//        FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
+//                "LocalFlinkTest");
+//        System.out.println(FlinkLearnPropertiesUtil.param().toMap().toString());
+        bEnv = ExecutionEnvironment.getExecutionEnvironment();
+//        FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param(),
+//                FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
+//                10000L);
+    }
+
     public static String uid = "wordcountUID";
     public static String path = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint";
-    public static String sourcePath  = path + "/SocketJavaPoJoWordcountTest/202007031107/41e13c6240a3a6faa09d743bd1c8cf4c/chk-1";
+    public static String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007061807/fbd51959983968a76dfa7b167e01e33a/chk-2";
     public static String newPath = path + "/javatanssavepoint";
-    public static ExecutionEnvironment bEnv = ExecutionEnvironment.getExecutionEnvironment();
 
 
+    /**
+     * @throws Exception
+     */
     @Test
     public void testPojoStateProcessor() throws Exception {
         remove(new File(newPath.substring(7, newPath.length())));
-        ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath , new RocksDBStateBackend(path));
-        DataSet<TranWordCountPoJo> oldState1 =  existSp.readKeyedState(
+        ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath, new RocksDBStateBackend(path));
+        DataSet<WordCountPoJo> oldState1 = existSp.readKeyedState(
                 uid,
                 new WordCountJavaPojoKeyreader("wordcountState")
         );
         oldState1.print();
         // 对原始state做转换
-        BootstrapTransformation<TranWordCountPoJo> transformation = OperatorTransformation
+        BootstrapTransformation<WordCountPoJo> transformation = OperatorTransformation
                 .bootstrapWith(oldState1)
                 // 必须要用 KeySelector 否则报 The generic type parameters of 'Tuple2' are missin
-                .keyBy(new KeySelector<TranWordCountPoJo, WordCountGroupByKey>() {
+                .keyBy(new KeySelector<WordCountPoJo, WordCountGroupByKey>() {
                     @Override
-                    public WordCountGroupByKey getKey(TranWordCountPoJo value) throws Exception {
+                    public WordCountGroupByKey getKey(WordCountPoJo value) throws Exception {
                         WordCountGroupByKey k = new WordCountGroupByKey();
                         k.setKey(value.word);
                         return k;
@@ -58,7 +77,7 @@ public class StateProcessorTest  extends AbstractTestBase implements Serializabl
                 .write(newPath);
         bEnv.execute("jel");
 
-        ExistingSavepoint existSp2 = Savepoint.load(bEnv, newPath , new RocksDBStateBackend(path));
+        ExistingSavepoint existSp2 = Savepoint.load(bEnv, newPath, new RocksDBStateBackend(path));
         existSp2.readKeyedState(
                 uid,
                 new WordCountJavaPojoKeyreader("wordcountState")
@@ -66,50 +85,65 @@ public class StateProcessorTest  extends AbstractTestBase implements Serializabl
     }
 
     @Test
-    public void testTuple2StateProcessor() throws Exception {
-        remove(new File(newPath.substring(7, newPath.length())));
-        ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath , new RocksDBStateBackend(path));
-        DataSet<TranWordCountPoJo> oldState1 =  existSp.readKeyedState(
-                uid,
-                new WordCountJavaTuple2Keyreader("wordcountState")
-        );
+    public void testOpearteStateProcessor() throws Exception {
+        ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath, new RocksDBStateBackend(path));
+        DataSet<WordCountPoJo> oldState1 = existSp.readListState(
+                "wordcountsink",
+                "opearatorstate",
+                new ListTypeInfo(WordCountPoJo.class));
         oldState1.print();
-        // 对原始state做转换
-        BootstrapTransformation<TranWordCountPoJo> transformation = OperatorTransformation
-                .bootstrapWith(oldState1)
-                // 必须要用 KeySelector 否则报 The generic type parameters of 'Tuple2' are missin
-                .keyBy(new KeySelector<TranWordCountPoJo, Tuple2<String, String>>() {
-                    @Override
-                    public Tuple2<String, String> getKey(TranWordCountPoJo value) throws Exception {
-                        return new Tuple2<String, String>(value.word, value.word);
-                    }
-                })// 确认状态的key
-                .transform(new AccountJavaTuple2KeyedStateBootstrapFunction()); // 对数据做修改
-        //转换后的数据写入新的savepoint path
-        existSp
-                .removeOperator(uid)
-                .withOperator(uid, transformation)
-                .write(newPath);
-        bEnv.execute("jel");
-
-        ExistingSavepoint existSp2 = Savepoint.load(bEnv, newPath , new RocksDBStateBackend(path));
-        existSp2.readKeyedState(
-                uid,
-                new WordCountJavaTuple2Keyreader("wordcountState")
-        ).print();
     }
+//    @Test
+//    public void testTuple2StateProcessor() throws Exception {
+//        remove(new File(newPath.substring(7, newPath.length())));
+//        ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath, new RocksDBStateBackend(path));
+//        DataSet<WordCountPoJo> oldState1 = existSp.readKeyedState(
+//                uid,
+//                new WordCountJavaTuple2Keyreader("wordcountState")
+//        );
+//        oldState1.print();
+//        // 对原始state做转换
+//        BootstrapTransformation<WordCountPoJo> transformation = OperatorTransformation
+//                .bootstrapWith(oldState1)
+//                // 必须要用 KeySelector 否则报 The generic type parameters of 'Tuple2' are missin
+//                // https://ci.apache.org/projects/flink/flink-docs-release-1.10/zh/dev/java_lambdas.html
+//                .keyBy(new KeySelector<WordCountPoJo, Tuple2<String, String>>() {
+//                    @Override
+//                    public Tuple2<String, String> getKey(WordCountPoJo value) throws Exception {
+//                        return new Tuple2<String, String>(value.word, value.word);
+//                    }
+//                })// 确认状态的key
+//                .transform(new AccountJavaTuple2KeyedStateBootstrapFunction()); // 对数据做修改
+//        //转换后的数据写入新的savepoint path
+//        existSp
+//                .removeOperator(uid)
+//                .withOperator(uid, transformation)
+//                .write(newPath);
+//        bEnv.execute("jel");
+//
+//        ExistingSavepoint existSp2 = Savepoint.load(bEnv, newPath, new RocksDBStateBackend(path));
+//        existSp2.readKeyedState(
+//                uid,
+//                new WordCountJavaTuple2Keyreader("wordcountState")
+//        ).print();
+//    }
 
 
+    /**
+     * @param dir
+     */
     public static void remove(File dir) {
-        File files[] = dir.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            if(files[i].isDirectory()) {
-                remove(files[i]);
-            }else {
-                files[i].delete();
+        if (dir.exists()) {
+            File files[] = dir.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    remove(files[i]);
+                } else {
+                    files[i].delete();
+                }
             }
+            //删除目录
+            dir.delete();
         }
-        //删除目录
-        dir.delete();
     }
 }

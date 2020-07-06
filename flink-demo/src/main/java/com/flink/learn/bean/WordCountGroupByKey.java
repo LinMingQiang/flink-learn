@@ -34,4 +34,11 @@ public class WordCountGroupByKey {
     public int hashCode() {
         return Objects.hash(key);
     }
+
+    @Override
+    public String toString() {
+        return "WordCountGroupByKey{" +
+                "key='" + key + '\'' +
+                '}';
+    }
 }

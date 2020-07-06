@@ -5,9 +5,8 @@ import java.util.Date
 import com.alibaba.fastjson.JSON
 import org.apache.flink.streaming.api.scala._
 import com.flink.learn.bean.{AdlogBean, CaseClassUtil, StatisticalIndic}
-
 import com.flink.common.core.FlinkLearnPropertiesUtil._
-import com.flink.common.deserialize.{TopicMessageDeserialize}
+import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
 import com.flink.learn.bean.CaseClassUtil.SessionLogInfo
@@ -29,7 +28,9 @@ import org.apache.flink.streaming.api.windowing.assigners.{
   EventTimeSessionWindows,
   TumblingProcessingTimeWindows
 }
+import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor
 import org.apache.flink.streaming.api.windowing.time.Time
+import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger
 
 class LocalFlinkTest extends FlinkStreamCommonSuit {
   case class UserDefinedKey(name: String, age: Int)
@@ -49,11 +50,15 @@ class LocalFlinkTest extends FlinkStreamCommonSuit {
     * session; 注意： 只有下一条数据来了，才会打印上一个窗口的结果。
     * 因为下一条数据的时间会更新wartermark，
     * 当wartermark更新后，才能确定某个窗口的数据永远不再更新了才会打印出来，否则一直等。
+    * window 有两种 Windowfunction ：
+    * AggregateFunction(一条一条聚合)
+    * ProcessindowFunction 触发的时候一次性聚合， Iterator给你数据
     */
   test("sessionWindowWatermark") {
     env.setParallelism(1)
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime) // 时间设为eventime
     env.getConfig.setAutoWatermarkInterval(5000L) // 每5s更新一次wartermark
+
     env
       .addSource(kafkaSource(TEST_TOPIC, BROKER))
       .map(x => {
@@ -62,6 +67,7 @@ class LocalFlinkTest extends FlinkStreamCommonSuit {
       .assignTimestampsAndWatermarks(new MyTimestampsAndWatermarks2(0))
       .keyBy(x => x.sessionId)
       .window(EventTimeSessionWindows.withGap(Time.seconds(6)))
+      .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
       .apply(new SessionWindowRichF)
       .print()
     env.execute("sessionWindowWatermark")
@@ -78,6 +84,8 @@ class LocalFlinkTest extends FlinkStreamCommonSuit {
       .keyBy(0)
       // .window(ProcessingTimeSessionWindows.withGap(Time.seconds(10))) // 算session
       .window(TumblingProcessingTimeWindows.of(Time.seconds(4))) // = .timeWindow(Time.seconds(60))
+      .evictor(TimeEvictor.of(Time.seconds(2))) // 只保留 窗口内最近2s的数据做计算
+      .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
       .sum(1) // 10s窗口的数据
       .print
     // .setParallelism(2)

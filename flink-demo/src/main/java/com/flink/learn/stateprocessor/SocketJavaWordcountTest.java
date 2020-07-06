@@ -1,18 +1,14 @@
 package com.flink.learn.stateprocessor;
 
 import com.flink.common.core.EnvironmentalKey;
-import com.flink.common.core.FlinkEvnBuilder;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.flink.learn.bean.TranWordCountPoJo;
 import com.flink.learn.bean.WordCountGroupByKey;
 import com.flink.learn.bean.WordCountPoJo;
+import com.flink.learn.sink.WordCountJavaSink;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.typeutils.PojoTypeInfo;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -43,41 +39,47 @@ public class SocketJavaWordcountTest {
 
         DataStream<String> source = env.socketTextStream("localhost", 9877);
         source
-                .map(x -> new WordCountPoJo(x, 1L, new Date().getTime()))
-                .keyBy(new KeySelector<WordCountPoJo, Tuple2<String, String>>() {
-          // tuple2 和 WordCountGroupByKey 是类似的，tuple2不需要自己去实现hashcode和equal方法
+                .map(x ->
+                        new WordCountPoJo(x, 1L, new Date().getTime(), x.split(","), new WordCountGroupByKey(x))
+                )
+                .keyBy(new KeySelector<WordCountPoJo, WordCountGroupByKey>() {
+                    // tuple2 和 WordCountGroupByKey 是类似的，tuple2不需要自己去实现hashcode和equal方法
                     @Override
-                    public Tuple2<String, String> getKey(WordCountPoJo value) throws Exception {
-                        return new Tuple2<String, String>(value.word, value.word);
+                    public WordCountGroupByKey getKey(WordCountPoJo value) throws Exception {
+                        // return new Tuple2<String, String>(value.word, value.word);
                         // return value.word;
-                        // return new WordCountGroupByKey(value.word);
+                        return new WordCountGroupByKey(value.word);
                     }
                 })
-             .flatMap(new RichFlatMapFunction<WordCountPoJo, WordCountPoJo>() {
-                 ValueState<WordCountPoJo> lastState = null ;
-                 @Override
-                 public void flatMap(WordCountPoJo value, Collector<WordCountPoJo> out) throws Exception {
-                     WordCountPoJo ls = lastState.value();
-                     if (ls == null) {
-                         ls = value;
-                     } else {
-                         ls.count += value.count;
-                     }
-                     lastState.update(ls);
-                     out.collect(ls);
-                 }
+                .flatMap(new RichFlatMapFunction<WordCountPoJo, WordCountPoJo>() {
+                    ValueState<WordCountPoJo> lastState = null;
 
-                 @Override
-                 public void open(Configuration parameters) throws Exception {
-                     super.open(parameters);
-                     ValueStateDescriptor desc = new ValueStateDescriptor<WordCountPoJo>(
-                        "wordcountState",WordCountPoJo.class);
-                lastState = getRuntimeContext().getState(desc);
-                 }
-        })
+                    @Override
+                    public void flatMap(WordCountPoJo value, Collector<WordCountPoJo> out) throws Exception {
+                        WordCountPoJo ls = lastState.value();
+                        if (ls == null) {
+                            ls = value;
+                        } else {
+                            ls.count += value.count;
+                        }
+                        lastState.update(ls);
+                        out.collect(ls);
+                    }
+
+                    @Override
+                    public void open(Configuration parameters) throws Exception {
+                        super.open(parameters);
+                        ValueStateDescriptor desc = new ValueStateDescriptor<WordCountPoJo>(
+                                "wordcountState", WordCountPoJo.class);
+                        lastState = getRuntimeContext().getState(desc);
+                    }
+                })
                 .name("wordcountUID")
                 .uid("wordcountUID")
-                .print();
+                .addSink(new WordCountJavaSink())
+                .uid("wordcountsink");
+
+        // .print();
         env.execute("SocketWordcountTest");
     }
 }

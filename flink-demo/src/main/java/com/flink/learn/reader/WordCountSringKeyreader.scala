@@ -6,7 +6,7 @@ import org.apache.flink.state.api.functions.KeyedStateReaderFunction
 import org.apache.flink.streaming.api.scala.createTypeInformation
 import org.apache.flink.util.Collector
 
-class WordCountSringKeyreader(stateName : String) extends KeyedStateReaderFunction[String, TranWordCountPoJo] {
+class WordCountSringKeyreader(stateName : String) extends KeyedStateReaderFunction[String, WordCountPoJo] {
   var lastState: ValueState[WordCountPoJo] = _
   override def open(parameters: Configuration): Unit = {
     val desc = new ValueStateDescriptor[WordCountPoJo](
@@ -17,12 +17,8 @@ class WordCountSringKeyreader(stateName : String) extends KeyedStateReaderFuncti
 
   override def readKey(key: String,
                        context: KeyedStateReaderFunction.Context,
-                       collector: Collector[TranWordCountPoJo]): Unit = {
-    val w = new TranWordCountPoJo()
+                       collector: Collector[WordCountPoJo]): Unit = {
     val v = lastState.value()
-    w.word = v.word
-    w.count = v.count
-    w.timestamp = v.timestamp
-    collector.collect(w)
+    collector.collect(v)
   }
 }

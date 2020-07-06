@@ -9,7 +9,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.state.api.functions.KeyedStateBootstrapFunction;
 
 public class AccountJavaTuple2KeyedStateBootstrapFunction
-        extends KeyedStateBootstrapFunction<Tuple2<String, String>, TranWordCountPoJo> {
+        extends KeyedStateBootstrapFunction<Tuple2<String, String>, WordCountPoJo> {
    ValueState<WordCountPoJo> lastState;
 
     @Override
@@ -20,7 +20,7 @@ public class AccountJavaTuple2KeyedStateBootstrapFunction
     }
 
     @Override
-    public void processElement(TranWordCountPoJo value, Context ctx) throws Exception {
-        lastState.update(new WordCountPoJo(value.word, 1000L+ value.count, value.timestamp));
+    public void processElement(WordCountPoJo value, Context ctx) throws Exception {
+        lastState.update(new WordCountPoJo(value.word, 1000L+ value.count, value.timestamp, value.srcArr, value.keyby));
     }
 }
