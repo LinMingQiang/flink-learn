@@ -1,5 +1,6 @@
 package com.flink.learn.sink;
 
+import com.flink.learn.bean.WordCountGroupByKey;
 import com.flink.learn.bean.WordCountPoJo;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
@@ -11,17 +12,20 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WordCountJavaSink extends RichSinkFunction<WordCountPoJo> implements CheckpointedFunction {
     ListState<WordCountPoJo> checkpointedState = null ; // checkpoint state
-    ArrayList<WordCountPoJo> buffer = new ArrayList<WordCountPoJo>();
+    HashMap<WordCountGroupByKey, WordCountPoJo> buffer = new HashMap<WordCountGroupByKey, WordCountPoJo>();
     @Override
     public void snapshotState(FunctionSnapshotContext context) throws Exception {
         checkpointedState.clear();
-        for(WordCountPoJo tmp : buffer){
-            checkpointedState.add(tmp);
+        for(Map.Entry<WordCountGroupByKey, WordCountPoJo> tmp : buffer.entrySet()){
+            checkpointedState.add(tmp.getValue());
             System.out.println(">> " + tmp);
         }
+        System.out.println(">> snapshotState << " + buffer.size());
         buffer.clear();
     }
 
@@ -39,7 +43,7 @@ public class WordCountJavaSink extends RichSinkFunction<WordCountPoJo> implement
 
     @Override
     public void invoke(WordCountPoJo value, Context context) throws Exception {
-        System.out.println(value);
-        buffer.add(value);
+       // System.out.println(value);
+        buffer.put(value.getKeyby(), value);
     }
 }
