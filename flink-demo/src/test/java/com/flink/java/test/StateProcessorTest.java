@@ -3,30 +3,24 @@ package com.flink.java.test;
 import com.flink.learn.bean.WordCountGroupByKey;
 import com.flink.learn.bean.WordCountPoJo;
 import com.flink.learn.reader.WordCountJavaPojoKeyreader;
-import com.flink.learn.test.common.FlinkTestBase;
+import com.flink.learn.test.common.FlinkStreamTableTestBase;
 import com.flink.learn.trans.AccountJavaPojoKeyedStateBootstrapFunction;
 import com.flink.learn.trans.AcountJavaPoJoOperatorStateBootstrap;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.DataSet;
-import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.state.api.BootstrapTransformation;
 import org.apache.flink.state.api.ExistingSavepoint;
 import org.apache.flink.state.api.OperatorTransformation;
 import org.apache.flink.state.api.Savepoint;
-import org.apache.flink.test.util.AbstractTestBase;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import java.io.File;
-import java.io.Serializable;
-
 
 /**
  * 当 state 使用 ttlconfig的时候，readKeyedState的时候里面也要一样配
  */
-public class StateProcessorTest extends FlinkTestBase {
+public class StateProcessorTest extends FlinkStreamTableTestBase {
 
     public static String uid = "wordcountUID";
     public static String path = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint";
@@ -76,7 +70,7 @@ public class StateProcessorTest extends FlinkTestBase {
      */
     @Test
     public void testOpearteStateProcessor() throws Exception {
-        String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007061807/e10174e03999d77fb7655a6e9c4f64b4/chk-3";
+        String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007071207/fe4dfe843f45d4bb61b4b0a6a4307d68/chk-2";
         remove(new File(newPath.substring(7, newPath.length())));
         ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath, new RocksDBStateBackend(path));
         // read src key state
