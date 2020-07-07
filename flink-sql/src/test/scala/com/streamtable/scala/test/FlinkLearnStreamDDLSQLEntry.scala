@@ -1,20 +1,15 @@
-package com.flink.learn.sql.stream.entry
-import org.apache.flink.api.scala._
-import org.apache.flink.table.api.scala._
-import com.flink.learn.sql.common.{
-  DDLQueryOrSinkSQLManager,
-  DDLSourceSQLManager,
-  TableSinkManager
-}
-import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
-import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.types.Row
+package com.streamtable.scala.test
+
+import com.flink.learn.sql.common.{DDLQueryOrSinkSQLManager, DDLSourceSQLManager, TableSinkManager}
 import com.flink.learn.sql.func.DdlTableFunction.Split
-import com.flink.learn.sql.func.{
-  StrToLowOrUpScalarFunction,
-  WeightedAvgAggregateFunction
-}
-import com.flink.learn.test.common.{FlinkStreamTableCommonSuit}
+import com.flink.learn.sql.func.{StrToLowOrUpScalarFunction, WeightedAvgAggregateFunction}
+import com.flink.learn.test.common.FlinkStreamTableCommonSuit
+import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
+import org.apache.flink.api.scala._
+import org.apache.flink.core.fs.FileSystem.WriteMode
+import org.apache.flink.table.api.scala._
+import org.apache.flink.types.Row
+
 class FlinkLearnStreamDDLSQLEntry extends FlinkStreamTableCommonSuit {
 
 

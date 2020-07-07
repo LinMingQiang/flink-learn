@@ -4,6 +4,8 @@ object DDLQueryOrSinkSQLManager {
 
   /**
    * 以1分钟为窗口，如果定了 watermark，数据展示时间 = 2+wartermark才会打印出来
+   * 滚动窗口
+   * https://help.aliyun.com/document_detail/62511.html?spm=a2c4g.11186623.6.664.4a7834edRreGGZ
    * @param tbl
    */
   def tumbleWindowSink(tbl: String): String = {
