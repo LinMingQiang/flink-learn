@@ -10,7 +10,8 @@ Maven 模板 : https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/ja
 ```
 **Flink Submit**
 ```
-1：单独资源： flink run -m yarn-cluster --yarnname _wc -p 5 -yn 4 -yjm 1024 -ytm 1024 -ys 2 WordCount.jar
+！：1.10之后去掉 -yn ，加上会报错
+1：单独资源： flink run -m yarn-cluster --yarnname _wc -p 5 -yjm 1024 -ytm 1024 -ys 2 WordCount.jar
 2：共享空间： yarn-session.sh -n 5 -jm 1024 -tm 1024 -s 2 // 在yarn提前开辟一个资源空间 application_1567318548013_0001。 <br>
 在开辟的空间上提交任务： flink run -m yarn-cluster --yarnname flink_wc -p 5 -yn 4 -yjm 1024 -ytm 1024 -ys 2 -yid application_1567318548013_0001 WordCount.jar <br>
 ```
