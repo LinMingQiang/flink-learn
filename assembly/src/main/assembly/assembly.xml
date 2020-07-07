@@ -65,14 +65,6 @@
         </fileSet>
 
         <fileSet>
-            <directory>${project.parent.basedir}/flink-test/target/lib/</directory>
-            <outputDirectory>/dependency-lib</outputDirectory>
-            <includes>
-                <include>**/*</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
             <directory>${project.parent.basedir}/resources/target/resources/conf</directory>
             <outputDirectory>/conf</outputDirectory>
             <includes>
