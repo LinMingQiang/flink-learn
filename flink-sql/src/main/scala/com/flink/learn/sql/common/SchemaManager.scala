@@ -9,4 +9,10 @@ object SchemaManager {
     .field("id", Types.STRING)
     .field("name", Types.STRING)
     .field("age", Types.INT)
+
+
+  val KAFKA_SCHEMA = new Schema()
+    .field("topic", Types.STRING)
+    .field("offset", Types.LONG)
+    .field("msg", Types.STRING)
 }
