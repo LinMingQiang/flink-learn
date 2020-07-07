@@ -3,6 +3,7 @@ package com.flink.java.test;
 import com.flink.learn.bean.WordCountGroupByKey;
 import com.flink.learn.bean.WordCountPoJo;
 import com.flink.learn.reader.WordCountJavaPojoKeyreader;
+import com.flink.learn.test.common.FlinkTestBase;
 import com.flink.learn.trans.AccountJavaPojoKeyedStateBootstrapFunction;
 import com.flink.learn.trans.AcountJavaPoJoOperatorStateBootstrap;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -15,6 +16,8 @@ import org.apache.flink.state.api.ExistingSavepoint;
 import org.apache.flink.state.api.OperatorTransformation;
 import org.apache.flink.state.api.Savepoint;
 import org.apache.flink.test.util.AbstractTestBase;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import java.io.File;
 import java.io.Serializable;
@@ -23,24 +26,11 @@ import java.io.Serializable;
 /**
  * 当 state 使用 ttlconfig的时候，readKeyedState的时候里面也要一样配
  */
-public class StateProcessorTest extends AbstractTestBase implements Serializable {
-    public static ExecutionEnvironment bEnv = null;
-
-    static {
-//        FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
-//                "LocalFlinkTest");
-//        System.out.println(FlinkLearnPropertiesUtil.param().toMap().toString());
-        bEnv = ExecutionEnvironment.getExecutionEnvironment();
-//        FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param(),
-//                FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
-//                10000L);
-    }
+public class StateProcessorTest extends FlinkTestBase {
 
     public static String uid = "wordcountUID";
     public static String path = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint";
     public static String newPath = path + "/javatanssavepoint";
-
-
     /**
      * @throws Exception
      */

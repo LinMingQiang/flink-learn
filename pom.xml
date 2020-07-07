@@ -14,7 +14,6 @@
         <module>flink-sql</module>
         <module>flink-batch</module>
         <module>assembly</module>
-        <module>flink-test</module>
     </modules>
     <name>${project.artifactId}</name>
     <description>My wonderfull scala app</description>
