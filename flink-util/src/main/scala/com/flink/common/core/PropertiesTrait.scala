@@ -1,11 +1,13 @@
 package com.flink.common.core
 
 import org.apache.flink.api.java.utils.ParameterTool
-
+import scala.collection.JavaConverters._
 trait PropertiesTrait {
   var proName = ""
-  var param: ParameterTool = null
+  var param: ParameterTool = ParameterTool.fromMap(Map("" -> "").asJava)
   def getProperties(key: String): String = param.get(key)
+  def getProperties(key: String, defualt: String): String = param.get(key, defualt)
+
   /**
    * 用于driver端初始化
    */
