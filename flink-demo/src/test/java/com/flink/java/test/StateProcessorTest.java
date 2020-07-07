@@ -3,13 +3,12 @@ package com.flink.java.test;
 import com.flink.learn.bean.WordCountGroupByKey;
 import com.flink.learn.bean.WordCountPoJo;
 import com.flink.learn.reader.WordCountJavaPojoKeyreader;
-import com.flink.learn.reader.WordCountJavaPojoOpearateKeyreader;
 import com.flink.learn.trans.AccountJavaPojoKeyedStateBootstrapFunction;
+import com.flink.learn.trans.AcountJavaPoJoOperatorStateBootstrap;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.typeutils.ListTypeInfo;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.state.api.BootstrapTransformation;
 import org.apache.flink.state.api.ExistingSavepoint;
@@ -17,9 +16,7 @@ import org.apache.flink.state.api.OperatorTransformation;
 import org.apache.flink.state.api.Savepoint;
 import org.apache.flink.test.util.AbstractTestBase;
 import org.junit.Test;
-
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 
 
@@ -41,7 +38,6 @@ public class StateProcessorTest extends AbstractTestBase implements Serializable
 
     public static String uid = "wordcountUID";
     public static String path = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint";
-    public static String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007061807/e10174e03999d77fb7655a6e9c4f64b4/chk-3";
     public static String newPath = path + "/javatanssavepoint";
 
 
@@ -50,6 +46,7 @@ public class StateProcessorTest extends AbstractTestBase implements Serializable
      */
     @Test
     public void testPojoStateProcessor() throws Exception {
+        String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007061807/e10174e03999d77fb7655a6e9c4f64b4/chk-3";
         remove(new File(newPath.substring(7, newPath.length())));
         ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath, new RocksDBStateBackend(path));
         DataSet<WordCountPoJo> oldState1 = existSp.readKeyedState(
@@ -77,21 +74,105 @@ public class StateProcessorTest extends AbstractTestBase implements Serializable
                 .write(newPath);
         bEnv.execute("jel");
 
-        ExistingSavepoint existSp2 = Savepoint.load(bEnv, newPath, new RocksDBStateBackend(path));
-        existSp2.readKeyedState(
-                uid,
-                new WordCountJavaPojoKeyreader("wordcountState")
-        ).print();
+        Savepoint.load(bEnv, newPath, new RocksDBStateBackend(path))
+                .readKeyedState(
+                        uid,
+                        new WordCountJavaPojoKeyreader("wordcountState")
+                ).print();
     }
 
+    /**
+     * @throws Exception
+     */
     @Test
     public void testOpearteStateProcessor() throws Exception {
+        String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007061807/e10174e03999d77fb7655a6e9c4f64b4/chk-3";
+        remove(new File(newPath.substring(7, newPath.length())));
         ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath, new RocksDBStateBackend(path));
+        // read src key state
         DataSet<WordCountPoJo> oldState1 = existSp.readListState(
                 "wordcountsink",
                 "opearatorstate",
                 Types.POJO(WordCountPoJo.class));
         oldState1.print();
+        // trans
+        existSp
+                .removeOperator("wordcountsink")
+                .withOperator("wordcountsink", OperatorTransformation
+                        .bootstrapWith(oldState1)
+                        .transform(new AcountJavaPoJoOperatorStateBootstrap()))
+                .write(newPath);
+        bEnv.execute("jel");
+        // read new key state
+        Savepoint.load(bEnv, newPath, new RocksDBStateBackend(path))
+                .readListState(
+                        "wordcountsink",
+                        "opearatorstate",
+                        Types.POJO(WordCountPoJo.class)).print();
+    }
+
+
+    /**
+     * 同时修改两个state。单独改的话互不影响
+     * @throws Exception
+     */
+    @Test
+    public void testKeyAndOperatorState() throws Exception {
+        String sourcePath = path + "/SocketJavaPoJoWordcountTest/202007061807/e10174e03999d77fb7655a6e9c4f64b4/chk-3";
+        remove(new File(newPath.substring(7, newPath.length())));
+        ExistingSavepoint existSp = Savepoint.load(bEnv, sourcePath, new RocksDBStateBackend(path));
+        // operator state
+        DataSet<WordCountPoJo> oldState1 = existSp.readListState(
+                "wordcountsink",
+                "opearatorstate",
+                Types.POJO(WordCountPoJo.class));
+        oldState1.print();
+        // key state
+        DataSet<WordCountPoJo> keysState = existSp.readKeyedState(
+                uid,
+                new WordCountJavaPojoKeyreader("wordcountState")
+        );
+        keysState.print();
+
+        // key state trans
+        BootstrapTransformation<WordCountPoJo> keystateTransformation = OperatorTransformation
+                .bootstrapWith(oldState1)
+                // 必须要用 KeySelector 否则报 The generic type parameters of 'Tuple2' are missin
+                .keyBy(new KeySelector<WordCountPoJo, WordCountGroupByKey>() {
+                    @Override
+                    public WordCountGroupByKey getKey(WordCountPoJo value) throws Exception {
+                        WordCountGroupByKey k = new WordCountGroupByKey();
+                        k.setKey(value.word);
+                        return k;
+                    }
+                })// 确认状态的key
+                .transform(new AccountJavaPojoKeyedStateBootstrapFunction()); // 对数据做修改
+        // operator state trans
+        BootstrapTransformation<WordCountPoJo> transformation = OperatorTransformation
+                .bootstrapWith(oldState1)
+                .transform(new AcountJavaPoJoOperatorStateBootstrap());
+        // write new state
+        existSp
+                .removeOperator("wordcountsink")
+                .withOperator("wordcountsink", transformation)
+                .removeOperator(uid)
+                .withOperator(uid, keystateTransformation)
+                .write(newPath);
+        bEnv.execute("jel");
+
+        // read new sstate
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Savepoint.load(bEnv, newPath, new RocksDBStateBackend(path))
+                .readListState(
+                        "wordcountsink",
+                        "opearatorstate",
+                        Types.POJO(WordCountPoJo.class)).print();
+
+        Savepoint.load(bEnv, newPath, new RocksDBStateBackend(path))
+                .readKeyedState(
+                        uid,
+                        new WordCountJavaPojoKeyreader("wordcountState")
+                ).print();
     }
 //    @Test
 //    public void testTuple2StateProcessor() throws Exception {
