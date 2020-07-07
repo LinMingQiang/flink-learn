@@ -25,6 +25,11 @@ class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
       .withSchema(SchemaManager.ID_NAME_AGE_SCHEMA)
       .inAppendMode()
       .createTemporaryTable("test")
+
+    tableEnv.sqlQuery("select * from test")
+      .toRetractStream[Row]
+      .print()
+    tableEnv.execute("")
   }
 
   /**

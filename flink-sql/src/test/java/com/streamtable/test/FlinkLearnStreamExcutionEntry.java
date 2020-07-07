@@ -2,6 +2,7 @@ package com.streamtable.test;
 
 import com.flink.learn.sql.common.TableSinkManager;
 import com.flink.learn.test.common.FlinkStreamTableTestBase;
+import org.apache.flink.api.java.io.jdbc.JDBCTableSourceSinkFactory;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.test.util.AbstractTestBase;
@@ -17,11 +18,20 @@ public class FlinkLearnStreamExcutionEntry extends FlinkStreamTableTestBase {
                 streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
         ,"topic,offset,msg");
         a.printSchema();
+
         // sink1
-        tableEnv.toAppendStream(a, Row.class).print();
+        // tableEnv.toAppendStream(a, Row.class).print();
+
         // sink2
         // TableSinkManager.registAppendStreamTableSink(tableEnv);
-        // a.insertInto("test");
+        // a.insertInto("test2");
+
+        // sink3
+       // TableSinkManager.connctKafkaSink(tableEnv, "test_sink_kafka");
+        TableSinkManager.connectFileSystemSink(tableEnv, "test_sink_csv");
+       // a.insertInto("test_sink_kafka");
+        a.insertInto("test_sink_csv");
+
        tableEnv.execute("");
     }
     //    test("wordCount") {
