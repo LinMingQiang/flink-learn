@@ -33,6 +33,16 @@
           <version>${project.version}</version>
       </dependency>
       <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-csv</artifactId>
+          <version>${flink.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-json</artifactId>
+          <version>${flink.version}</version>
+      </dependency>
+      <dependency>
           <groupId>org.apache.hbase</groupId>
           <artifactId>hbase-client</artifactId>
           <version>1.2.0</version>

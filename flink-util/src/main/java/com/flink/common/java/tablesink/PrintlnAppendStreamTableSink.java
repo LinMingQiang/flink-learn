@@ -1,4 +1,4 @@
-package com.flink.common.java.sink;
+package com.flink.common.java.tablesink;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;

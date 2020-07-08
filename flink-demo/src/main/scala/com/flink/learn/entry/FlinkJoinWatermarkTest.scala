@@ -22,7 +22,7 @@ import org.apache.flink.util.Collector
 class FlinkJoinWatermarkTest extends FlinkStreamCommonSuit {
 
   def main(args: Array[String]): Unit = {
-   // env.getConfig.setAutoWatermarkInterval(5000L)
+//    env.getConfig.setAutoWatermarkInterval(5000L)
 //    val source = env.socketTextStream("localhost", 9876)
 //    source
 //      .map(x => Wordcount(x, 1L, new Date().getTime))
@@ -54,8 +54,8 @@ class FlinkJoinWatermarkTest extends FlinkStreamCommonSuit {
     // 点击去join 前 后 10s的曝光。 允许点击比曝光早和晚 10s。
     click
       .keyBy(_.word)
-      .intervalJoin(expose.keyBy(_.word))
-      .between(Time.milliseconds(-10000), Time.milliseconds(10000))
+       .intervalJoin(expose.keyBy(_.word))
+       .between(Time.milliseconds(-10000), Time.milliseconds(10000))
       .process(new ProcessJoinFunction[Wordcount, Wordcount, Wordcount]() {
         override def processElement(in1: Wordcount,
                                     in2: Wordcount,

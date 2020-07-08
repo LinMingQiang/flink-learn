@@ -1,8 +1,8 @@
-package com.flink.learn.sql.common
+package com.flink.common.manager
 
 import org.apache.flink.table.descriptors.Kafka
 
-object SqlConnectorManager {
+object TableSourceConnectorManager {
 
   /**
     *
