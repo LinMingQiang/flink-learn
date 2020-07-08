@@ -1,8 +1,8 @@
 package com.streamtable.scala.test
 
 import com.flink.common.core.FlinkLearnPropertiesUtil.BROKER
-import com.flink.common.manager.TableSourceConnectorManager
-import com.flink.learn.sql.common.{DataFormatUril, SchemaManager}
+import com.flink.common.manager.{SchemaManager, TableSourceConnectorManager}
+import com.flink.learn.sql.common.DataFormatUril
 import com.flink.learn.test.common.FlinkStreamTableCommonSuit
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api.scala._

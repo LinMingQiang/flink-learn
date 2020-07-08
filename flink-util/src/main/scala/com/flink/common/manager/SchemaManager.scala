@@ -1,4 +1,4 @@
-package com.flink.learn.sql.common
+package com.flink.common.manager
 
 import org.apache.flink.api.common.typeinfo.Types
 import org.apache.flink.table.descriptors.Schema
