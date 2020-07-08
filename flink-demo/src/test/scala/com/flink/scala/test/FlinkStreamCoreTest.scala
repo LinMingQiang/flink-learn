@@ -1,15 +1,14 @@
-package com.flink.learn.entry
+package com.flink.scala.test
 
 import java.util.Date
 
 import com.alibaba.fastjson.JSON
-import org.apache.flink.streaming.api.scala._
-import com.flink.learn.bean.{AdlogBean, CaseClassUtil, StatisticalIndic}
 import com.flink.common.core.FlinkLearnPropertiesUtil._
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
 import com.flink.learn.bean.CaseClassUtil.SessionLogInfo
+import com.flink.learn.bean.{AdlogBean, CaseClassUtil, StatisticalIndic}
 import com.flink.learn.richf.{
   AdlogPVRichFlatMapFunction,
   SessionWindowRichF,
@@ -24,6 +23,7 @@ import com.flink.learn.test.common.FlinkStreamCommonSuit
 import com.flink.learn.time.MyTimestampsAndWatermarks2
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
+import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.assigners.{
   EventTimeSessionWindows,
   TumblingProcessingTimeWindows
@@ -32,7 +32,7 @@ import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger
 
-class LocalFlinkTest extends FlinkStreamCommonSuit {
+class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   case class UserDefinedKey(name: String, age: Int)
 
   test("wordCount") {
@@ -116,7 +116,7 @@ class LocalFlinkTest extends FlinkStreamCommonSuit {
       .flatMap(new AdlogPVRichFlatMapFunction) //通常都是用的flatmap，功能类似 (filter + map)
     //operate state。用于写hbase是吧恢复
     result.addSink(new StateRecoverySinkCheckpointFunc(50))
-    //result.addSink(new SystemPrintSink)
+    // result.addSink(new SystemPrintSink[AdlogBean]())
     //result.addSink(new HbaseReportSink)
     env.execute()
   }
