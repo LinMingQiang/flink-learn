@@ -1,14 +1,13 @@
-package com.flink.learn.dbUtil
+package com.flink.common.dbutil
 
-import org.apache.hadoop.hbase.client.Connection
-import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.client.ConnectionFactory
 import java.util.HashMap
-import org.apache.hadoop.hbase.client.Table
+
+import com.flink.common.core.EnvironmentalKey
+import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase.client._
+
 import scala.collection.JavaConversions._
-import org.apache.hadoop.hbase.TableName
-import org.apache.hadoop.hbase.client.Put
-import org.apache.hadoop.hbase.client.Get
+
 object FlinkHbaseFactory {
   var conn: Connection = null
   var tables: HashMap[String, Table] = new HashMap[String, Table]
@@ -16,7 +15,7 @@ object FlinkHbaseFactory {
     if (conn == null || conn.isClosed()) {
       println("----  Init Conn  -----")
       var hconf = HBaseConfiguration.create()
-      hconf.set("hbase.zookeeper.quorum", HBASE_ZOOKEEPER)
+      hconf.set("hbase.zookeeper.quorum", EnvironmentalKey.HBASE_ZOOKEEPER)
       hconf.set("hbase.zookeeper.property.clientPort", "2181")
       conn = ConnectionFactory.createConnection(hconf)
     }
