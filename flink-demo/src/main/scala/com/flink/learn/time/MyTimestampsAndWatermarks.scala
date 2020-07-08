@@ -14,7 +14,8 @@ class MyTimestampsAndWatermarks(maxOutOfOrderness: Long)
     */
   override def getCurrentWatermark: Watermark = {
     val w = new Watermark(currentMaxTimestamp - maxOutOfOrderness)
-    println(w)
+    if(currentMaxTimestamp > 0)
+      println(s"event t : ${currentMaxTimestamp} water : ${w.getTimestamp}")
     w
   }
 

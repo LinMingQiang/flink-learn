@@ -6,6 +6,7 @@
     <packaging>pom</packaging>
     <version>1.0.0</version>
     <modules>
+        <module>flink-sourcesink</module>
         <module>flink-util</module>
         <module>flink-cep</module>
         <module>flink-demo</module>
