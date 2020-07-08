@@ -35,13 +35,19 @@ class FlinkStreamCommonSuit extends FunSuite with BeforeAndAfterAll {
     */
   def kafkaSource(
       topic: String,
-      broker: String): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
+      broker: String,
+      reset: String = "latest"): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
     val kafkasource = KafkaManager.getKafkaSource(
       topic,
       broker,
       new TopicOffsetMsgDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
+    reset match{
+      case "earliest" =>kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
+      case "latest" => kafkasource.setStartFromLatest() //不加这个默认是从上次消费
+      case _ =>
+    }
+
     kafkasource
   }
 }
