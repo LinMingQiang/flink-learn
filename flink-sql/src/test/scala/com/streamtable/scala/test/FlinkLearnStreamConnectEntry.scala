@@ -1,7 +1,8 @@
 package com.streamtable.scala.test
 
 import com.flink.common.core.FlinkLearnPropertiesUtil.BROKER
-import com.flink.learn.sql.common.{DataFormatUril, SchemaManager, SqlConnectorManager}
+import com.flink.common.manager.TableSourceConnectorManager
+import com.flink.learn.sql.common.{DataFormatUril, SchemaManager}
 import com.flink.learn.test.common.FlinkStreamTableCommonSuit
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api.scala._
@@ -16,7 +17,7 @@ class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
   test("createTestTbl") {
     // kafka source
     val kafkaConnector =
-      SqlConnectorManager.kafkaConnector(BROKER, "test", "test", "latest")
+      TableSourceConnectorManager.kafkaConnector(BROKER, "test", "test", "latest")
     val jsonFormat = DataFormatUril.kafkaConnJsonFormat(kafkaConnector)
     // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
     tableEnv
@@ -38,7 +39,7 @@ class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
   test("createTest2Tbl") {
     // kafka source
     val kafkaConnector =
-      SqlConnectorManager.kafkaConnector(BROKER, "test2", "test", "latest")
+      TableSourceConnectorManager.kafkaConnector(BROKER, "test2", "test", "latest")
     val jsonFormat = DataFormatUril.kafkaConnJsonFormat(kafkaConnector)
     // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
     tableEnv

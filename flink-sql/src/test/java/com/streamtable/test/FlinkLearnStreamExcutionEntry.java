@@ -1,48 +1,103 @@
 package com.streamtable.test;
 
-import com.flink.learn.sql.common.TableSinkManager;
+import com.flink.common.manager.TableSourceConnectorManager;
+import com.flink.learn.sql.common.SchemaManager;
 import com.flink.learn.test.common.FlinkStreamTableTestBase;
-import org.apache.flink.api.java.io.jdbc.JDBCTableSourceSinkFactory;
+import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.test.util.AbstractTestBase;
+import org.apache.flink.table.descriptors.Json;
+import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.types.Row;
 import org.junit.Test;
-import org.junit.runner.Description;
-
 public class FlinkLearnStreamExcutionEntry extends FlinkStreamTableTestBase {
+    /**
+     * table 转stream
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testTableToStream() throws Exception {
+        Table a = tableEnv.fromDataStream(
+                streamEnv.addSource(
+                        getKafkaSource("test", "localhost:9092", "latest"))
+                , "topic,offset,msg");
+        a.printSchema();
+        tableEnv.createTemporaryView("test", a);
+        // 具有group by 需要用到state 用 toRetractStream
+        tableEnv.toRetractStream(
+                tableEnv.sqlQuery("select topic,count(1) from test group by topic"),
+                Row.class).print();
+        // 只追加数据，没有回溯历史数据可以用 append
+        tableEnv.toAppendStream(
+                tableEnv.sqlQuery("select * from test"),
+                Row.class).print();
+        tableEnv.execute("");
+    }
 
     @Test
-    public void testWordCount() throws Exception {
-        Table a= tableEnv.fromDataStream(
+    public void testStreamToTable() throws Exception {
+        // 方法1
+//        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> ds = streamEnv.addSource(
+//                getKafkaSource("test", "localhost:9092", "latest"))
+//        Table a = tableEnv.fromDataStream(
+//                ds
+//                , "topic,offset,msg");
+
+        // 方法2
+        Kafka kafkaConnector =
+                TableSourceConnectorManager.kafkaConnector("localhost:9092", "test", "test", "latest");
+        Json jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat(kafkaConnector);
+        tableEnv
+                .connect(kafkaConnector)
+                .withFormat(jsonFormat)
+                .withSchema(SchemaManager.ID_NAME_AGE_SCHEMA())
+                .inAppendMode()
+                .createTemporaryTable("test");
+        tableEnv.toRetractStream(tableEnv.sqlQuery("select * from test"), Row.class)
+                .print();
+
+        tableEnv.execute("");
+
+    }
+
+
+    @Test
+    public void testTableSink() throws Exception {
+        Table a = tableEnv.fromDataStream(
                 streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
-        ,"topic,offset,msg");
+                , "topic,offset,msg");
         a.printSchema();
 
-        // sink1
+        // sink1 : 转 stream后sink
         // tableEnv.toAppendStream(a, Row.class).print();
+        // 使用 connect的方式
+        // sink3
+        // TableSinkManager.connctKafkaSink(tableEnv, "test_sink_kafka");
+        // a.insertInto("test_sink_kafka");
+        // TableSinkManager.connectFileSystemSink(tableEnv, "test_sink_csv");
+        // a.insertInto("test_sink_csv");
 
-        // sink2
+
+        // sink2 : 也是过期的，改用 connector方式 ，需要自己实现 TableSinkFactory .参考csv
         // TableSinkManager.registAppendStreamTableSink(tableEnv);
         // a.insertInto("test2");
 
-        // sink3
-       // TableSinkManager.connctKafkaSink(tableEnv, "test_sink_kafka");
-        TableSinkManager.connectFileSystemSink(tableEnv, "test_sink_csv");
-       // a.insertInto("test_sink_kafka");
-        a.insertInto("test_sink_csv");
 
-       tableEnv.execute("");
+        // sink4 : register 的方式已经过期，用conector的方式
+//        String[] s = {"topic", "offset", "msg"};
+//        TypeInformation[] ss = {Types.STRING, Types.LONG, Types.STRING};
+//        TableSinkManager.registerJavaCsvTableSink(
+//                tableEnv,
+//                "test_sink_csv",
+//                s,
+//                ss,
+//                "file:///Users/eminem/workspace/flink/flink-learn/checkpoint/data", // output path
+//                "|", // optional: delimit files by '|'
+//                1, // optional: write to a single file
+//                FileSystem.WriteMode.OVERWRITE
+//        );
+        // a.insertInto("test_sink_csv");
+
+        tableEnv.execute("");
     }
-    //    test("wordCount") {
-//        env
-//                .addSource(kafkaSource(TEST_TOPIC, BROKER))
-//                .flatMap(_.msg.split("\\|", -1))
-//                .map(x => (x, 1))
-//      .keyBy(0)
-//                .flatMap(new WordCountRichFunction)
-//                .print
-//        env.execute("lmq-flink-demo") //程序名
-//    }
-
 }

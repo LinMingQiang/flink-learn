@@ -1,0 +1,13 @@
+#source
+org.apache.flink.formats.json.CustomJsonRowFormatFactory
+com.mob.streaming.source.sharesdk.factory.RedisLookupSourceTableFactory
+
+# sink
+com.mob.streaming.sink.sharesdk.factory.MongoUpsertSinkTableFactory
+com.mob.streaming.sink.common.factory.HDFSRetractSinkTableFactory
+com.mob.streaming.sink.common.factory.HDFSUpsertSinkTableFactory
+com.mob.streaming.sink.common.factory.HDFSSinkTableFactory
+
+com.mob.streaming.sink.mobeye.factory.MobEyeVolumeSinkTableFactory
+com.mob.streaming.source.mobeye.factory.MobEyeEsCustomerTypeTableFactory
+com.mob.streaming.source.mobeye.factory.MobEyeHttpProbeStoreTableFactory
