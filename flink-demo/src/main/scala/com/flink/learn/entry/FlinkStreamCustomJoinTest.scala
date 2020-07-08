@@ -22,7 +22,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.util.Collector
 
-object FlinkStreamJoinTest {
+object FlinkStreamCustomJoinTest {
   var env: StreamExecutionEnvironment = null
 
   /**
