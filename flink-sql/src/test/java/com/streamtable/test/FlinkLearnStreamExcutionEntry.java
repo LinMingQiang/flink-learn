@@ -1,7 +1,7 @@
 package com.streamtable.test;
 
+import com.flink.common.manager.SchemaManager;
 import com.flink.common.manager.TableSourceConnectorManager;
-import com.flink.learn.sql.common.SchemaManager;
 import com.flink.learn.test.common.FlinkStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
 import org.apache.flink.table.api.Table;
