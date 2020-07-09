@@ -3,6 +3,7 @@ package com.flink.scala.test
 import java.util.Date
 
 import com.alibaba.fastjson.JSON
+import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.core.FlinkLearnPropertiesUtil._
 import com.flink.common.deserialize.TopicMessageDeserialize
 import com.flink.common.kafka.KafkaManager
@@ -38,6 +39,19 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   test("wordCount") {
     env
       .addSource(kafkaSource(TEST_TOPIC, BROKER))
+      .flatMap(_.msg.split("\\|", -1))
+      .map(x => (x, 1))
+      .keyBy(0)
+      .flatMap(new WordCountRichFunction)
+      .print
+    env.execute("lmq-flink-demo") //程序名
+  }
+
+  /**
+    * 测试不进行checkpoint的情况下的state，针对大state，选择不chk
+    */
+  test("stateWithnoChk") {
+    env.addSource(kafkaSource(TEST_TOPIC, BROKER))
       .flatMap(_.msg.split("\\|", -1))
       .map(x => (x, 1))
       .keyBy(0)

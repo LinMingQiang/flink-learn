@@ -15,12 +15,12 @@ class FlinkStreamCommonSuit extends FunSuite with BeforeAndAfterAll {
   protected override def beforeAll(): Unit = {
     super.beforeAll()
     FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
-                                  "LocalFlinkTest")
+                                  "FlinkStreamCommonSuit")
     //    kafkasource.setStartFromSpecificOffsets(
     //      Map(new KafkaTopicPartition("maxwell_new", 0) -> 1L.asInstanceOf[java.lang.Long]));
     env = FlinkEvnBuilder.buildStreamingEnv(param,
                                             FLINK_DEMO_CHECKPOINT_PATH,
-                                            60000) // 1 min
+      -1) // 1 min
   }
 
   protected override def afterAll(): Unit = {
