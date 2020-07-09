@@ -26,19 +26,21 @@ object FlinkEvnBuilder {
       checkPointInterval: Long = 6000): StreamExecutionEnvironment = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.getConfig.setGlobalJobParameters(parameters) // 广播配置
-    env.enableCheckpointing(checkPointInterval) //更新offsets。每60s提交一次
-    env.getCheckpointConfig.setMinPauseBetweenCheckpoints(checkPointInterval) // 两个chk最小间隔
+    env.setParallelism(3)
+    if(checkPointInterval >=0 ){
+      env.enableCheckpointing(checkPointInterval) //更新offsets。每60s提交一次
+      env.getCheckpointConfig.setMinPauseBetweenCheckpoints(checkPointInterval) // 两个chk最小间隔
+      // 同一时间只允许进行一个检查点
+      env.getCheckpointConfig.setMaxConcurrentCheckpoints(1);
+      // 表示一旦Flink处理程序被cancel后，会保留Checkpoint数据，以便根据实际需要恢复到指定的Checkpoint
+      env.getCheckpointConfig.enableExternalizedCheckpoints(
+        ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+      //超时
+      //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
+      env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+      env.getConfig.setAutoWatermarkInterval(5000L) // 设置 触发水位计算 间隔
+    }
 
-    //超时
-    //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
-    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
-    env.getConfig.setAutoWatermarkInterval(5000L) // 设置 触发水位计算 间隔
-
-    // 同一时间只允许进行一个检查点
-    env.getCheckpointConfig.setMaxConcurrentCheckpoints(1);
-    // 表示一旦Flink处理程序被cancel后，会保留Checkpoint数据，以便根据实际需要恢复到指定的Checkpoint
-    env.getCheckpointConfig.enableExternalizedCheckpoints(
-      ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
     //env.setStateBackend(new FsStateBackend(checkpointPath))
     val rocksDBStateBackend = new RocksDBStateBackend(checkpointPath, true)
     // rocksDBStateBackend.setDbStoragePath("") // rocksdb本地路径，默认在tm临时路径下
