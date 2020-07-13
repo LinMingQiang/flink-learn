@@ -94,6 +94,16 @@ object DDLSourceSQLManager {
 
   }
 
+def createCustomSinkTbl(printlnSinkTbl: String): String ={
+  s"""CREATE TABLE ${printlnSinkTbl} (
+     |topic VARCHAR,
+     |ll BIGINT,
+     |msg VARCHAR
+     |) WITH (
+     |'connector.type' = 'printsink',
+     |'println.prefix'='>> : '
+     |)""".stripMargin
+}
 
   def createFromMysql(sourceTbl: String, targetTbl: String) =
     s"""CREATE TABLE ${targetTbl} (
