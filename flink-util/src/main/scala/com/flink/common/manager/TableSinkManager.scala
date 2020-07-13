@@ -87,7 +87,7 @@ object TableSinkManager {
       "test",
       Array("topic", "offset", "msg"),
       Array[TypeInformation[_]](Types.STRING, Types.LONG, Types.STRING),
-      new PrintlnAppendStreamTableSink())
+      new PrintlnAppendStreamTableSink)
   }
 
   /**

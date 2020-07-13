@@ -3,18 +3,49 @@ package com.flink.common.java.tablesink;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.DataSet;
+import org.apache.flink.api.java.io.jdbc.JDBCAppendTableSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.streaming.connectors.kafka.Kafka010TableSourceSinkFactory;
+import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sinks.AppendStreamTableSink;
 import org.apache.flink.table.sinks.BatchTableSink;
+import org.apache.flink.table.sinks.CsvAppendTableSinkFactory;
 import org.apache.flink.table.sinks.TableSink;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 public class PrintlnAppendStreamTableSink implements AppendStreamTableSink<Row>, BatchTableSink<Row> {
+    private String[] fieldNames;
+    private DataType[] fieldTypes;
+
+    public PrintlnAppendStreamTableSink(String[] fieldNames, DataType[] fieldTypes) {
+        this.fieldNames = fieldNames;
+        this.fieldTypes = fieldTypes;
+    }
+
+    public PrintlnAppendStreamTableSink() {
+    }
+
+    @Override
+    public TypeInformation<?>[] getFieldTypes() {
+        return getTableSchema().getFieldTypes();
+    }
+
+    @Override
+    public TableSchema getTableSchema() {
+        return new TableSchema.Builder().fields(fieldNames, fieldTypes).build();
+    }
+    public DataType getConsumedDataType() {
+        return getTableSchema().toRowDataType();
+    }
+
     @Override
     public void emitDataSet(DataSet<Row> dataSet) {
         List<Row> elements = null;
@@ -39,26 +70,19 @@ public class PrintlnAppendStreamTableSink implements AppendStreamTableSink<Row>,
 
     }
 
-    private String[] fieldNames;
-    private TypeInformation<?>[] fieldTypes;
-
     @Override
     public DataStreamSink<Row> consumeDataStream(DataStream<Row> dataStream) {
-        emitDataStream(dataStream);
         return dataStream.addSink(new SinkFunction<Row>() {
             @Override
             public void invoke(Row value, Context context) throws Exception {
-                System.out.println((value).toString());
+                System.out.println("》》》 " + (value).toString());
             }
-        });
+        }).name(this.getClass().getSimpleName());
     }
 
     @Override
     public TableSink configure(String[] strings, TypeInformation<?>[] typeInformations) {
-        PrintlnAppendStreamTableSink configuredSink = new PrintlnAppendStreamTableSink();
-        configuredSink.fieldNames = strings;
-        configuredSink.fieldTypes = typeInformations;
-        return configuredSink;
+        return this;
     }
 
     @Override
@@ -75,20 +99,5 @@ public class PrintlnAppendStreamTableSink implements AppendStreamTableSink<Row>,
 //                }
 //            });
 
-    }
-
-    @Override
-    public String[] getFieldNames() {
-        return fieldNames;
-    }
-
-    @Override
-    public TypeInformation<?>[] getFieldTypes() {
-        return fieldTypes;
-    }
-
-    @Override
-    public TypeInformation<Row> getOutputType() {
-        return Types.ROW_NAMED(fieldNames, fieldTypes);
     }
 }

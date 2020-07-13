@@ -20,36 +20,41 @@ import java.io.Serializable;
 
 public class FlinkStreamTableTestBase extends AbstractTestBase implements Serializable {
     public static StreamTableEnvironment tableEnv = null;
-    public static StreamExecutionEnvironment streamEnv = null ;
+    public static StreamExecutionEnvironment streamEnv = null;
     public static ExecutionEnvironment bEnv = null;
+
     @Before
     public void before() throws Exception {
         System.out.println("Init >>>>>>>>>>>>>>>>>>> ExecutionEnvironment");
 //        FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
 //                "FlinkLearnStreamDDLSQLEntry");
         bEnv = ExecutionEnvironment.getExecutionEnvironment();
-         streamEnv = FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param(),
+        streamEnv = FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param(),
                 FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
-                 FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());
+                FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());
         tableEnv = FlinkEvnBuilder.buildStreamTableEnv(streamEnv,
                 Time.minutes(1),
                 Time.minutes(6));
     }
+
     @After
-    public void after(){
+    public void after() {
         System.out.println("<<<<<<<<<<<<<<<<<<<");
     }
 
 
-    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> getKafkaSource(String topic, String broker, String reset){
+    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> getKafkaSource(
+            String topic,
+            String broker,
+            String reset) {
         FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> kafkasource = KafkaManager.getKafkaSource(
                 topic,
                 broker,
                 new TopicOffsetMsgDeserialize());
         kafkasource.setCommitOffsetsOnCheckpoints(true);
-        if(reset == "earliest") {
+        if (reset == "earliest") {
             kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
-        } else if (reset == "latest"){
+        } else if (reset == "latest") {
             kafkasource.setStartFromLatest();
         }
         return kafkasource;
