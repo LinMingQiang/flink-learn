@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+    <id>dist</id>
+    <formats>
+        <format>dir</format>
+        <!--<format>tar.gz</format>-->
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <fileSets>
+<!--    md    -->
+        <fileSet>
+            <directory>${project.parent.basedir}/</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>*.md</include>
+            </includes>
+        </fileSet>
+<!--       doc -->
+        <fileSet>
+            <directory>${project.parent.basedir}/docs</directory>
+            <outputDirectory>/docs</outputDirectory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>**/tmp/**</exclude>
+            </excludes>
+        </fileSet>
+<!-- lib -->
+        <fileSet>
+            <directory>${project.parent.basedir}/lib</directory>
+            <outputDirectory>/lib</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+<!-- stream -->
+        <fileSet>
+            <directory>${project.parent.basedir}/stream/target/</directory>
+            <outputDirectory>/lib</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+<!-- conf -->
+        <fileSet>
+            <directory>${project.parent.basedir}/resources/target/resources/conf</directory>
+            <outputDirectory>/conf</outputDirectory>
+            <includes>
+                <include>*/**</include>
+            </includes>
+        </fileSet>
+
+<!-- util -->
+        <fileSet>
+            <directory>${project.parent.basedir}/util/target/</directory>
+            <outputDirectory>/lib</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+<!-- sbin -->
+        <fileSet>
+            <directory>${project.parent.basedir}/sbin/main</directory>
+            <outputDirectory>/sbin/main</outputDirectory>
+            <includes>
+                <include>**/*.sh</include>
+            </includes>
+            <fileMode>0755</fileMode>
+        </fileSet>
+    </fileSets>
+</assembly>
