@@ -1,6 +1,7 @@
-package com.flink.common.manager
+package com.flink.commom.scala.streamsink
 
 import com.flink.common.java.tablesink.PrintlnAppendStreamTableSink
+import com.flink.common.manager.{SchemaManager, TableSourceConnectorManager}
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils
 import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
 import org.apache.flink.core.fs.FileSystem.WriteMode
