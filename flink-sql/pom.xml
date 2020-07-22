@@ -8,6 +8,7 @@
   <artifactId>flink-sql</artifactId>
 
   <dependencies>
+
     <dependency>
       <groupId>com.flink.learn</groupId>
       <artifactId>flink-util</artifactId>
@@ -93,6 +94,12 @@
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-jdbc_${scala.binary.version}</artifactId>
       <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.flink.learn</groupId>
+      <artifactId>flink-sourcesink</artifactId>
+      <version>1.0.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <profiles>

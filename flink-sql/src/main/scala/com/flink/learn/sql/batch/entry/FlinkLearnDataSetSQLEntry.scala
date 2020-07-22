@@ -19,7 +19,6 @@ object FlinkLearnDataSetSQLEntry {
 
   }
 
-
   def testFactory(): Unit = {
     val streamEnv = FlinkEvnBuilder.buildStreamingEnv(
       FlinkLearnPropertiesUtil.param,
@@ -33,14 +32,12 @@ object FlinkLearnDataSetSQLEntry {
       streamEnv.addSource(
         FlinkStreamTableTestBase
           .getKafkaSource("test", "localhost:9092", "latest")),
-      "topic,offset,msg")
-    a.printSchema()
-    tableEnv.sqlUpdate(
-      DDLSourceSQLManager.createCustomSinkTbl("printlnSinkTbl"))
-    tableEnv.from("printlnSinkTbl").printSchema()
-    tableEnv.insertInto("printlnSinkTbl", a)
-    // sink1 : 转 stream后sink
-    tableEnv.toAppendStream(a, classOf[Row]).print
+      "topic,offset,msg").renameColumns("offset as ll"); // offset是关键字
+    tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomSinkTbl("printlnSinkTbl"))
+
+    tableEnv.insertInto("printlnSinkTbl", a.select("topic,ll,msg"))
+
+
     tableEnv.execute("eee")
   }
 
@@ -66,7 +63,6 @@ object FlinkLearnDataSetSQLEntry {
   // *************************************************************************
   //     USER DATA TYPES
   // *************************************************************************
-
   case class WC(word: String, frequency: Long)
 
 }
