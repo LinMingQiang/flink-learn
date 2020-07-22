@@ -7,6 +7,7 @@ import org.apache.flink.api.java.io.jdbc.JDBCAppendTableSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
 import org.apache.flink.streaming.connectors.kafka.Kafka010TableSourceSinkFactory;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sinks.AppendStreamTableSink;
@@ -31,6 +32,7 @@ public class PrintlnAppendStreamTableSink implements AppendStreamTableSink<Row>,
     }
 
     public PrintlnAppendStreamTableSink() {
+
     }
 
     @Override
@@ -60,8 +62,6 @@ public class PrintlnAppendStreamTableSink implements AppendStreamTableSink<Row>,
             Row e = (Row) var2.next();
             System.out.println(e);
         }
-
-
         try {
             dataSet.print();
         } catch (Exception e) {
@@ -69,7 +69,6 @@ public class PrintlnAppendStreamTableSink implements AppendStreamTableSink<Row>,
         }
 
     }
-
     @Override
     public DataStreamSink<Row> consumeDataStream(DataStream<Row> dataStream) {
         return dataStream.addSink(new SinkFunction<Row>() {
@@ -87,17 +86,6 @@ public class PrintlnAppendStreamTableSink implements AppendStreamTableSink<Row>,
 
     @Override
     public void emitDataStream(DataStream dataStream) {
-        //输出到控制台
-        //dataStream.print();
-        //dataStream.addSink(new PrintSinkFunction<>());
-
-        //打印到日志
-//            dataStream.addSink(new SinkFunction() {
-//                @Override
-//                public void invoke(Object value, Context context) throws Exception {
-//                    System.out.println(((Row)value).toString());
-//                }
-//            });
 
     }
 }
