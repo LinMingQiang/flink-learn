@@ -1,6 +1,6 @@
 package com.streamtable.scala.test
 
-import com.flink.common.manager.TableSinkManager
+import com.flink.commom.scala.streamsink.TableSinkManager
 import com.flink.learn.sql.common.{DDLQueryOrSinkSQLManager, DDLSourceSQLManager}
 import com.flink.learn.sql.func.DdlTableFunction.Split
 import com.flink.learn.sql.func.{StrToLowOrUpScalarFunction, WeightedAvgAggregateFunction}

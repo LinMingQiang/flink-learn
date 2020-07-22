@@ -105,6 +105,15 @@ def createCustomSinkTbl(printlnSinkTbl: String): String ={
      |)""".stripMargin
 }
 
+  def createCustomHbaseSinkTbl(hbasesinkTbl: String): String ={
+    s"""CREATE TABLE ${hbasesinkTbl} (
+       |topic VARCHAR,
+       |c BIGINT
+       |) WITH (
+       |'connector.type' = 'hbasesink'
+       |)""".stripMargin
+  }
+
   def createFromMysql(sourceTbl: String, targetTbl: String) =
     s"""CREATE TABLE ${targetTbl} (
                            |    bid_req_num BIGINT,

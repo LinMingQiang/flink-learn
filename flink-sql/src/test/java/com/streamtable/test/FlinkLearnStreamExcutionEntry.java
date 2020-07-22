@@ -1,20 +1,22 @@
 package com.streamtable.test;
 
+import com.flink.common.java.tablesink.HbaseRetractStreamTableSink;
 import com.flink.common.manager.SchemaManager;
-import com.flink.common.manager.TableSinkManager;
 import com.flink.common.manager.TableSourceConnectorManager;
 import com.flink.learn.sql.common.DDLSourceSQLManager;
-import com.flink.learn.sql.common.DDLSourceSQLManager$;
 import com.flink.learn.test.common.FlinkStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.factories.TableFactory;
+import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.junit.Test;
-
-import java.util.ServiceLoader;
+import org.apache.flink.api.*;
 
 public class FlinkLearnStreamExcutionEntry extends FlinkStreamTableTestBase {
     /**
@@ -69,15 +71,19 @@ public class FlinkLearnStreamExcutionEntry extends FlinkStreamTableTestBase {
 
 
     @Test
-    public void testTableSink() throws Exception {
+    public void testStreamTableSink() throws Exception {
         Table a = tableEnv.fromDataStream(
                 streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
-                , "topic,offset,msg").addColumns("offset as ll");
-         // sink1 : 转 stream后sink
-         tableEnv.toAppendStream(a, Row.class).print();
+                , "topic,offset,msg").renameColumns("offset as ll");
+        // sink1 : 转 stream后sink
+        // tableEnv.toAppendStream(a, Row.class).print();
+
+        // String sql="insert into hbasesink select topic,count(1) as c from test  group by topic";
+        // tableEnv.sqlUpdate(sql);
+
         // 使用 connect的方式
         // sink3
-        // TableSinkManager.connctKafkaSink(tableEnv, "test_sink_kafka");
+//         TableSinkManager.connctKafkaSink(tableEnv, "test_sink_kafka");
         // a.insertInto("test_sink_kafka");
         // TableSinkManager.connectFileSystemSink(tableEnv, "test_sink_csv");
         // a.insertInto("test_sink_csv");
@@ -107,6 +113,32 @@ public class FlinkLearnStreamExcutionEntry extends FlinkStreamTableTestBase {
     }
 
     /**
+     * 将统计结果输出到hbase
+     * @throws Exception
+     */
+    @Test
+    public void testcustomHbasesink() throws Exception {
+        Table a = tableEnv.fromDataStream(
+                streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
+                , "topic,offset,msg");
+        tableEnv.createTemporaryView("test", tableEnv.toAppendStream(a, Row.class));
+        // 方法1
+//        tableEnv.registerTableSink("hbasesink",
+//                new HbaseRetractStreamTableSink(new String[]{"topic", "c"},
+//                        new DataType[]{DataTypes.STRING(), DataTypes.BIGINT()
+//                        }));
+        // 方法2
+        tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomHbaseSinkTbl("hbasesink"));
+
+
+        tableEnv.sqlQuery("select topic,count(1) as c from test  group by topic").insertInto("hbasesink");
+        tableEnv.execute("");
+
+
+
+    }
+
+    /**
      * 自定义的sinkfactory
      * 百度SPI
      * 1： 需要再resources/META-INF.services/下创建一个接口名-(org.apache.flink.table.factories.TableFactory)的SPI文件（不是txt）
@@ -118,12 +150,11 @@ public class FlinkLearnStreamExcutionEntry extends FlinkStreamTableTestBase {
         Table a = tableEnv.fromDataStream(
                 streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
                 , "topic,offset,msg").renameColumns("offset as ll"); // offset是关键字
+        tableEnv.createTemporaryView("test", a);
+        System.out.println(tableEnv.explain(tableEnv.sqlQuery("select count(1) from test")));
 
         tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomSinkTbl("printlnSinkTbl"));
-
-        tableEnv.insertInto("printlnSinkTbl", a.select("topic,ll,msg"));
-
+        tableEnv.insertInto("printlnSinkTbl", a.select("topic, ll,msg"));
         tableEnv.execute("");
-
     }
 }
