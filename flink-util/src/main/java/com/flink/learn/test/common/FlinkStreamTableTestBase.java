@@ -25,9 +25,9 @@ public class FlinkStreamTableTestBase extends AbstractTestBase implements Serial
 
     @Before
     public void before() throws Exception {
-        System.out.println("Init >>>>>>>>>>>>>>>>>>> ExecutionEnvironment");
-//        FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
-//                "FlinkLearnStreamDDLSQLEntry");
+        System.out.println("! INITIALIZE ExecutionEnvironment SUCCESS !");
+        FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
+                "FlinkLearnStreamDDLSQLEntry");
         bEnv = ExecutionEnvironment.getExecutionEnvironment();
         streamEnv = FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param(),
                 FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
