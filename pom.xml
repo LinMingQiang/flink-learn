@@ -6,14 +6,15 @@
     <packaging>pom</packaging>
     <version>1.0.0</version>
     <modules>
-        <module>flink-sourcesink</module>
         <module>flink-util</module>
+        <module>flink-sourcesink</module>
         <module>flink-cep</module>
         <module>flink-demo</module>
         <module>es-shade</module>
         <module>resources</module>
         <module>flink-sql</module>
         <module>flink-batch</module>
+        <module>flink-function</module>
         <module>assembly</module>
     </modules>
     <name>${project.artifactId}</name>
@@ -231,7 +232,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-
                 <executions>
                     <execution>
                         <id>copy</id>
