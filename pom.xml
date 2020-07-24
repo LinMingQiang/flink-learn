@@ -10,6 +10,7 @@
       <module>stream</module>
       <module>resources</module>
       <module>assembly</module>
+      <module>testutil</module>
     </modules>
     <name>${project.artifactId}</name>
   <description>My wonderfull scala app</description>

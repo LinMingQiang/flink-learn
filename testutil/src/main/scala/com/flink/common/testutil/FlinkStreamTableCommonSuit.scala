@@ -1,5 +1,6 @@
 package com.flink.common.testutil
 
+import com.flink.common.core.FlinkLearnPropertiesUtil.{FLINK_DEMO_CHECKPOINT_PATH, param}
 import com.flink.common.core.{FlinkEvnBuilder, FlinkLearnPropertiesUtil}
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
@@ -8,10 +9,7 @@ import org.apache.flink.api.common.time.Time
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import com.flink.common.core.FlinkLearnPropertiesUtil.{
-  FLINK_DEMO_CHECKPOINT_PATH,
-  param
-}
+
 class FlinkStreamTableCommonSuit extends FunSuite with BeforeAndAfterAll {
   var tableEnv: StreamTableEnvironment = null
 
