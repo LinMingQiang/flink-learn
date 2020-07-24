@@ -43,18 +43,18 @@ public class PrintlnAppendStreamTableSink implements AppendStreamTableSink<Row>,
 
     @Override
     public void emitDataSet(DataSet<Row> dataSet) {
-        List<Row> elements = null;
-        try {
-            elements = dataSet.collect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Iterator var2 = elements.iterator();
-
-        while (var2.hasNext()) {
-            Row e = (Row) var2.next();
-            System.out.println(e);
-        }
+//        List<Row> elements = null;
+//        try {
+//            elements = dataSet.collect();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        Iterator var2 = elements.iterator();
+//
+//        while (var2.hasNext()) {
+//            Row e = (Row) var2.next();
+//            System.out.println(e);
+//        }
         try {
             dataSet.print();
         } catch (Exception e) {
