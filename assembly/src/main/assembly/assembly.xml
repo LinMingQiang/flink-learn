@@ -87,6 +87,14 @@
             </includes>
         </fileSet>
         <fileSet>
+            <directory>${project.parent.basedir}/flink-function/target/</directory>
+            <outputDirectory>/lib</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
             <directory>${project.parent.basedir}/flink-sql/target/</directory>
             <outputDirectory>/lib</outputDirectory>
             <includes>
