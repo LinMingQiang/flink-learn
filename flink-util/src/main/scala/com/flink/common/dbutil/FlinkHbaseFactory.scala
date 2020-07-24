@@ -51,11 +51,11 @@ object FlinkHbaseFactory {
 //    })
 //    asyncClient.shutdown()
 
-    val  conn = getGlobalConn("localhost:2181")
+    val  conn = getGlobalConn("10.21.34.174:2181,10.21.34.175:2181,10.21.34.176:2181,10.21.34.177:2181,10.21.34.178:2181")
     conn.getAdmin.listTableNames().foreach(println)
-    val test =   conn.getTable(TableName.valueOf("test"))
-    println(test.exists(new Get("test".getBytes())))
-    println(test.get(new Get("test".getBytes())).getValue("info".getBytes(),"v".getBytes()))
+//    val test =   conn.getTable(TableName.valueOf("test"))
+//    println(test.exists(new Get("test".getBytes())))
+//    println(test.get(new Get("test".getBytes())).getValue("info".getBytes(),"v".getBytes()))
     conn.close()
    // println(">>>>>>>" + r)
   }
