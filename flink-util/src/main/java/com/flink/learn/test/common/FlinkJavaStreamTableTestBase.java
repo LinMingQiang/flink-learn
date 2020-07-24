@@ -18,7 +18,7 @@ import org.junit.Before;
 import java.io.IOException;
 import java.io.Serializable;
 
-public class FlinkStreamTableTestBase extends AbstractTestBase implements Serializable {
+public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Serializable {
     public static StreamTableEnvironment tableEnv = null;
     public static StreamExecutionEnvironment streamEnv = null;
     public static ExecutionEnvironment bEnv = null;
