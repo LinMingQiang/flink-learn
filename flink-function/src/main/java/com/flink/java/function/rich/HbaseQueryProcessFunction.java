@@ -23,23 +23,23 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- *
- * @param <IN> Tuple2<String, KafkaTopicOffsetMsgPoJo>
+ * @param <IN>  Tuple2<String, KafkaTopicOffsetMsgPoJo>
  * @param <OUT> WordCountPoJo
  */
 public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<String, Tuple2<String, IN>, OUT>
         implements CheckpointedFunction {
-    private int flushSize = 10;
-    private int msgNum = 0;
-    private ListState<IN> checkpointedState = null;// checkpoint state
-    private List bufferedElements = new ArrayList<Tuple2<String, IN>>(); // buffer List
+    private int flushSize = 100;
+    private ListState<Tuple2<String, IN>> checkpointedState = null;// checkpoint state
+    private List<Tuple2<String, IN>> bufferedElements = new ArrayList<Tuple2<String, IN>>(); // buffer List
     private List<OUT> queryResBuffer = new ArrayList<>(); // ckp的时候结果
     private HbaseQueryFunction<IN, OUT> qf = null;
-    private TypeInformation<IN> inType = null;
+    private TypeInformation<Tuple2<String, IN>> inType = null;
     private Table t = null;
     private String tablename = null;
+
     /**
      * 初始化，初始化hbase等
+     *
      * @param parameters
      * @throws Exception
      */
@@ -53,9 +53,14 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
         // init hbase conn and table
     }
 
-    public HbaseQueryProcessFunction(HbaseQueryFunction qf, String tablename, TypeInformation<IN> inType) {
+    public HbaseQueryProcessFunction(
+            HbaseQueryFunction qf,
+            String tablename,
+            int flushSize,
+            TypeInformation<Tuple2<String, IN>> inType) {
         this.qf = qf;
         this.inType = inType;
+        this.flushSize = flushSize;
         this.tablename = tablename;
     }
 
@@ -63,13 +68,13 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     public void snapshotState(FunctionSnapshotContext context) throws Exception {
         checkpointedState.clear();
         if (!bufferedElements.isEmpty()) {
+            checkpointedState.addAll(bufferedElements);
             List<Tuple2<Result, Tuple2<String, IN>>> res = qf.queryHbase(t, bufferedElements);
             for (Object o : qf.transResult(res)) {
                 queryResBuffer.add((OUT) o);
             }
             bufferedElements.clear();
         }
-        checkpointedState.clear();
     }
 
     @Override
@@ -80,10 +85,16 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
         );
         checkpointedState = context.getOperatorStateStore()
                 .getListState(descriptor);
+        if(context.isRestored()){
+            for (Tuple2<String, IN> element : checkpointedState.get()) {
+                bufferedElements.add(element);
+            }
+        }
     }
 
     /**
      * 处理每个元素
+     *
      * @param value
      * @param ctx
      * @param out
@@ -93,27 +104,26 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     public void processElement(Tuple2<String, IN> value, Context ctx, Collector<OUT> out) throws Exception {
         // 每个元素在最后一次ckp之后10s后执行一次
         ctx.timerService().registerProcessingTimeTimer(
-                new Date().getTime() + FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL()+ 1000L);
+                new Date().getTime() + FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL() + 1000L);
         if (!queryResBuffer.isEmpty()) {
             queryResBuffer.forEach(x -> out.collect(x));
             queryResBuffer.clear();
         }
-        bufferedElements.add(value);
-        msgNum++;
-        if (msgNum >= flushSize) {
+        if (!value.f0.isEmpty()) bufferedElements.add(value); // key不为空
+        if (bufferedElements.size() >= flushSize) {
             // query hbase
             List<Tuple2<Result, Tuple2<String, IN>>> res = qf.queryHbase(t, bufferedElements);
             for (Object o : qf.transResult(res)) {
                 out.collect((OUT) o);
             }
             bufferedElements.clear();
-            msgNum = 0;
         }
     }
 
     /**
      * 当没有数据之后，触发最后一个查询结果.
      * 如果ckp卡主，这里也会延后，所以不会有gap问题
+     *
      * @param timestamp
      * @param ctx
      * @param out
