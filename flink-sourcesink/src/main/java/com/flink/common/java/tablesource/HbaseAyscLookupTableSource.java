@@ -79,4 +79,37 @@ public class HbaseAyscLookupTableSource implements LookupableTableSource<Row>, S
     public String explainSource() {
         return null;
     }
+
+
+    public static final class Builder {
+        private String[] fieldNames;
+        private String[] connectionField;
+        private TypeInformation[] fieldTypes;
+
+        private Builder() {
+        }
+
+        public static Builder newBuilder() {
+            return new Builder();
+        }
+
+        public Builder withFieldNames(String[] fieldNames) {
+            this.fieldNames = fieldNames;
+            return this;
+        }
+
+        public Builder withFieldTypes(TypeInformation[] fieldTypes) {
+            this.fieldTypes = fieldTypes;
+            return this;
+        }
+
+        public Builder withConnectionField(String[] connectionField) {
+            this.connectionField = connectionField;
+            return this;
+        }
+
+//        public HbaseAyscLookupTableSource build() {
+//            return new HbaseAyscLookupTableSource(fieldNames,connectionField, fieldTypes);
+//        }
+    }
 }
