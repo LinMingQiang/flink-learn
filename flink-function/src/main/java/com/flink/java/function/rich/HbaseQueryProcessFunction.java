@@ -84,7 +84,7 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
         ctx.timerService().registerProcessingTimeTimer(
                 new Date().getTime() + FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL()+ 1000L);
         if (!queryResBuffer.isEmpty()) {
-          //  queryResBuffer.forEach(x -> out.collect(x));
+            queryResBuffer.forEach(x -> out.collect(x));
             queryResBuffer.clear();
         }
         bufferedElements.put(ctx.getCurrentKey(), value);
