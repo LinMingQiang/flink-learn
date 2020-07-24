@@ -1,7 +1,7 @@
 package com.flink.learn.test.common
 
-import com.flink.common.core.FlinkLearnPropertiesUtil.{CHECKPOINT_PATH, param}
 import com.flink.common.core.{EnvironmentalKey, FlinkEvnBuilder, FlinkLearnPropertiesUtil}
+import com.flink.common.core.FlinkLearnPropertiesUtil.{param, CHECKPOINT_PATH}
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg

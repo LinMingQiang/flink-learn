@@ -10,25 +10,14 @@ import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaMessge
 import com.flink.learn.bean.CaseClassUtil.SessionLogInfo
 import com.flink.learn.bean.{AdlogBean, CaseClassUtil, StatisticalIndic}
-import com.flink.learn.richf.{
-  AdlogPVRichFlatMapFunction,
-  SessionWindowRichF,
-  SessiontProcessFunction,
-  WordCountRichFunction
-}
-import com.flink.learn.sink.{
-  OperatorStateBufferingSink,
-  StateRecoverySinkCheckpointFunc
-}
+import com.flink.learn.richf.{AdlogPVRichFlatMapFunction, SessiontProcessFunction, SessionWindowRichF, WordCountRichFunction}
+import com.flink.learn.sink.{OperatorStateBufferingSink, StateRecoverySinkCheckpointFunc}
 import com.flink.learn.test.common.FlinkStreamCommonSuit
 import com.flink.learn.time.MyTimestampsAndWatermarks2
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.windowing.assigners.{
-  EventTimeSessionWindows,
-  TumblingProcessingTimeWindows
-}
+import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, TumblingProcessingTimeWindows}
 import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger

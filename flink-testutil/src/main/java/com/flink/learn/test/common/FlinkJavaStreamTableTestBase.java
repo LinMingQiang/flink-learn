@@ -9,14 +9,13 @@ import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
-import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.test.util.AbstractTestBase;
 import org.junit.After;
 import org.junit.Before;
 
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Serializable {
     public static StreamTableEnvironment tableEnv = null;

@@ -3,7 +3,6 @@ package com.flink.learn.sql.batch.entry
 import com.flink.common.core.FlinkLearnPropertiesUtil
 import com.flink.common.java.core.FlinkEvnBuilder
 import com.flink.learn.sql.common.DDLSourceSQLManager
-import com.flink.learn.test.common.FlinkJavaStreamTableTestBase
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.table.api.scala.BatchTableEnvironment
@@ -20,25 +19,24 @@ object FlinkLearnDataSetSQLEntry {
   }
 
   def testFactory(): Unit = {
-    val streamEnv = FlinkEvnBuilder.buildStreamingEnv(
-      FlinkLearnPropertiesUtil.param,
-      FlinkLearnPropertiesUtil.CHECKPOINT_PATH,
-      FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL)
-    val tableEnv = FlinkEvnBuilder.buildStreamTableEnv(streamEnv,
-                                                       Time.minutes(1),
-                                                       Time.minutes(6))
-
-    val a = tableEnv.fromDataStream(
-      streamEnv.addSource(
-        FlinkJavaStreamTableTestBase
-          .getKafkaSource("test", "localhost:9092", "latest")),
-      "topic,offset,msg").renameColumns("offset as ll"); // offset是关键字
-    tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomSinkTbl("printlnSinkTbl"))
-
-    tableEnv.insertInto("printlnSinkTbl", a.select("topic,ll,msg"))
-
-
-    tableEnv.execute("eee")
+//    val streamEnv = FlinkEvnBuilder.buildStreamingEnv(
+//      FlinkLearnPropertiesUtil.param,
+//      FlinkLearnPropertiesUtil.CHECKPOINT_PATH,
+//      FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL)
+//    val tableEnv = FlinkEvnBuilder.buildStreamTableEnv(streamEnv,
+//                                                       Time.minutes(1),
+//                                                       Time.minutes(6))
+//    val a = tableEnv.fromDataStream(
+//      streamEnv.addSource(
+//        FlinkJavaStreamTableTestBase
+//          .getKafkaSource("test", "localhost:9092", "latest")),
+//      "topic,offset,msg").renameColumns("offset as ll"); // offset是关键字
+//    tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomSinkTbl("printlnSinkTbl"))
+//
+//    tableEnv.insertInto("printlnSinkTbl", a.select("topic,ll,msg"))
+//
+//
+//    tableEnv.execute("eee")
   }
 
   /**
