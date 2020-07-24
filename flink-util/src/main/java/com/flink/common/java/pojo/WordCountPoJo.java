@@ -2,11 +2,19 @@ package com.flink.common.java.pojo;
 
 public class WordCountPoJo {
     public String word = "";
-    public long count = 0L;
+    public long num = 0L;
 
-    public WordCountPoJo(String word, long count) {
+    public WordCountPoJo(String word, long num) {
         this.word = word;
-        this.count = count;
+        this.num = num;
+    }
+
+    @Override
+    public String toString() {
+        return "WordCountPoJo{" +
+                "word='" + word + '\'' +
+                ", num=" + num +
+                '}';
     }
 
     public WordCountPoJo() {
