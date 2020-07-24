@@ -6,8 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="ssp-stream" />
-        <module name="ssp-util" />
+        <module name="stream" />
+        <module name="util" />
         <module name="resources" />
         <module name="assembly" />
       </profile>

@@ -16,13 +16,11 @@ class TopicMessageDeserialize
     false
   }
   override def getProducedType() = {
-    createTypeInformation[KafkaMessge].asInstanceOf[CaseClassTypeInfo[KafkaMessge]]
-
+    createTypeInformation[KafkaMessge]
+      .asInstanceOf[CaseClassTypeInfo[KafkaMessge]]
   }
 
 }
-
-
 /** flink 1.7.2 */
 //import org.apache.flink.api.common.typeinfo.TypeInformation
 //import org.apache.flink.streaming.util.serialization.KeyedDeserializationSchema
@@ -46,7 +44,3 @@ class TopicMessageDeserialize
 //    TypeInformation.of(
 //      KafkaMessge.getClass.asInstanceOf[Class[KafkaMessge]])
 //}
-
-
-
-

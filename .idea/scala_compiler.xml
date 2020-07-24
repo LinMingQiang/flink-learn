@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="Maven 1" modules="ssp-stream">
-      <parameters>
-        <parameter value="-dependencyfile" />
-        <parameter value="$PROJECT_DIR$/stream/target/.scala_dependencies" />
-      </parameters>
-    </profile>
-    <profile name="Maven 2" modules="ssp-util">
-      <parameters>
-        <parameter value="-dependencyfile" />
-        <parameter value="$PROJECT_DIR$/util/target/.scala_dependencies" />
-      </parameters>
-    </profile>
+    <profile name="Maven 2" modules="ssp-stream,ssp-util,stream,util" />
     <profile name="Maven 3" modules="ssp-sample">
       <parameters>
         <parameter value="-dependencyfile" />

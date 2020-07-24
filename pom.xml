@@ -127,29 +127,30 @@
             <source>1.8</source>
             <target>1.8</target>
             <encoding>UTF-8</encoding>
-            <maxmem>1024m</maxmem>
-            <fork>true</fork>
           </configuration>
         </plugin>
-
         <plugin>
+          <!-- 这个是必须的 -->
           <groupId>net.alchim31.maven</groupId>
           <artifactId>scala-maven-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.2.2</version>
           <executions>
+            <!-- Run scala compiler in the process-resources phase, so that dependencies on
+                scala classes can be resolved later in the (Java) compile phase -->
             <execution>
+              <id>scala-compile-first</id>
+              <phase>process-resources</phase>
               <goals>
                 <goal>compile</goal>
-                <goal>testCompile</goal>
               </goals>
-              <configuration>
-                <args>
-                  <arg>-dependencyfile</arg>
-                  <arg>${project.build.directory}/.scala_dependencies</arg>
-                </args>
-              </configuration>
             </execution>
           </executions>
+          <configuration>
+            <jvmArgs>
+              <jvmArg>-Xms128m</jvmArg>
+              <jvmArg>-Xmx512m</jvmArg>
+            </jvmArgs>
+          </configuration>
         </plugin>
 
         <plugin>
