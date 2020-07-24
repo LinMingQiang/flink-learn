@@ -3,7 +3,7 @@ package com.flink.learn.sql.batch.entry
 import com.flink.common.core.FlinkLearnPropertiesUtil
 import com.flink.common.java.core.FlinkEvnBuilder
 import com.flink.learn.sql.common.DDLSourceSQLManager
-import com.flink.learn.test.common.FlinkStreamTableTestBase
+import com.flink.learn.test.common.FlinkJavaStreamTableTestBase
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.table.api.scala.BatchTableEnvironment
@@ -30,7 +30,7 @@ object FlinkLearnDataSetSQLEntry {
 
     val a = tableEnv.fromDataStream(
       streamEnv.addSource(
-        FlinkStreamTableTestBase
+        FlinkJavaStreamTableTestBase
           .getKafkaSource("test", "localhost:9092", "latest")),
       "topic,offset,msg").renameColumns("offset as ll"); // offset是关键字
     tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomSinkTbl("printlnSinkTbl"))

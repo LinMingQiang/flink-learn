@@ -2,37 +2,30 @@ package com.streamtable.test;
 
 import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
 import com.flink.common.java.pojo.WordCountPoJo;
-import com.flink.common.java.tablesink.HbaseRetractStreamTableSink;
 import com.flink.common.manager.SchemaManager;
 import com.flink.common.manager.TableSourceConnectorManager;
 import com.flink.java.function.rich.HbaseQueryFunction;
 import com.flink.java.function.rich.HbaseQueryProcessFunction;
 import com.flink.learn.sql.common.DDLSourceSQLManager;
-import com.flink.learn.test.common.FlinkStreamTableTestBase;
+import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.scala.DataStream;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
-import org.apache.flink.table.factories.TableFactory;
-import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.apache.hadoop.hbase.client.Result;
 import org.junit.Test;
-import org.apache.flink.api.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FlinkLearnStreamExcutionEntry extends FlinkStreamTableTestBase {
+public class FlinkLearnStreamExcutionEntry extends FlinkJavaStreamTableTestBase {
     /**
      * table 转stream
      *

@@ -1,9 +1,9 @@
 package com.flink.java.test;
-import com.flink.learn.test.common.FlinkStreamTableTestBase;
+import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.junit.Test;
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg;
-public class AsyncIODatabaseRequestTest extends FlinkStreamTableTestBase {
+public class AsyncIODatabaseRequestTest extends FlinkJavaStreamTableTestBase {
     /**
      * 异步io测试
      */

@@ -3,7 +3,7 @@ package com.flink.java.test;
 import com.flink.learn.bean.WordCountGroupByKey;
 import com.flink.learn.bean.WordCountPoJo;
 import com.flink.learn.reader.WordCountJavaPojoKeyreader;
-import com.flink.learn.test.common.FlinkStreamTableTestBase;
+import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.learn.trans.AccountJavaPojoKeyedStateBootstrapFunction;
 import com.flink.learn.trans.AcountJavaPoJoOperatorStateBootstrap;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -20,7 +20,7 @@ import java.io.File;
 /**
  * 当 state 使用 ttlconfig的时候，readKeyedState的时候里面也要一样配
  */
-public class StateProcessorTest extends FlinkStreamTableTestBase {
+public class StateProcessorTest extends FlinkJavaStreamTableTestBase {
 
     public static String uid = "wordcountUID";
     public static String path = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint";
