@@ -101,6 +101,12 @@
       <version>1.0.0</version>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>com.flink.learn</groupId>
+          <artifactId>flink-function</artifactId>
+          <version>1.0.0</version>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
   <profiles>
     <profile>
