@@ -13,7 +13,7 @@ public class KafkaTopicOffsetMsgPoJo {
 
     @Override
     public String toString() {
-        return "WordCountPoJo{" +
+        return "KafkaTopicOffsetMsgPoJo{" +
                 "topic='" + topic + '\'' +
                 ", msg='" + msg + '\'' +
                 ", offset=" + offset +

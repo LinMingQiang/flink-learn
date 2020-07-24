@@ -1,9 +1,10 @@
 package com.flink.common.dbutil
 
 import java.util
-import java.util.HashMap
+import java.util.{ArrayList, HashMap}
 
 import com.flink.common.core.EnvironmentalKey
+import org.apache.flink.api.java.tuple.Tuple2
 //import com.stumbleupon.async.Callback
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.hadoop.hbase.client._
@@ -31,11 +32,10 @@ object FlinkHbaseFactory {
 
 //  def getGlobalAsyncConn(zk: String) ={
 //  if(asyncClient == null){
-    //      asyncClient = new HBaseClient(zk)
-    //    }
-    //    asyncClient
+  //      asyncClient = new HBaseClient(zk)
+  //    }
+  //    asyncClient
 //  }
-
 
   def main(args: Array[String]): Unit = {
 //    getGlobalAsyncConn("localhost:2181")
@@ -51,13 +51,14 @@ object FlinkHbaseFactory {
 //    })
 //    asyncClient.shutdown()
 
-    val  conn = getGlobalConn("10.21.34.174:2181,10.21.34.175:2181,10.21.34.176:2181,10.21.34.177:2181,10.21.34.178:2181")
+    val conn = getGlobalConn(
+      "10.21.34.174:2181,10.21.34.175:2181,10.21.34.176:2181,10.21.34.177:2181,10.21.34.178:2181")
     conn.getAdmin.listTableNames().foreach(println)
 //    val test =   conn.getTable(TableName.valueOf("test"))
 //    println(test.exists(new Get("test".getBytes())))
 //    println(test.get(new Get("test".getBytes())).getValue("info".getBytes(),"v".getBytes()))
     conn.close()
-   // println(">>>>>>>" + r)
+    // println(">>>>>>>" + r)
   }
 
 }
