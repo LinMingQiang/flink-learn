@@ -36,6 +36,18 @@
 
   <dependencyManagement>
     <dependencies>
+<!-- Hbase 异步 -->
+      <dependency>
+        <groupId>org.hbase</groupId>
+        <artifactId>asynchbase</artifactId>
+        <version>1.8.2</version>
+      </dependency>
+<!--      LUR 缓存 -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>28.0-jre</version>
+      </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
@@ -107,13 +119,6 @@
   <build>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.scalastyle</groupId>
-          <artifactId>scalastyle-maven-plugin</artifactId>
-          <configuration>
-            <configLocation>${project.basedir}/../resources/conf/scalastyle-config.xml</configLocation>
-          </configuration>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
