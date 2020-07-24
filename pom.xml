@@ -7,6 +7,7 @@
     <version>1.0.0</version>
     <modules>
         <module>flink-util</module>
+        <module>flink-testutil</module>
         <module>flink-sourcesink</module>
         <module>flink-cep</module>
         <module>flink-demo</module>
