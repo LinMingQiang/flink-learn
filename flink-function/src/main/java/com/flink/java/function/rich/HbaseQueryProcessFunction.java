@@ -1,6 +1,7 @@
 package com.flink.java.function.rich;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
+import com.flink.scala.function.dbutil.HbaseQueryUtils;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -13,22 +14,35 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<String, IN, OUT>
+/**
+ *
+ * @param <IN> Tuple2<String, KafkaTopicOffsetMsgPoJo>
+ * @param <OUT> WordCountPoJo
+ */
+public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<String, Tuple2<String, IN>, OUT>
         implements CheckpointedFunction {
     private int flushSize = 10;
     private int msgNum = 0;
-    private ListState<Row> checkpointedState = null;// checkpoint state
-    private HashMap<String, IN> bufferedElements = new HashMap(); // buffer List
+    private ListState<IN> checkpointedState = null;// checkpoint state
+    private List bufferedElements = new ArrayList<Tuple2<String, IN>>(); // buffer List
     private List<OUT> queryResBuffer = new ArrayList<>(); // ckp的时候结果
     private HbaseQueryFunction<IN, OUT> qf = null;
     private TypeInformation<IN> inType = null;
-
+    private Table t = null;
+    private String tablename = null;
+    /**
+     * 初始化，初始化hbase等
+     * @param parameters
+     * @throws Exception
+     */
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
@@ -36,23 +50,20 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
                 .getExecutionConfig()
                 .getGlobalJobParameters();
         FlinkLearnPropertiesUtil.init(p);
+        // init hbase conn and table
     }
 
-    public HbaseQueryProcessFunction(HbaseQueryFunction qf, TypeInformation<IN> inType) {
+    public HbaseQueryProcessFunction(HbaseQueryFunction qf, String tablename, TypeInformation<IN> inType) {
         this.qf = qf;
         this.inType = inType;
-    }
-
-    // 查询hbase
-    public List<IN> queryHbase(HashMap<String, IN> bufferedElements) {
-        return new ArrayList<>(bufferedElements.values());
+        this.tablename = tablename;
     }
 
     @Override
     public void snapshotState(FunctionSnapshotContext context) throws Exception {
         checkpointedState.clear();
         if (!bufferedElements.isEmpty()) {
-            List<IN> res = queryHbase(bufferedElements);
+            List<Tuple2<Result, Tuple2<String, IN>>> res = qf.queryHbase(t, bufferedElements);
             for (Object o : qf.transResult(res)) {
                 queryResBuffer.add((OUT) o);
             }
@@ -79,7 +90,7 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
      * @throws Exception
      */
     @Override
-    public void processElement(IN value, Context ctx, Collector<OUT> out) throws Exception {
+    public void processElement(Tuple2<String, IN> value, Context ctx, Collector<OUT> out) throws Exception {
         // 每个元素在最后一次ckp之后10s后执行一次
         ctx.timerService().registerProcessingTimeTimer(
                 new Date().getTime() + FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL()+ 1000L);
@@ -87,11 +98,11 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
             queryResBuffer.forEach(x -> out.collect(x));
             queryResBuffer.clear();
         }
-        bufferedElements.put(ctx.getCurrentKey(), value);
+        bufferedElements.add(value);
         msgNum++;
         if (msgNum >= flushSize) {
             // query hbase
-            List<IN> res = queryHbase(bufferedElements);
+            List<Tuple2<Result, Tuple2<String, IN>>> res = qf.queryHbase(t, bufferedElements);
             for (Object o : qf.transResult(res)) {
                 out.collect((OUT) o);
             }
@@ -116,4 +127,6 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
             queryResBuffer.clear();
         }
     }
+
+
 }
