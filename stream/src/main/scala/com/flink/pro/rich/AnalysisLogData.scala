@@ -16,6 +16,7 @@ class AnalysisLogData
   var parame: ParameterTool = _
   val _log = LoggerFactory.getLogger(this.getClass)
   var taskIndex = 0L
+
   /**
     *
     * @param parameters
@@ -43,17 +44,20 @@ class AnalysisLogData
       val arr = in.msg.split("\\|", -1)
       in.topic match {
         case REQUEST_TOPIC =>
-          if (arr.size >= REQ_BID_LOG_SIZE)
+          if (arr.size >= REQ_BID_LOG_SIZE) {
             out.collect(SourceLogData(REQUEST_TOPIC, arr(1), arr))
-         //  else println(s"errsize : $REQUEST_TOPIC : ${in.msg}")
+          }
+        //  else println(s"errsize : $REQUEST_TOPIC : ${in.msg}")
         case IMPRESS_TOPIC =>
-          if (arr.size >= IMPRESS_CLICK_LOG_SIZE)
+          if (arr.size >= IMPRESS_CLICK_LOG_SIZE) {
             out.collect(SourceLogData(IMPRESS_TOPIC, arr(1), arr))
+          }
         //  else println(s"errsize： $IMPRESS_TOPIC : ${in.msg}")
         case CLICK_TOPIC =>
-          if (arr.size >= IMPRESS_CLICK_LOG_SIZE)
+          if (arr.size >= IMPRESS_CLICK_LOG_SIZE) {
             out.collect(SourceLogData(CLICK_TOPIC, arr(1), arr))
-         // else println(s"errsize ：$CLICK_TOPIC : ${in.msg}")
+          }
+        // else println(s"errsize ：$CLICK_TOPIC : ${in.msg}")
       }
     } catch {
       case e: Throwable => e.printStackTrace()

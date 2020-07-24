@@ -14,17 +14,17 @@ import org.slf4j.LoggerFactory
 object FlinkStreamReport2MysqlEntry {
   val _log = LoggerFactory.getLogger(this.getClass)
   val PRO_NAME = "RPT_"
-
   /**
     * @param args
     */
   def main(args: Array[String]): Unit = {
-    val proPath = args(0)
-    StreamPropertiesUtil.init(proPath, PRO_NAME);
+    StreamPropertiesUtil.init(args(0), PRO_NAME);
     val kafkasource =
       KafkaSourceManager.getKafkaSource(TOPIC, BROKER, "latest", "test")
     val env =
-      FlinkEvnBuilder.buildStreamTableEnv(param, CHECKPOINT_PATH, CHECKPOINT_INTERVAL)
+      FlinkEvnBuilder.buildStreamingEnv(param,
+                                          CHECKPOINT_PATH,
+                                          CHECKPOINT_INTERVAL)
     env
       .addSource(kafkasource)
       .uid("kafkasource")
