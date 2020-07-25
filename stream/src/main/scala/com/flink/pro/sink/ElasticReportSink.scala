@@ -17,8 +17,7 @@ import org.apache.flink.streaming.api.operators.StreamingRuntimeContext
 import org.elasticsearch.action.bulk.{BulkProcessor, BulkRequestBuilder}
 import org.elasticsearch.client.transport.TransportClient
 import org.slf4j.LoggerFactory
-
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 class ElasticReportSink(size: Int, interval: Long)
     extends RichSinkFunction[ReportInfo]
@@ -101,7 +100,7 @@ class ElasticReportSink(size: Int, interval: Long)
       .getListState(descriptor)
     if (functionInitializationContext.isRestored) {
       _log.info(s"${taskIndex}> --- initializeState ---")
-      for (element <- checkpointedState.get()) {
+      for (element <- checkpointedState.get().asScala) {
         bufferedElements += (element.keybyKey -> element)
         _log.info(s"restore : $element")
       }
