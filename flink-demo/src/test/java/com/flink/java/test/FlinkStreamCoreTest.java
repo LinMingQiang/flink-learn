@@ -2,10 +2,17 @@ package com.flink.java.test;
 
 import com.flink.common.java.pojo.WordCountPoJo;
 import com.flink.common.kafka.KafkaManager;
+import com.flink.java.function.process.StreamConnectCoProcessFunc;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
+import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.junit.Test;
@@ -44,5 +51,25 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
                 .print();
         streamEnv.execute("ww");
 
+    }
+
+    /**
+     * 可用于双流join。
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testConnectStream() throws Exception {
+        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> s1 = streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"));
+        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> s2 = streamEnv.addSource(getKafkaSource("test2", "localhost:9092", "latest"));
+
+        s1.connect(s2)
+                .keyBy(KafkaManager.KafkaTopicOffsetMsg::msg, KafkaManager.KafkaTopicOffsetMsg::msg)
+                .process(new StreamConnectCoProcessFunc())
+                .returns(Types.STRING)
+                .print();
+
+        streamEnv.execute("");
+        // .map(CoMapFunction<> value -> null);
     }
 }
