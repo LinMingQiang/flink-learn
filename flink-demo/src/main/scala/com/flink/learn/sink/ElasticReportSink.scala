@@ -3,8 +3,8 @@ package com.flink.learn.sink
 import java.util.Date
 
 import com.flink.common.core.FlinkLearnPropertiesUtil
+import com.flink.common.dbutil.ElasticsearchHandler
 import com.flink.learn.bean.CaseClassUtil.ReportInfo
-import com.flink.learn.dbutil.ElasticsearchHandler
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.{TypeHint, TypeInformation}
 import org.apache.flink.api.java.utils.ParameterTool
