@@ -1,13 +1,8 @@
-package com.flink.learn.dbutil
+package com.flink.common.dbutil
 
 import java.net.InetAddress
 
-import org.elasticsearch.action.bulk.{
-  BackoffPolicy,
-  BulkProcessor,
-  BulkRequest,
-  BulkResponse
-}
+import org.elasticsearch.action.bulk.{BackoffPolicy, BulkProcessor, BulkRequest, BulkResponse}
 import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
