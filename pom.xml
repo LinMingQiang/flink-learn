@@ -9,8 +9,10 @@
       <module>util</module>
       <module>stream</module>
       <module>resources</module>
-      <module>assembly</module>
       <module>testutil</module>
+      <module>sourcesink</module>
+      <module>assembly</module>
+      <module>function</module>
     </modules>
     <name>${project.artifactId}</name>
   <description>My wonderfull scala app</description>
