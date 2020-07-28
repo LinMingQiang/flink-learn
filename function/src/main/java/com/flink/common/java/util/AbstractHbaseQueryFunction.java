@@ -12,8 +12,27 @@ import java.util.List;
 
 public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializable {
 
-    public abstract List<OUT> transResult(List<Tuple2<Result, Tuple2<String, IN>>> res);
+    /**
+     * 查询结果转化
+     * @param res
+     * @return
+     */
+    public void transResult(List<Tuple2<Result, Tuple2<String, IN>>> res, List<OUT> result){
 
+    };
+
+    public void transResult(Tuple2<Result, Tuple2<String, IN>> res, List<OUT> result){
+
+    };
+
+
+    /**
+     * 查询逻辑
+     * @param t
+     * @param d
+     * @return
+     * @throws IOException
+     */
     public List<Tuple2<Result, Tuple2<String, IN>>> queryHbase(Table t, List<Tuple2<String, IN>> d) throws IOException {
         List keys = new ArrayList<Get>();
         for (int i = 0; i < d.size(); i++) {

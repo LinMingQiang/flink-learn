@@ -13,9 +13,12 @@ import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.OutputTag;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +26,8 @@ import java.util.List;
 /**
  * @param <IN>  Tuple2<String, KafkaTopicOffsetMsgPoJo>
  * @param <OUT> WordCountPoJo
+ * @author eminem
+ * @describe join维表, 必须是经过keyby之后的
  */
 public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<String, Tuple2<String, IN>, OUT>
         implements CheckpointedFunction {
@@ -34,7 +39,8 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     private TypeInformation<Tuple2<String, IN>> inType = null;
     private Table t = null;
     private String tablename = null;
-
+    public OutputTag<Tuple2<String, IN>> queryEmpt = null; // 没查到的
+private List<Tuple2<String, IN>> queryEmptList = new ArrayList<>();
     /**
      * 初始化，初始化hbase等
      *
@@ -55,11 +61,13 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
             AbstractHbaseQueryFunction qf,
             String tablename,
             int flushSize,
-            TypeInformation<Tuple2<String, IN>> inType) {
+            TypeInformation<Tuple2<String, IN>> inType,
+            OutputTag<Tuple2<String, IN>> queryEmpt) {
         this.qf = qf;
         this.inType = inType;
         this.flushSize = flushSize;
         this.tablename = tablename;
+        this.queryEmpt = queryEmpt;
     }
 
     @Override
@@ -67,9 +75,12 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
         checkpointedState.clear();
         if (!bufferedElements.isEmpty()) {
             checkpointedState.addAll(bufferedElements);
-            List<Tuple2<Result, Tuple2<String, IN>>> res = qf.queryHbase(t, bufferedElements);
-            for (Object o : qf.transResult(res)) {
-                queryResBuffer.add((OUT) o);
+            for (Tuple2<Result, Tuple2<String, IN>> tmp : qf.queryHbase(t, bufferedElements)) {
+                if (tmp.f0 == null || tmp.f0.isEmpty()) {
+                    queryEmptList.add(tmp.f1);
+                } else {
+                    qf.transResult(tmp, queryResBuffer);
+                }
             }
             bufferedElements.clear();
         }
@@ -83,7 +94,7 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
         );
         checkpointedState = context.getOperatorStateStore()
                 .getListState(descriptor);
-        if(context.isRestored()){
+        if (context.isRestored()) {
             for (Tuple2<String, IN> element : checkpointedState.get()) {
                 bufferedElements.add(element);
             }
@@ -107,12 +118,21 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
             queryResBuffer.forEach(x -> out.collect(x));
             queryResBuffer.clear();
         }
-        if (!value.f0.isEmpty()) bufferedElements.add(value); // key不为空
+        if(!queryEmptList.isEmpty()){
+            queryEmptList.forEach(x -> ctx.output(queryEmpt, x));
+            queryEmptList.clear();
+        }
+        if (!value.f0.isEmpty()) {
+            bufferedElements.add(value); // key不为空
+        }
         if (bufferedElements.size() >= flushSize) {
             // query hbase
-            List<Tuple2<Result, Tuple2<String, IN>>> res = qf.queryHbase(t, bufferedElements);
-            for (Object o : qf.transResult(res)) {
-                out.collect((OUT) o);
+            for (Tuple2<Result, Tuple2<String, IN>> tmp : qf.queryHbase(t, bufferedElements)) {
+                if (tmp.f0 == null || tmp.f0.isEmpty()) {
+                    ctx.output(queryEmpt, tmp.f1);
+                } else {
+                    qf.transResult(tmp, queryResBuffer);
+                }
             }
             bufferedElements.clear();
         }
@@ -133,6 +153,10 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
         if (!queryResBuffer.isEmpty()) {
             queryResBuffer.forEach(x -> out.collect(x));
             queryResBuffer.clear();
+        }
+        if(!queryEmptList.isEmpty()){
+            queryEmptList.forEach(x -> ctx.output(queryEmpt, x));
+            queryEmptList.clear();
         }
     }
 
