@@ -3,6 +3,7 @@ package com.flink.learn.test.common;
 import com.flink.common.core.EnvironmentalKey;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize;
+import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.flink.common.java.core.FlinkEvnBuilder;
 import com.flink.common.kafka.KafkaManager;
 import org.apache.flink.api.common.time.Time;
@@ -50,6 +51,24 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
                 topic,
                 broker,
                 new TopicOffsetMsgDeserialize());
+        kafkasource.setCommitOffsetsOnCheckpoints(true);
+        if (reset == "earliest") {
+            kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
+        } else if (reset == "latest") {
+            kafkasource.setStartFromLatest();
+        }
+        return kafkasource;
+    }
+
+
+    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithTS(
+            String topic,
+            String broker,
+            String reset) {
+        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
+                topic,
+                broker,
+                new TopicOffsetTimeStampMsgDeserialize());
         kafkasource.setCommitOffsetsOnCheckpoints(true);
         if (reset == "earliest") {
             kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
