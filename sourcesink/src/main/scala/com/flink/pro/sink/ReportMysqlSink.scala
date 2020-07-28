@@ -122,8 +122,9 @@ class ReportMysqlSink(size: Int,
       .getListState(descriptor)
     if (functionInitializationContext.isRestored) {
       for (element <- checkpointedState.get().asScala) {
-        if (element.groupKey(5) != null)
+        if (element.groupKey(5) != null) {
           bufferedElements += (element.keybyKey -> element)
+        }
         _log.info(s"restore : $element")
       }
     }

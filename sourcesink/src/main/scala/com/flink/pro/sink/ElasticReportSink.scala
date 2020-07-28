@@ -5,21 +5,27 @@ import java.util.Date
 import com.flink.pro.common.CaseClassUtil.ReportInfo
 import com.flink.common.dbutil.ElasticsearchHandler
 import com.flink.pro.common.StreamPropertiesUtil
-import com.flink.pro.func.ElasticDocAssembleUtil
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.{TypeHint, TypeInformation}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
+import org.apache.flink.runtime.state.{
+  FunctionInitializationContext,
+  FunctionSnapshotContext
+}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.operators.StreamingRuntimeContext
 import org.elasticsearch.action.bulk.{BulkProcessor, BulkRequestBuilder}
+import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.client.transport.TransportClient
 import org.slf4j.LoggerFactory
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-class ElasticReportSink(size: Int, interval: Long)
+class ElasticReportSink(size: Int,
+                        interval: Long,
+                        func: ReportInfo => UpdateRequest)
     extends RichSinkFunction[ReportInfo]
     with CheckpointedFunction {
   val _log = LoggerFactory.getLogger(this.getClass)
@@ -58,7 +64,7 @@ class ElasticReportSink(size: Int, interval: Long)
         nextTime = new Date().getTime + 1000 * interval
         val bulk = client.prepareBulk()
         bufferedElements.foreach(x => {
-          val index = ElasticDocAssembleUtil.getUpsertIndex(x._2)
+          val index = func(x._2)
           bulk.add(index)
         })
         commitBulk(bulk)
@@ -79,7 +85,7 @@ class ElasticReportSink(size: Int, interval: Long)
     val bulk = client.prepareBulk()
     for (element <- bufferedElements) {
       checkpointedState.add(element._2)
-      val index = ElasticDocAssembleUtil.getUpsertIndex(element._2)
+      val index = func(element._2)
       bulk.add(index)
     }
     commitBulk(bulk)
