@@ -27,6 +27,7 @@ public class FlinkEvnBuilder {
             Long checkPointInterval) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.getConfig().setGlobalJobParameters(parameters); // 广播配置
+        env.getConfig().setAutoWatermarkInterval(10000L); // 每10s触发一次 wtm
         env.enableCheckpointing(checkPointInterval); //更新offsets。每60s提交一次
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(checkPointInterval); //; 两个chk最小间隔
 

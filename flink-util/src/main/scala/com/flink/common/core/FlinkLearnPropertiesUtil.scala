@@ -26,4 +26,7 @@ object FlinkLearnPropertiesUtil extends PropertiesTrait {
   lazy val FLINK_DEMO_CHECKPOINT_PATH = getProperties("flink.checkpoint.path") + s"/${proName}/${DateFormatUtils
     .format(new Date(), "yyyyMMddHHMM")}"
 
+
+  lazy val ZOOKEEPER = getProperties("hbase.zk")
+
 }
