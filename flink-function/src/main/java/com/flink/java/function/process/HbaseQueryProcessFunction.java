@@ -1,7 +1,7 @@
-package com.flink.java.function.rich;
+package com.flink.java.function.process;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.flink.scala.function.dbutil.HbaseQueryUtils;
+import com.flink.java.function.common.util.AbstractHbaseQueryFunction;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -12,14 +12,12 @@ import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
-import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,7 +30,7 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     private ListState<Tuple2<String, IN>> checkpointedState = null;// checkpoint state
     private List<Tuple2<String, IN>> bufferedElements = new ArrayList<Tuple2<String, IN>>(); // buffer List
     private List<OUT> queryResBuffer = new ArrayList<>(); // ckp的时候结果
-    private HbaseQueryFunction<IN, OUT> qf = null;
+    private AbstractHbaseQueryFunction<IN, OUT> qf = null;
     private TypeInformation<Tuple2<String, IN>> inType = null;
     private Table t = null;
     private String tablename = null;
@@ -54,7 +52,7 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     }
 
     public HbaseQueryProcessFunction(
-            HbaseQueryFunction qf,
+            AbstractHbaseQueryFunction qf,
             String tablename,
             int flushSize,
             TypeInformation<Tuple2<String, IN>> inType) {

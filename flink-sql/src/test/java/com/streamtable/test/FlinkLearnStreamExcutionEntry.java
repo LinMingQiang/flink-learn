@@ -4,8 +4,8 @@ import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
 import com.flink.common.java.pojo.WordCountPoJo;
 import com.flink.common.manager.SchemaManager;
 import com.flink.common.manager.TableSourceConnectorManager;
-import com.flink.java.function.rich.HbaseQueryFunction;
-import com.flink.java.function.rich.HbaseQueryProcessFunction;
+import com.flink.java.function.common.util.AbstractHbaseQueryFunction;
+import com.flink.java.function.process.HbaseQueryProcessFunction;
 import com.flink.learn.sql.common.DDLSourceSQLManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
@@ -198,7 +198,7 @@ public class FlinkLearnStreamExcutionEntry extends FlinkJavaStreamTableTestBase 
 
         SingleOutputStreamOperator t = ds.keyBy(x -> x.f0)
                 .process(new HbaseQueryProcessFunction(
-                        new HbaseQueryFunction<KafkaTopicOffsetMsgPoJo, WordCountPoJo>() {
+                        new AbstractHbaseQueryFunction<KafkaTopicOffsetMsgPoJo, WordCountPoJo>() {
                             @Override
                             public List<WordCountPoJo> transResult(List<Tuple2<Result, Tuple2<String, KafkaTopicOffsetMsgPoJo>>> res) {
                                 List<WordCountPoJo> r = new ArrayList<>();
