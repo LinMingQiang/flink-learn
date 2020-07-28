@@ -2,8 +2,7 @@ package com.flink.pro.common
 
 import java.util.Date
 
-import org.apache.commons.lang3.time.{DateFormatUtils, DateUtils}
-import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.commons.lang3.time.DateFormatUtils
 
 object StreamPropertiesUtil extends PropertiesTrait {
   // kafka相关配置
