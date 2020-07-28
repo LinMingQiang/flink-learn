@@ -1,17 +1,15 @@
-package com.flink.java.function.rich;
+package com.flink.java.function.common.util;
 
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.types.Row;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class HbaseQueryFunction<IN, OUT> implements Serializable {
+public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializable {
 
     public abstract List<OUT> transResult(List<Tuple2<Result, Tuple2<String, IN>>> res);
 
