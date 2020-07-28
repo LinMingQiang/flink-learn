@@ -5,7 +5,6 @@ import com.flink.pro.common.StreamPropertiesUtil
 import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
 object ElasticDocAssembleUtil {
-
   /**
     * 组装卖家报表
     * @param groupKey
