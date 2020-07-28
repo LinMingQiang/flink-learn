@@ -55,3 +55,6 @@ build.log
 /es-shade/dependency-reduced-pom.xml
 /assembly/target/
 /savepoint/
+/flink-function/target/
+/flink-sourcesink/target/
+/flink-testutil/target/
