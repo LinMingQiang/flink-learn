@@ -2,12 +2,12 @@
 
 # 初始化环境
 set -x
-export MOBSSP_ENV=${mobssp.env}
-export mobssp_shell_mock=0
-export MOBSSP_HOME="$(cd "`dirname "$0"`"/../..; pwd)"
-profilePath=$MOBSSP_HOME/conf/application.properties
-stream_jar=$MOBSSP_HOME/lib/ssp-stream-${project.version}.jar
-sample_jar=$MOBSSP_HOME/lib/ssp-sample-${project.version}.jar
+export PRO_ENV=${pro.env}
+export PRO_shell_mock=0
+export PRO_HOME="$(cd "`dirname "$0"`"/../..; pwd)"
+profilePath=$PRO_HOME/conf/application.properties
+stream_jar=$PRO_HOME/lib/stream-${project.version}.jar
+sample_jar=$PRO_HOME/lib/sample-${project.version}.jar
 
-log_path=$MOBSSP_HOME/conf/log4j.properties
+log_path=$PRO_HOME/conf/log4j.properties
 
