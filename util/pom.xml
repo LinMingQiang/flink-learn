@@ -9,11 +9,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase-client</artifactId>
-      <version>${hbase.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.flink.pro</groupId>
       <artifactId>es-shade</artifactId>
       <version>${parent.version}</version>
@@ -36,8 +31,8 @@
     </dependency>
     <dependency>
       <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase-client</artifactId>
-      <version>1.2.0</version>
+      <artifactId>hbase-shaded-client</artifactId>
+      <version>${hbase.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>

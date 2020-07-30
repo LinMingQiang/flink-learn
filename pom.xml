@@ -39,11 +39,10 @@
 
   <dependencyManagement>
     <dependencies>
-<!-- Hbase 异步 -->
       <dependency>
-        <groupId>org.hbase</groupId>
-        <artifactId>asynchbase</artifactId>
-        <version>1.8.2</version>
+        <groupId>org.apache.hbase</groupId>
+        <artifactId>hbase-shaded-client</artifactId>
+        <version>${hbase.version}</version>
       </dependency>
 <!--      LUR 缓存 -->
       <dependency>
