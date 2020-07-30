@@ -11,22 +11,42 @@ import java.util.List;
 
 public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializable {
 
-    public abstract List<OUT> transResult(List<Tuple2<Result, Tuple2<String, IN>>> res);
+    public abstract String getRowkey(IN input);
+    /**
+     * 查询结果转化
+     * @param res
+     * @return
+     */
+    public void transResult(List<Tuple2<Result, IN>> res, List<OUT> result){
 
-    public List<Tuple2<Result, Tuple2<String, IN>>> queryHbase(Table t, List<Tuple2<String, IN>> d) throws IOException {
-        List keys = new ArrayList<Get>();
-        for (int i = 0; i < d.size(); i++) {
-            keys.add(new Get(d.get(i).f0.getBytes()));
-        }
+    };
+
+    public void transResult(Tuple2<Result, IN> res, List<OUT> result){
+
+    };
+
+
+    /**
+     * 查询逻辑
+     * @param t
+     * @return
+     * @throws IOException
+     */
+    public List<Tuple2<Result, IN>> queryHbase(Table t, List<IN> input) throws Exception {
+
         List ret = new ArrayList<Tuple2<Result, Tuple2<String, IN>>>();
         Result[] r = null;
         if (t == null) {
-            r = new Result[d.size()];
+            r = new Result[input.size()];
         } else {
+            List keys = new ArrayList<Get>();
+            for (int i = 0; i < input.size(); i++) {
+                keys.add(new Get(getRowkey(input.get(i)).getBytes()));
+            }
             r = t.get(keys);
         }
-        for (int i = 0; i < d.size(); i++) {
-            ret.add(new Tuple2(r[i], d.get(i)));
+        for (int i = 0; i < input.size(); i++) {
+            ret.add(new Tuple2(r[i], input.get(i)));
         }
         return ret;
     }

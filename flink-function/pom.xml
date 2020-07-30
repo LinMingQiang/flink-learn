@@ -11,24 +11,6 @@
 
 
   <dependencies>
-    <!-- Test -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>${scope.value}</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-test-utils_${scala.binary.version}</artifactId>
-      <version>${flink.version}</version>
-      <scope>${scope.value}</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_2.11</artifactId>
-      <version>3.0.5</version>
-    </dependency>
     <dependency>
       <artifactId>es-shade</artifactId>
       <groupId>com.flink.learn</groupId>
@@ -43,10 +25,6 @@
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-json</artifactId>
       <version>${flink.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase-client</artifactId>
     </dependency>
     <dependency>
       <groupId>com.alibaba</groupId>
@@ -109,8 +87,13 @@
     <dependency>
       <groupId>com.flink.learn</groupId>
       <artifactId>flink-util</artifactId>
-      <version>1.0.0</version>
-      <scope>compile</scope>
+      <version>${parent.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.flink.learn</groupId>
+      <artifactId>flink-testutil</artifactId>
+      <version>${parent.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
