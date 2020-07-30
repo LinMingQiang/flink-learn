@@ -146,15 +146,6 @@
     </profiles>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.scalastyle</groupId>
-                <artifactId>scalastyle-maven-plugin</artifactId>
-                <configuration>
-                    <configLocation>/Users/eminem/workspace/flink/flink-learn/resources/file/scalastyle-config.xml</configLocation>
-                </configuration>
-            </plugin>
-        </plugins>
         <pluginManagement>
         <plugins>
             <plugin>
@@ -163,6 +154,7 @@
                 <configuration>
                     <configLocation>${project.basedir}/../resources/file/scalastyle-config.xml</configLocation>
                 </configuration>
+                <version>0.8.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
