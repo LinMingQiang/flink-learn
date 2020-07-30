@@ -148,6 +148,7 @@
                     <configLocation>/Users/eminem/workspace/flink/flink-learn/resources/file/scalastyle-config.xml
                     </configLocation>
                 </configuration>
+                <version>0.8.0</version>
             </plugin>
         </plugins>
         <pluginManagement>
