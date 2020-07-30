@@ -10,22 +10,26 @@ import com.flink.learn.sql.common.DDLSourceSQLManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.types.Row;
+import org.apache.flink.util.OutputTag;
 import org.apache.hadoop.hbase.client.Result;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FlinkLearnStreamExcutionEntry extends FlinkJavaStreamTableTestBase {
+public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
     /**
      * table 转stream
      *
@@ -191,38 +195,40 @@ public class FlinkLearnStreamExcutionEntry extends FlinkJavaStreamTableTestBase 
         Table a = tableEnv.fromDataStream(
                 streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
                 , "topic,offset,msg");
-        // 可以转stream之后再转换。pojo可以直接对应上Row
-        SingleOutputStreamOperator<Tuple2<String, KafkaTopicOffsetMsgPoJo>> ds = tableEnv.toAppendStream(a, KafkaTopicOffsetMsgPoJo.class)
-                .map((MapFunction<KafkaTopicOffsetMsgPoJo, Tuple2<String, KafkaTopicOffsetMsgPoJo>>) value -> new Tuple2<>(value.msg, (value)))
-                .returns(new TupleTypeInfo(Types.STRING, TypeInformation.of(KafkaTopicOffsetMsgPoJo.class)));
-
-        SingleOutputStreamOperator t = ds.keyBy(x -> x.f0)
-                .process(new HbaseQueryProcessFunction(
+        OutputTag<KafkaTopicOffsetMsgPoJo> queryFailed = new OutputTag<KafkaTopicOffsetMsgPoJo>("queryFailed") {
+        };
+        SingleOutputStreamOperator t = tableEnv
+                .toAppendStream(a, KafkaTopicOffsetMsgPoJo.class)
+                .keyBy((KeySelector<KafkaTopicOffsetMsgPoJo, String>) value -> value.msg)
+                .process(new HbaseQueryProcessFunction<KafkaTopicOffsetMsgPoJo, WordCountPoJo>(
                         new AbstractHbaseQueryFunction<KafkaTopicOffsetMsgPoJo, WordCountPoJo>() {
                             @Override
-                            public List<WordCountPoJo> transResult(List<Tuple2<Result, Tuple2<String, KafkaTopicOffsetMsgPoJo>>> res) {
-                                List<WordCountPoJo> r = new ArrayList<>();
-                                for (Tuple2<Result, Tuple2<String, KafkaTopicOffsetMsgPoJo>> row : res) {
-                                    if (row.f0 == null) {
-                                        r.add(new WordCountPoJo(row.f1.f1.msg, 1L));
-                                    } else {
-                                        r.add(new WordCountPoJo(row.f1.f1.msg, 1L));
-                                    }
+                            public String getRowkey(KafkaTopicOffsetMsgPoJo input) {
+                                return input.msg;
+                            }
+                            @Override
+                            public void transResult(Tuple2<Result, KafkaTopicOffsetMsgPoJo> res, List<WordCountPoJo> result) {
+                                if(res.f0 == null)
+                                result.add(new WordCountPoJo("joinfail", 1L));
+                                else {
+                                    result.add(new WordCountPoJo(res.f1.msg, 1L));
                                 }
-                                return r;
                             }
                         },
                         null,
                         100,
-                        new TupleTypeInfo(Types.STRING, TypeInformation.of(KafkaTopicOffsetMsgPoJo.class))))
-                .returns(TypeInformation.of(WordCountPoJo.class))
-                .uid("uid").name("name");
+                        TypeInformation.of(KafkaTopicOffsetMsgPoJo.class),
+                        queryFailed))
+                .returns(TypeInformation.of(WordCountPoJo.class)).uid("uid").name("name");
 
+        t.getSideOutput(queryFailed)
+                .map(x -> "cant find : " + x.toString())
+                .print();
 
         tableEnv.createTemporaryView("wcstream", t);
         tableEnv.toRetractStream(
                 tableEnv.sqlQuery("select word,sum(num) num from wcstream group by word"),
-                Row.class)
+                TypeInformation.of(new TypeHint<Tuple2<String, Long>>(){})) // Row.class
                 .filter(x -> x.f0)
                 .print();
         tableEnv.execute("");
