@@ -30,6 +30,11 @@ object FlinkHbaseFactory {
     conn
   }
 
+  def getTable(zk: String, table: String): Table ={
+    initConn(zk)
+    conn.getTable(TableName.valueOf(table))
+  }
+
   def get(conn: Connection, tablename: String, key: String): Result = {
     val test = conn.getTable(TableName.valueOf(tablename))
     test.get(new Get(key.getBytes()))

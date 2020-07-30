@@ -90,13 +90,14 @@
     <dependency>
       <groupId>com.flink.learn</groupId>
       <artifactId>flink-sourcesink</artifactId>
-      <version>1.0.0</version>
+      <version>${parent.version}</version>
     </dependency>
       <dependency>
           <groupId>com.flink.learn</groupId>
           <artifactId>flink-function</artifactId>
-          <version>1.0.0</version>
+          <version>${parent.version}</version>
       </dependency>
+
     <dependency>
       <groupId>com.flink.learn</groupId>
       <artifactId>flink-testutil</artifactId>

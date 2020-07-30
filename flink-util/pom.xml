@@ -9,35 +9,6 @@
     <artifactId>flink-util</artifactId>
 
   <dependencies>
-      <!-- Hbase 异步 -->
-<!--      <dependency>-->
-<!--          <groupId>org.hbase</groupId>-->
-<!--          <artifactId>asynchbase</artifactId>-->
-<!--      </dependency>-->
-      <!--      LUR 缓存 -->
-<!--      <dependency>-->
-<!--          <groupId>com.google.guava</groupId>-->
-<!--          <artifactId>guava</artifactId>-->
-<!--      </dependency>-->
-      <!-- Test -->
-<!--      <dependency>-->
-<!--          <groupId>junit</groupId>-->
-<!--          <artifactId>junit</artifactId>-->
-<!--          <version>4.12</version>-->
-<!--          <scope>test</scope>-->
-<!--      </dependency>-->
-<!--      <dependency>-->
-<!--          <groupId>org.apache.flink</groupId>-->
-<!--          <artifactId>flink-test-utils_${scala.binary.version}</artifactId>-->
-<!--          <version>${flink.version}</version>-->
-<!--          <scope>compile</scope>-->
-<!--      </dependency>-->
-<!--      <dependency>-->
-<!--          <groupId>org.scalatest</groupId>-->
-<!--          <artifactId>scalatest_2.11</artifactId>-->
-<!--          <version>3.0.5</version>-->
-<!--          <scope>compile</scope>-->
-<!--      </dependency>-->
       <dependency>
           <artifactId>es-shade</artifactId>
           <groupId>com.flink.learn</groupId>
@@ -57,8 +28,7 @@
       </dependency>
       <dependency>
           <groupId>org.apache.hbase</groupId>
-          <artifactId>hbase-client</artifactId>
-          <scope>${scope.value}</scope>
+          <artifactId>hbase-shaded-client</artifactId>
       </dependency>
       <dependency>
           <groupId>com.alibaba</groupId>

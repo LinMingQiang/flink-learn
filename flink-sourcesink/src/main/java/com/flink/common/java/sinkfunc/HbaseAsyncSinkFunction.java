@@ -1,7 +1,6 @@
 package com.flink.common.java.sinkfunc;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -13,10 +12,8 @@ import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.types.Row;
-
 import java.util.HashMap;
 import java.util.Map;
-
 public class HbaseAsyncSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>>
         implements CheckpointedFunction {
     private int flushSize = 1000;
@@ -39,7 +36,6 @@ public class HbaseAsyncSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row
             bufferedElements.put(tp, value.f1);
             if (isTimeToFlush()) {
                 commitFlush();
-
             }
         }
     }

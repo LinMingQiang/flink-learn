@@ -11,12 +11,6 @@
 
     <artifactId>flink-demo</artifactId>
     <dependencies>
-
-        <dependency>
-            <groupId>com.flink.learn</groupId>
-            <artifactId>flink-util</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
@@ -70,14 +64,19 @@
         </dependency>
         <dependency>
             <groupId>com.flink.learn</groupId>
-            <artifactId>flink-testutil</artifactId>
+            <artifactId>flink-function</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.flink.learn</groupId>
-            <artifactId>flink-function</artifactId>
-            <version>${project.version}</version>
+            <artifactId>flink-util</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.flink.learn</groupId>
+            <artifactId>flink-testutil</artifactId>
+            <version>${parent.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <profiles>
