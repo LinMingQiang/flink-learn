@@ -39,7 +39,7 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     private TypeInformation<IN> inType = null;
     private Table t = null;
     private String tablename = null;
-    public OutputTag<IN> queryEmpt = null; // 没查到的
+    public OutputTag<IN> queryEmptOutput = null; // 没查到的
     private List<IN> queryEmptList = new ArrayList<>();
     /**
      * 初始化，初始化hbase等
@@ -65,19 +65,18 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
      * @param tablename
      * @param flushSize
      * @param inType
-     * @param queryEmpt
      */
     public HbaseQueryProcessFunction(
             AbstractHbaseQueryFunction qf,
             String tablename,
             int flushSize,
             TypeInformation<IN> inType,
-            OutputTag<IN> queryEmpt) {
+            OutputTag<IN> queryEmptOutput) {
         this.qf = qf;
         this.inType = inType;
         this.flushSize = flushSize;
         this.tablename = tablename;
-        this.queryEmpt = queryEmpt;
+        this.queryEmptOutput = queryEmptOutput;
     }
 
     @Override
@@ -85,14 +84,13 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
         checkpointedState.clear();
         if (!bufferedElements.isEmpty()) {
             checkpointedState.addAll(bufferedElements);
-                for (Tuple2<Result, IN> tmp : qf.queryHbase(t, bufferedElements)) {
-                    if (tmp.f0 == null || tmp.f0.isEmpty()) {
-                        queryEmptList.add(tmp.f1);
-                    } else {
-                        qf.transResult(tmp, queryResBuffer);
-                    }
+            for (Tuple2<Result, IN> tmp : qf.queryHbase(t, bufferedElements)) {
+                qf.transResult(tmp, queryResBuffer);
+                if (tmp.f0 == null || tmp.f0.isEmpty()) {
+                    queryEmptList.add(tmp.f1);
                 }
-                bufferedElements.clear();
+            }
+            bufferedElements.clear();
         }
     }
 
@@ -129,18 +127,19 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
             queryResBuffer.clear();
         }
         if(!queryEmptList.isEmpty()){
-            queryEmptList.forEach(x -> ctx.output(queryEmpt, x));
+            if(queryEmptOutput != null)
+                queryEmptList.forEach(x -> ctx.output(queryEmptOutput, x));
             queryEmptList.clear();
         }
         if (!qf.getRowkey(value).isEmpty()) {
             bufferedElements.add(value); // key不为空
         }
         if (bufferedElements.size() >= flushSize) {
+            // query hbase
             for (Tuple2<Result, IN> tmp : qf.queryHbase(t, bufferedElements)) {
-                if (tmp.f0 == null || tmp.f0.isEmpty()) {
-                    ctx.output(queryEmpt, tmp.f1);
-                } else {
-                    qf.transResult(tmp, queryResBuffer);
+                qf.transResult(tmp, queryResBuffer);
+                if ((tmp.f0 == null || tmp.f0.isEmpty()) &&  queryEmptOutput != null) {
+                    ctx.output(queryEmptOutput, tmp.f1);
                 }
             }
             bufferedElements.clear();
@@ -164,7 +163,8 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
             queryResBuffer.clear();
         }
         if(!queryEmptList.isEmpty()){
-            queryEmptList.forEach(x -> ctx.output(queryEmpt, x));
+            if(queryEmptOutput != null)
+                queryEmptList.forEach(x -> ctx.output(queryEmptOutput, x));
             queryEmptList.clear();
         }
     }

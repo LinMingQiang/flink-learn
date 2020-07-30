@@ -17,13 +17,9 @@ public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializabl
      * @param res
      * @return
      */
-    public void transResult(List<Tuple2<Result, IN>> res, List<OUT> result){
+    public void transResult(List<Tuple2<Result, IN>> res, List<OUT> result){};
 
-    };
-
-    public void transResult(Tuple2<Result, IN> res, List<OUT> result){
-
-    };
+    public abstract void transResult(Tuple2<Result, IN> res, List<OUT> result);
 
 
     /**
@@ -33,7 +29,6 @@ public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializabl
      * @throws IOException
      */
     public List<Tuple2<Result, IN>> queryHbase(Table t, List<IN> input) throws Exception {
-
         List ret = new ArrayList<Tuple2<Result, Tuple2<String, IN>>>();
         Result[] r = null;
         if (t == null) {
@@ -50,5 +45,6 @@ public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializabl
         }
         return ret;
     }
+
 
 }
