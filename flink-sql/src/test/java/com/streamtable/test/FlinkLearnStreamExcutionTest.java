@@ -10,6 +10,7 @@ import com.flink.learn.sql.common.DDLSourceSQLManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
@@ -196,9 +197,6 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 , "topic,offset,msg");
         OutputTag<KafkaTopicOffsetMsgPoJo> queryFailed = new OutputTag<KafkaTopicOffsetMsgPoJo>("queryFailed") {
         };
-        // 可以转stream之后再转换。pojo可以直接对应上Row
-        // .map((MapFunction<KafkaTopicOffsetMsgPoJo, Tuple2<String, KafkaTopicOffsetMsgPoJo>>) value -> new Tuple2<>(value.msg, (value)))
-        // .returns(new TupleTypeInfo(Types.STRING, TypeInformation.of(KafkaTopicOffsetMsgPoJo.class)));
         SingleOutputStreamOperator t = tableEnv
                 .toAppendStream(a, KafkaTopicOffsetMsgPoJo.class)
                 .keyBy((KeySelector<KafkaTopicOffsetMsgPoJo, String>) value -> value.msg)
@@ -208,10 +206,13 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                             public String getRowkey(KafkaTopicOffsetMsgPoJo input) {
                                 return input.msg;
                             }
-
                             @Override
                             public void transResult(Tuple2<Result, KafkaTopicOffsetMsgPoJo> res, List<WordCountPoJo> result) {
-                                result.add(new WordCountPoJo(res.f1.msg, 1L));
+                                if(res.f0 == null)
+                                result.add(new WordCountPoJo("joinfail", 1L));
+                                else {
+                                    result.add(new WordCountPoJo(res.f1.msg, 1L));
+                                }
                             }
                         },
                         null,
@@ -219,13 +220,15 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                         TypeInformation.of(KafkaTopicOffsetMsgPoJo.class),
                         queryFailed))
                 .returns(TypeInformation.of(WordCountPoJo.class)).uid("uid").name("name");
+
         t.getSideOutput(queryFailed)
                 .map(x -> "cant find : " + x.toString())
                 .print();
+
         tableEnv.createTemporaryView("wcstream", t);
         tableEnv.toRetractStream(
                 tableEnv.sqlQuery("select word,sum(num) num from wcstream group by word"),
-                Row.class)
+                TypeInformation.of(new TypeHint<Tuple2<String, Long>>(){})) // Row.class
                 .filter(x -> x.f0)
                 .print();
         tableEnv.execute("");
