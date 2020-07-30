@@ -29,7 +29,7 @@ public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializabl
      * @throws IOException
      */
     public List<Tuple2<Result, IN>> queryHbase(Table t, List<IN> input) throws Exception {
-        List ret = new ArrayList<Tuple2<Result, Tuple2<String, IN>>>();
+        List ret = new ArrayList<Tuple2<Result, IN>>();
         Result[] r = null;
         if (t == null) {
             r = new Result[input.size()];
