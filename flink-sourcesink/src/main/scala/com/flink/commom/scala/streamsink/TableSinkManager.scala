@@ -104,7 +104,7 @@ object TableSinkManager {
                                          tablename,
                                          "test",
                                          "latest")
-    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat(kafkaConnector)
+    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat()
     // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
     tEnv
       .connect(kafkaConnector)
