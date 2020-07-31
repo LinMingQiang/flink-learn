@@ -14,4 +14,10 @@ object SchemaManager {
     .field("topic", Types.STRING)
     .field("offset", Types.LONG)
     .field("msg", Types.STRING)
+
+  val PRINTLN_SCHEMA = new Schema()
+    .field("topic", Types.STRING)
+    .field("msg", Types.STRING)
+    .field("ll", Types.LONG)
+
 }

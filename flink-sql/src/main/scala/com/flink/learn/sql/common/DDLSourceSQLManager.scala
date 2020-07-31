@@ -105,6 +105,18 @@ def createCustomSinkTbl(printlnSinkTbl: String): String ={
      |)""".stripMargin
 }
 
+
+  def createCustomPrintlnRetractSinkTbl(printlnSinkTbl: String): String ={
+    s"""CREATE TABLE ${printlnSinkTbl} (
+       |topic VARCHAR,
+       |msg VARCHAR,
+       |ll BIGINT
+       |) WITH (
+       |'connector.type' = 'printsink_retract',
+       |'println.prefix'='>> : '
+       |)""".stripMargin
+  }
+
   def createCustomHbaseSinkTbl(hbasesinkTbl: String): String ={
     s"""CREATE TABLE ${hbasesinkTbl} (
        |topic VARCHAR,
