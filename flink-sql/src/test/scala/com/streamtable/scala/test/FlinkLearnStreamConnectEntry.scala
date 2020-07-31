@@ -18,7 +18,7 @@ class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
     // kafka source
     val kafkaConnector =
       TableSourceConnectorManager.kafkaConnector(BROKER, "test", "test", "latest")
-    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat(kafkaConnector)
+    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat()
     // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
     tableEnv
       .connect(kafkaConnector)
@@ -40,7 +40,7 @@ class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
     // kafka source
     val kafkaConnector =
       TableSourceConnectorManager.kafkaConnector(BROKER, "test2", "test", "latest")
-    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat(kafkaConnector)
+    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat()
     // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
     tableEnv
       .connect(kafkaConnector)
