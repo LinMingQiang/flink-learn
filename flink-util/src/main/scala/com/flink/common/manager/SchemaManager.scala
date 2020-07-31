@@ -20,4 +20,8 @@ object SchemaManager {
     .field("msg", Types.STRING)
     .field("ll", Types.LONG)
 
+
+  val WORD_COUNT_SCHEMA = new Schema()
+    .field("word", Types.STRING)
+    .field("num", Types.LONG)
 }
