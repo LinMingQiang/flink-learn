@@ -1,5 +1,6 @@
 package com.streamtable.test;
 
+import com.flink.common.java.connect.PrintlnConnect;
 import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
 import com.flink.common.java.pojo.WordCountPoJo;
 import com.flink.common.java.tablesink.HbaseRetractStreamTableSink;
@@ -209,11 +210,21 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 .print();
 
         tableEnv.createTemporaryView("wcstream", t);
+
+        // retract
         tableEnv.toRetractStream(
                 tableEnv.sqlQuery("select word,sum(num) num from wcstream group by word"),
                 TypeInformation.of(new TypeHint<Tuple2<String, Long>>(){})) // Row.class
-                .filter(x -> x.f0)
                 .print();
+        // upsert
+//        tableEnv.connect(new PrintlnConnect("printsink_upsert", 1, true))
+//                .inRetractMode()
+//                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
+//                .withSchema(SchemaManager.WORD_COUNT_SCHEMA())
+//                .createTemporaryTable("printsink_upsert");
+//        tableEnv.sqlUpdate("insert into printsink_upsert select word,sum(num) num from wcstream group by word");
+
+
         tableEnv.execute("");
     }
 }
