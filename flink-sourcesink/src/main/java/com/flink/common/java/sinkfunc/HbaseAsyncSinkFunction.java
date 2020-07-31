@@ -14,6 +14,7 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.types.Row;
 import java.util.HashMap;
 import java.util.Map;
+
 public class HbaseAsyncSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>>
         implements CheckpointedFunction {
     private int flushSize = 1000;
@@ -47,12 +48,12 @@ public class HbaseAsyncSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row
                 .getExecutionConfig()
                 .getGlobalJobParameters();
         FlinkLearnPropertiesUtil.init(p);
+        // init hbase conn
     }
 
     @Override
     public void snapshotState(FunctionSnapshotContext context) throws Exception {
         checkpointedState.clear();
-        System.out.println("snapshotState : " + bufferedElements.size());
         for (Map.Entry<String, Row> r : bufferedElements.entrySet()) {
             checkpointedState.add(r.getValue());
         }

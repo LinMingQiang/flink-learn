@@ -1,2 +1,3 @@
 com.flink.common.source.java.factory.PrintlnAppendStreamFactory
+com.flink.common.source.java.factory.PrintlnRetractStreamFactory
 com.flink.common.source.java.factory.HbaseRetractStreamFactory
