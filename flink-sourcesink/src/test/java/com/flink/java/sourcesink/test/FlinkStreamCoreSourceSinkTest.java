@@ -36,6 +36,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
 
     /**
      * 功能同上
+     *
      * @throws Exception
      */
     @Test
@@ -45,7 +46,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
                 , "topic,offset,msg").renameColumns("offset as ll"); // offset是关键字
         tableEnv.createTemporaryView("test", a);
 
-
+// append
 //        tableEnv
 //                .connect(new PrintlnConnect().property("println.prefix", "connect sink : "))
 //                .inAppendMode()
@@ -54,18 +55,27 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
 //                .createTemporaryTable("printlnSinkTbl");
 //        tableEnv.insertInto("printlnSinkTbl", a.select("topic,msg,ll"));
 
+        // retract
+//        tableEnv
+//                .connect(new PrintlnConnect("printsink_retract", 1, true))
+//                .inRetractMode()
+//                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
+//                .withSchema(SchemaManager.PRINTLN_SCHEMA())
+//                .createTemporaryTable("printlnSinkTbl");
+//
+//        tableEnv.insertInto("printlnSinkTbl",
+//                tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
 
+// upsert
         tableEnv
-                .connect(new PrintlnConnect("printsink_retract", 1, true))
+                .connect(new PrintlnConnect("printsink_upsert", 1, true))
                 .inRetractMode()
                 .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
                 .withSchema(SchemaManager.PRINTLN_SCHEMA())
-                .createTemporaryTable("printlnSinkTbl");
+                .createTemporaryTable("printsink_upsert");
 
-        tableEnv.insertInto("printlnSinkTbl",
+        tableEnv.insertInto("printsink_upsert",
                 tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
-
-
         tableEnv.execute("");
 
     }
