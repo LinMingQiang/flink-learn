@@ -41,7 +41,15 @@
         <hbase.version>1.3.2</hbase.version>
     </properties>
     <dependencyManagement>
+
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-hbase -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-hbase_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
             <!--   解决guava包冲突问题     -->
             <dependency>
                 <groupId>org.apache.hbase</groupId>
