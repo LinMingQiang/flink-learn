@@ -16,6 +16,7 @@ import com.flink.learn.test.common.FlinkStreamCommonSuit
 import com.flink.learn.time.MyTimestampsAndWatermarks2
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, TumblingProcessingTimeWindows}
 import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor
@@ -23,6 +24,7 @@ import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger
 
 class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
+
   case class UserDefinedKey(name: String, age: Int)
 
   test("wordCount") {
@@ -37,8 +39,8 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    * 测试不进行checkpoint的情况下的state，针对大state，选择不chk
-    */
+   * 测试不进行checkpoint的情况下的state，针对大state，选择不chk
+   */
   test("stateWithnoChk") {
     env.addSource(kafkaSource(TEST_TOPIC, BROKER))
       .flatMap(_.msg.split("\\|", -1))
@@ -50,13 +52,13 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    * session; 注意： 只有下一条数据来了，才会打印上一个窗口的结果。
-    * 因为下一条数据的时间会更新wartermark，
-    * 当wartermark更新后，才能确定某个窗口的数据永远不再更新了才会打印出来，否则一直等。
-    * window 有两种 Windowfunction ：
-    * AggregateFunction(一条一条聚合)
-    * ProcessindowFunction 触发的时候一次性聚合， Iterator给你数据
-    */
+   * session; 注意： 只有下一条数据来了，才会打印上一个窗口的结果。
+   * 因为下一条数据的时间会更新wartermark，
+   * 当wartermark更新后，才能确定某个窗口的数据永远不再更新了才会打印出来，否则一直等。
+   * window 有两种 Windowfunction ：
+   * AggregateFunction(一条一条聚合)
+   * ProcessindowFunction 触发的时候一次性聚合， Iterator给你数据
+   */
   test("sessionWindowWatermark") {
     env.setParallelism(1)
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime) // 时间设为eventime
@@ -67,7 +69,10 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
       .map(x => {
         SessionLogInfo(x.msg, new Date().getTime)
       })
-      .assignTimestampsAndWatermarks(new MyTimestampsAndWatermarks2(0))
+      .assignTimestampsAndWatermarks( // new MyTimestampsAndWatermarks2(10)
+        new BoundedOutOfOrdernessTimestampExtractor[SessionLogInfo](Time.seconds(10)) {
+        override def extractTimestamp(element: SessionLogInfo): Long = element.timeStamp
+      }) // 0的话表示不延迟
       .keyBy(x => x.sessionId)
       .window(EventTimeSessionWindows.withGap(Time.seconds(6)))
       .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
@@ -77,8 +82,8 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    * 翻转窗口
-    */
+   * 翻转窗口
+   */
   test("tumblingWindows") {
     env
       .addSource(kafkaSource(TEST_TOPIC, BROKER))
@@ -97,9 +102,10 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    * operate状态恢复
-    * @param env
-    */
+   * operate状态恢复
+   *
+   * @param env
+   */
   def StateRecoverySink(env: StreamExecutionEnvironment): Unit = {
     val result = env
       .addSource(kafkaSource(TEST_TOPIC, BROKER))
@@ -125,9 +131,10 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    * operate
-    * @param env
-    */
+   * operate
+   *
+   * @param env
+   */
   def operateState(env: StreamExecutionEnvironment): Unit = {
     env
       .addSource(kafkaSource(TEST_TOPIC, BROKER))
@@ -140,9 +147,10 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    * process func
-    * @param env
-    */
+   * process func
+   *
+   * @param env
+   */
   def processFunc(env: StreamExecutionEnvironment): Unit = {
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
@@ -181,7 +189,9 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   def userDefinedKey(env: StreamExecutionEnvironment): Unit = {
     env
       .fromElements("a", "b", "a", "a", "a")
-      .map(x => { (UserDefinedKey(x, x.hashCode), 1) })
+      .map(x => {
+        (UserDefinedKey(x, x.hashCode), 1)
+      })
       .keyBy(_._1)
       .sum(1)
       .print()
@@ -190,10 +200,10 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    *
-    * @param env
-    * @return
-    */
+   *
+   * @param env
+   * @return
+   */
   def getImpressDStream(env: StreamExecutionEnvironment) = {
 
     val kafkasource2 = KafkaManager.getKafkaSource[KafkaMessge](
@@ -211,10 +221,10 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    *
-    * @param env
-    * @return
-    */
+   *
+   * @param env
+   * @return
+   */
   def getClickDStream(env: StreamExecutionEnvironment) = {
     val kafkasource = KafkaManager.getKafkaSource[KafkaMessge](
       TEST_TOPIC,

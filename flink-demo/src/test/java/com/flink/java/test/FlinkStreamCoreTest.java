@@ -24,9 +24,9 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testOutputTag() throws Exception {
-        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> s1 = streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"));
-        OutputTag<WordCountPoJo> rejectedWordsTag = new OutputTag<WordCountPoJo>("rejected"){};
-
+        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> s1 =
+                        getKafkaDataStream("test", "localhost:9092", "latest");
+        OutputTag<WordCountPoJo> rejectedWordsTag = new OutputTag<WordCountPoJo>("rejected") {};
         SingleOutputStreamOperator<WordCountPoJo> sourceStream = s1.keyBy(x -> x.msg())
                 .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetMsg, WordCountPoJo>() {
                     @Override
@@ -58,14 +58,15 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testAsyncIo() throws Exception {
-        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> stream = streamEnv
-                .addSource(getKafkaSource("test", "localhost:9092", "latest"));
+        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> stream = getKafkaDataStream(
+                "test", "localhost:9092", "latest");
         AsyncDataStream.unorderedWait(
                 stream,
                 new AsyncIODatabaseRequest(), 4, TimeUnit.SECONDS, 3) // 100异步最大个数，超过100个请求将构成反压。
                 .print();
         streamEnv.execute("lmq-flink-demo"); //程序名
     }
+
     /**
      * 可用于双流join。假设 Test2为维表（永久保存状态）
      *
@@ -74,16 +75,17 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testConnectStream() throws Exception {
         // 10s过期
-        OutputTag<String> rejectedWordsTag = new OutputTag<String>("rejected"){};
+        OutputTag<String> rejectedWordsTag = new OutputTag<String>("rejected") {
+        };
         SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> sourceStream = streamEnv.addSource(
                 getKafkaSourceWithTS("test", "localhost:9092", "latest"))
-                        .assignTimestampsAndWatermarks(
+                .assignTimestampsAndWatermarks(
                         new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                    @Override
-                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                        return element.ts();
-                    }
-                });
+                            @Override
+                            public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
+                                return element.ts();
+                            }
+                        });
         DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> s2 = streamEnv.addSource(getKafkaSourceWithTS("test2", "localhost:9092", "latest"));
         SingleOutputStreamOperator resultStream = sourceStream.connect(s2)
                 .keyBy(KafkaManager.KafkaTopicOffsetTimeMsg::msg, KafkaManager.KafkaTopicOffsetTimeMsg::msg)
@@ -96,5 +98,4 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
         streamEnv.execute("");
         // .map(CoMapFunction<> value -> null);
     }
-
 }
