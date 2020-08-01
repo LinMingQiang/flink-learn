@@ -41,10 +41,9 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testTableToStream() throws Exception {
-        Table a = tableEnv.fromDataStream(
-                streamEnv.addSource(
-                        getKafkaSource("test", "localhost:9092", "latest"))
-                , "topic,offset,msg");
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg");
         a.printSchema();
         tableEnv.createTemporaryView("test", a);
         // 具有group by 需要用到state 用 toRetractStream
@@ -88,9 +87,9 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void testStreamTableSink() throws Exception {
-        Table a = tableEnv.fromDataStream(
-                streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
-                , "topic,offset,msg").renameColumns("offset as ll");
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg").renameColumns("offset as ll");
         // sink1 : 转 stream后sink
         // tableEnv.toAppendStream(a, Row.class).print();
 
@@ -136,9 +135,9 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testcustomHbasesink() throws Exception {
-        Table a = tableEnv.fromDataStream(
-                streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
-                , "topic,offset,msg");
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg");
         tableEnv.createTemporaryView("test", a);
 
 
@@ -176,9 +175,9 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testHbaseJoin() throws Exception {
-        Table a = tableEnv.fromDataStream(
-                streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
-                , "topic,offset,msg");
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg");
         OutputTag<KafkaTopicOffsetMsgPoJo> queryFailed = new OutputTag<KafkaTopicOffsetMsgPoJo>("queryFailed") {
         };
         SingleOutputStreamOperator t = tableEnv

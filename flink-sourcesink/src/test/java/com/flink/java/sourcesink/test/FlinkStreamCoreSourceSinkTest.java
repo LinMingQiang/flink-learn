@@ -27,9 +27,11 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
      */
     @Test
     public void testcustomSinkFactory() throws Exception {
-        Table a = tableEnv.fromDataStream(
-                streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
-                , "topic,offset,msg").renameColumns("offset as ll"); // offset是关键字
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg")
+                .renameColumns("offset as ll"); // offset是关键字
+
         tableEnv.createTemporaryView("test", a);
 
 
@@ -49,9 +51,10 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
      */
     @Test
     public void testPrintlneConnect() throws Exception {
-        Table a = tableEnv.fromDataStream(
-                streamEnv.addSource(getKafkaSource("test", "localhost:9092", "latest"))
-                , "topic,offset,msg").renameColumns("offset as ll"); // offset是关键字
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg")
+                .renameColumns("offset as ll"); // offset是关键字
         tableEnv.createTemporaryView("test", a);
 
 // append
@@ -102,7 +105,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
                         ","));
 
         // 方法1
-         tableEnv.sqlUpdate(DDLSourceSQLManager.createHbaseLookupSourceTbl("hbaselookup"));
+        tableEnv.sqlUpdate(DDLSourceSQLManager.createHbaseLookupSourceTbl("hbaselookup"));
         tableEnv.toAppendStream(
                 tableEnv.sqlQuery("select * from test as t left join" +
                         " hbaselookup FOR SYSTEM_TIME AS OF t.proctime AS hb" +
