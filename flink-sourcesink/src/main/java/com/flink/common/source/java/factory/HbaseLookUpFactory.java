@@ -1,19 +1,21 @@
 package com.flink.common.source.java.factory;
 
-import com.flink.common.java.tablesink.HbaseRetractStreamTableSink;
-import org.apache.flink.api.java.tuple.Tuple2;
+import com.flink.common.java.sourcefunc.HbaseAsyncLookupFunction;
+import com.flink.common.java.sourcefunc.HbaseLookupFunction;
+import com.flink.common.java.tablesource.HbaseAyscLookupTableSource;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.descriptors.DescriptorProperties;
-import org.apache.flink.table.factories.StreamTableSinkFactory;
-import org.apache.flink.table.sinks.StreamTableSink;
-import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.factories.StreamTableSourceFactory;
+import org.apache.flink.table.sources.StreamTableSource;
+import org.apache.flink.table.utils.TableSchemaUtils;
 import org.apache.flink.types.Row;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static org.apache.flink.table.descriptors.ConnectorDescriptorValidator.CONNECTOR_PROPERTY_VERSION;
 import static org.apache.flink.table.descriptors.ConnectorDescriptorValidator.CONNECTOR_TYPE;
 import static org.apache.flink.table.descriptors.FormatDescriptorValidator.FORMAT;
 import static org.apache.flink.table.descriptors.KafkaValidator.*;
@@ -22,35 +24,29 @@ import static org.apache.flink.table.descriptors.Schema.*;
 import static org.apache.flink.table.descriptors.Schema.SCHEMA_NAME;
 import static org.apache.flink.table.descriptors.StreamTableDescriptorValidator.UPDATE_MODE;
 
-public class HbaseRetractStreamFactory implements StreamTableSinkFactory<Tuple2<Boolean, Row>> {
+public class HbaseLookUpFactory implements StreamTableSourceFactory<Row> {
     @Override
-    public StreamTableSink<Tuple2<Boolean, Row>> createStreamTableSink(Map<String, String> properties) {
+    public StreamTableSource<Row> createStreamTableSource(Map<String, String> properties) {
         DescriptorProperties descriptorProperties = new DescriptorProperties(true);
         descriptorProperties.putProperties(properties);
-        TableSchema tableSchema = descriptorProperties.getTableSchema(SCHEMA);
-// bridge to java.sql.Timestamp/Time/Date
-        DataType[] fieldTypes = Arrays.stream(tableSchema.getFieldDataTypes())
-                .map(dt -> {
-                    switch (dt.getLogicalType().getTypeRoot()) {
-                        case TIMESTAMP_WITHOUT_TIME_ZONE:
-                            return dt.bridgedTo(Timestamp.class);
-                        case TIME_WITHOUT_TIME_ZONE:
-                            return dt.bridgedTo(Time.class);
-                        case DATE:
-                            return dt.bridgedTo(Date.class);
-                        default:
-                            return dt;
-                    }
-                })
-                .toArray(DataType[]::new);
-        return new HbaseRetractStreamTableSink(tableSchema.getFieldNames(), fieldTypes);
+        TableSchema schema = TableSchemaUtils.getPhysicalSchema(
+                descriptorProperties.getTableSchema(SCHEMA));
+
+        return new HbaseAyscLookupTableSource(schema,
+                HbaseLookupFunction.builder()
+                        .setFieldNames(schema.getFieldNames())
+                        .setFieldTypes(schema.getFieldTypes())
+                        .build(),
+                null);
     }
 
     @Override
     public Map<String, String> requiredContext() {
         HashMap<String, String> context = new HashMap<String, String>();
-        context.put(CONNECTOR_TYPE, "hbasesink");
-        return context;    }
+        context.put(CONNECTOR_TYPE, "hbaselookup");
+        context.put(CONNECTOR_PROPERTY_VERSION, "1"); // backwards compatibility
+        return context;
+    }
 
     @Override
     public List<String> supportedProperties() {
