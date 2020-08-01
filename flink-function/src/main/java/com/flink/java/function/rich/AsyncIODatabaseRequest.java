@@ -1,4 +1,4 @@
-package com.flink.learn.richf;
+package com.flink.java.function.rich;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
 import com.flink.common.dbutil.FlinkHbaseFactory;
@@ -84,7 +84,7 @@ public class AsyncIODatabaseRequest extends RichAsyncFunction<KafkaTopicOffsetMs
             @Override
             public KafkaTopicOffsetMsg get() {
                 if (input.msg().equals("1")) {
-                    FlinkHbaseFactory.get(conn, "test", input.msg());
+                    // FlinkHbaseFactory.get(conn, "test", input.msg());
                     return new KafkaTopicOffsetMsg(input.topic(), input.offset(), "hello");
                 } else {
                     return input;

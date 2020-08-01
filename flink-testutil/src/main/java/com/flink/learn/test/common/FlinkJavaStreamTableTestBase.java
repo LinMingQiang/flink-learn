@@ -10,6 +10,7 @@ import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
+import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.test.util.AbstractTestBase;
 import org.junit.After;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 
 public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Serializable {
     public static StreamTableEnvironment tableEnv = null;
+    public static TableEnvironment tableE = null;
     public static StreamExecutionEnvironment streamEnv = null;
     public static ExecutionEnvironment bEnv = null;
 
@@ -35,6 +37,8 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
         tableEnv = FlinkEvnBuilder.buildStreamTableEnv(streamEnv,
                 Time.minutes(1),
                 Time.minutes(6));
+
+        tableE = FlinkEvnBuilder.buildTableEnv();
     }
 
     @After
