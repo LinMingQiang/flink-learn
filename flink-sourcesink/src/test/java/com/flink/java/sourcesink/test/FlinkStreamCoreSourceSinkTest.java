@@ -1,12 +1,20 @@
 package com.flink.java.sourcesink.test;
 
 import com.flink.common.java.connect.PrintlnConnect;
+import com.flink.common.java.sourcefunc.HbaseLookupFunction;
+import com.flink.common.java.tablesource.HbaseAyscLookupTableSource;
 import com.flink.common.manager.SchemaManager;
 import com.flink.learn.sql.common.DDLSourceSQLManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
+import org.apache.flink.addons.hbase.HBaseTableSource;
+import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.descriptors.Json;
+import org.apache.flink.table.factories.StreamTableSourceFactory;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.types.Row;
 import org.junit.Test;
 
 public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase {
@@ -67,21 +75,50 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
 //                tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
 
 // upsert
-        tableEnv
-                .connect(new PrintlnConnect("printsink_upsert", 1, true))
-                .inRetractMode()
-                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
-                .withSchema(SchemaManager.PRINTLN_SCHEMA())
-                .createTemporaryTable("printsink_upsert");
-
-        tableEnv.insertInto("printsink_upsert",
-                tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
+//        tableEnv
+//                .connect(new PrintlnConnect("printsink_upsert", 1, true))
+//                .inRetractMode()
+//                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
+//                .withSchema(SchemaManager.PRINTLN_SCHEMA())
+//                .createTemporaryTable("printsink_upsert");
+//
+//        tableEnv.insertInto("printsink_upsert",
+//                tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
+//
         tableEnv.execute("");
-
     }
 
+    /**
+     * hbase
+     */
     @Test
-    public void testHbaseConnect() {
+    public void testLookupTableSource() throws Exception {
+        // {"id":"id2","name":"name","age":1}
+        tableEnv.sqlUpdate(
+                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
+                        "localhost:2181",
+                        "test",
+                        "test",
+                        ","));
 
+        // 方法1
+         tableEnv.sqlUpdate(DDLSourceSQLManager.createHbaseLookupSourceTbl("hbaselookup"));
+        tableEnv.toAppendStream(
+                tableEnv.sqlQuery("select * from test as t left join" +
+                        " hbaselookup FOR SYSTEM_TIME AS OF t.proctime AS hb" +
+                        " on hb.id = t.id and t.name = hb.name"), Row.class)
+                .print();
+// 方法2
+//        tableEnv.registerFunction("hbaselookup", HbaseLookupFunction.builder()
+//                        .setFieldNames(schema.getFieldNames())
+//                        .setFieldTypes(schema.getFieldTypes())
+//                        .build());
+//
+//        tableEnv.toAppendStream(
+//                tableEnv.sqlQuery("select * from test, LATERAL TABLE (hbaselookup(id, name))"), Row.class)
+//                .print();
+
+        tableEnv.execute("");
     }
+
 }

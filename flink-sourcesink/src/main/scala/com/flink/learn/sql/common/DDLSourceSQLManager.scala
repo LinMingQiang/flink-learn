@@ -68,6 +68,30 @@ object DDLSourceSQLManager {
        |    'format.derive-schema' = 'true'
        |)""".stripMargin
   }
+
+  def createStreamFromKafkaProcessTime(broker: String,
+                            zk: String,
+                            topic: String,
+                            tableName: String,
+                            groupID: String): String = {
+    s"""CREATE TABLE $tableName (
+       |    id VARCHAR,
+       |    name VARCHAR,
+       |    age INT,
+       |    proctime as PROCTIME()
+       |) WITH (
+       |    'connector.type' = 'kafka',
+       |    'connector.version' = '0.10',
+       |    'connector.topic' = '$topic',
+       |    'connector.startup-mode' = 'latest-offset',
+       |    'connector.properties.zookeeper.connect' = '$zk',
+       |    'connector.properties.bootstrap.servers' = '$broker',
+       |    'connector.properties.group.id' = '$groupID',
+       |    'update-mode' = 'append',
+       |    'format.type' = 'json',
+       |    'format.derive-schema' = 'true'
+       |)""".stripMargin
+  }
   /**
     * 窗口
     */
@@ -114,6 +138,17 @@ def createCustomSinkTbl(printlnSinkTbl: String): String ={
        |'println.prefix'='>> : '
        |)""".stripMargin
   }
+
+  def createHbaseLookupSourceTbl(tbl: String): String ={
+    s"""CREATE TABLE ${tbl} (
+       |id VARCHAR,
+       |age BIGINT,
+       |name VARCHAR
+       |) WITH (
+       |'connector.type' = 'hbaselookup'
+       |)""".stripMargin
+  }
+
   def createCustomHbaseSinkTbl(hbasesinkTbl: String): String ={
     s"""CREATE TABLE ${hbasesinkTbl} (
        |topic VARCHAR,

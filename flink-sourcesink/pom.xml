@@ -35,6 +35,10 @@
 <!--      <version>3.0.5</version>-->
 <!--    </dependency>-->
     <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-hbase_${scala.binary.version}</artifactId>
+    </dependency>
+    <dependency>
       <artifactId>es-shade</artifactId>
       <groupId>com.flink.learn</groupId>
       <version>${project.version}</version>

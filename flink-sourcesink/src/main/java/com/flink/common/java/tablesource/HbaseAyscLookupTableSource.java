@@ -1,6 +1,7 @@
 package com.flink.common.java.tablesource;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
@@ -12,18 +13,19 @@ import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 
-public class HbaseAyscLookupTableSource implements LookupableTableSource<Row>, StreamTableSource<Row> {
+/**
+ * 维表
+ */
+public class HbaseAyscLookupTableSource implements StreamTableSource<Row>, LookupableTableSource<Row> {
 
-    public String[] fieldNames = null;
-    public DataType[] fieldTypes = null;
+    public TableSchema schema;
     public TableFunction<Row> func = null;
     public AsyncTableFunction<Row> asyncFunc = null;
-    public HbaseAyscLookupTableSource(String[] fieldNames,
-                                      DataType[] fieldTypes,
+
+    public HbaseAyscLookupTableSource(TableSchema schema,
                                       TableFunction<Row> func,
                                       AsyncTableFunction<Row> asyncFunc) {
-        this.fieldNames = fieldNames;
-        this.fieldTypes = fieldTypes;
+        this.schema=schema;
         this.func = func;
         this.asyncFunc = asyncFunc;
     }
@@ -43,36 +45,19 @@ public class HbaseAyscLookupTableSource implements LookupableTableSource<Row>, S
         return asyncFunc != null;
     }
 
-    @Override
-    public boolean isBounded() {
-        return false;
-    }
-
-    @Override
-    public DataStream<Row> getDataStream(StreamExecutionEnvironment streamExecutionEnvironment) {
-        return null;
-    }
-
-    @Override
-    public DataType getProducedDataType() {
-        DataTypes.Field[] a = new DataTypes.Field[fieldNames.length + 1];
-        for (int i = 0; i < fieldNames.length; i++) {
-            a[i] = (DataTypes.FIELD(fieldNames[i], fieldTypes[i]));
-        }
-        return DataTypes.ROW(a);
-    }
+//    @Override
+//    public boolean isBounded() {
+//        return false;
+//    }
 
     @Override
     public TypeInformation<Row> getReturnType() {
-        return null;
+        return new RowTypeInfo(getTableSchema().getFieldTypes(),getTableSchema().getFieldNames());
     }
 
     @Override
     public TableSchema getTableSchema() {
-        return TableSchema
-                .builder()
-                .fields(fieldNames, fieldTypes)
-                .build();
+        return schema;
     }
 
     @Override
@@ -80,13 +65,23 @@ public class HbaseAyscLookupTableSource implements LookupableTableSource<Row>, S
         return null;
     }
 
+    /***
+     * @param execEnv
+     * @return
+     */
+    @Override
+    public DataStream<Row> getDataStream(StreamExecutionEnvironment execEnv) {
+        throw new UnsupportedOperationException("do not support getDataStream");
+    }
+
 
     public static final class Builder {
         private String[] fieldNames;
-        private String[] connectionField;
         private TypeInformation[] fieldTypes;
 
-        private Builder() {
+        private static Builder Builder() {
+
+            return new Builder();
         }
 
         public static Builder newBuilder() {
@@ -103,10 +98,6 @@ public class HbaseAyscLookupTableSource implements LookupableTableSource<Row>, S
             return this;
         }
 
-        public Builder withConnectionField(String[] connectionField) {
-            this.connectionField = connectionField;
-            return this;
-        }
 
 //        public HbaseAyscLookupTableSource build() {
 //            return new HbaseAyscLookupTableSource(fieldNames,connectionField, fieldTypes);
