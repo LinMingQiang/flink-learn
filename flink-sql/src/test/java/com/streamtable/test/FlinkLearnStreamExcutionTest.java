@@ -149,7 +149,7 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
 //                        return new Tuple2<>(value.topic, Row.of(value.toString()));
 //                    }
 //                });
-       // tableEnv.createTemporaryView("test", ds);
+        // tableEnv.createTemporaryView("test", ds);
         // 方法1
         tableEnv.registerTableSink("hbasesink",
                 new HbaseRetractStreamTableSink(new String[]{"topic", "c"},
@@ -158,7 +158,6 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
 
         // 方法2
 //        tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomHbaseSinkTbl("hbasesink"));
-
 
 
         tableEnv.sqlQuery("select topic,count(1) as c from test  group by topic")
@@ -189,10 +188,11 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                             public String getRowkey(KafkaTopicOffsetMsgPoJo input) {
                                 return input.msg;
                             }
+
                             @Override
                             public void transResult(Tuple2<Result, KafkaTopicOffsetMsgPoJo> res, List<WordCountPoJo> result) {
-                                if(res.f0 == null)
-                                result.add(new WordCountPoJo("joinfail", 1L));
+                                if (res.f0 == null)
+                                    result.add(new WordCountPoJo("joinfail", 1L));
                                 else {
                                     result.add(new WordCountPoJo(res.f1.msg, 1L));
                                 }
@@ -213,7 +213,8 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
         // retract
         tableEnv.toRetractStream(
                 tableEnv.sqlQuery("select word,sum(num) num from wcstream group by word"),
-                TypeInformation.of(new TypeHint<Tuple2<String, Long>>(){})) // Row.class
+                TypeInformation.of(new TypeHint<Tuple2<String, Long>>() {
+                })) // Row.class
                 .print();
         // upsert
 //        tableEnv.connect(new PrintlnConnect("printsink_upsert", 1, true))
@@ -225,5 +226,34 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
 
 
         tableEnv.execute("");
+    }
+
+
+    /**
+     * 时间的几种定义
+     * 1: pt.proctime ： 默认就有 proctime属性，pt为它的命名
+     * 2: user_action_time AS PROCTIME()
+     */
+    @Test
+    public void testTimeAttributes() throws Exception {
+        // 方法1
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg,pt.proctime")
+                .renameColumns("offset as ll"); // offset是关键字
+        tableEnv.createTemporaryView("test", a);
+        tableEnv.toAppendStream(a, Row.class).print();
+
+
+        // 方法2
+        tableEnv.sqlUpdate(DDLSourceSQLManager.createStreamFromKafkaProcessTime(
+                "localhost:9092",
+                "localhost:2181",
+                "test", "test2", "test2"));
+        tableEnv.toAppendStream(tableEnv.from("test2"), Row.class).print();
+
+
+        tableEnv.execute("");
+
     }
 }
