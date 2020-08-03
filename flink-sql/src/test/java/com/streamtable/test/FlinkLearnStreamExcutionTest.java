@@ -4,6 +4,7 @@ import com.flink.common.java.connect.PrintlnConnect;
 import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
 import com.flink.common.java.pojo.WordCountPoJo;
 import com.flink.common.java.tablesink.HbaseRetractStreamTableSink;
+import com.flink.common.kafka.KafkaManager;
 import com.flink.common.manager.SchemaManager;
 import com.flink.common.manager.TableSourceConnectorManager;
 import com.flink.java.function.common.util.AbstractHbaseQueryFunction;
@@ -20,6 +21,8 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.descriptors.Json;
@@ -236,20 +239,45 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testTimeAttributes() throws Exception {
-        // 方法1
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg,pt.proctime")
-                .renameColumns("offset as ll"); // offset是关键字
-        tableEnv.createTemporaryView("test", a);
-        tableEnv.toAppendStream(a, Row.class).print();
+        // {"id":"id2","name":"name","age":1}
+        // 方法1 ： Processtime
+//        Table a = getStreamTable(
+//                getKafkaDataStream("test", "localhost:9092", "latest"),
+//                "topic,offset,msg,pt.proctime")
+//                .renameColumns("offset as ll"); // offset是关键字
+//        tableEnv.createTemporaryView("test", a);
+//        tableEnv.toAppendStream(a, Row.class).print();
+//
+//
+//        // 方法2 ： Processtime
+//        tableEnv.sqlUpdate(DDLSourceSQLManager.createStreamFromKafkaProcessTime(
+//                "localhost:9092",
+//                "localhost:2181",
+//                "test", "test2", "test2"));
+//        tableEnv.toAppendStream(tableEnv.from("test2"), Row.class).print();
 
 
-        // 方法2
-        tableEnv.sqlUpdate(DDLSourceSQLManager.createStreamFromKafkaProcessTime(
+        // {"id":"id2","name":"name","age":1,"etime":1596423467685}
+// eventtime
+//        Table a = getStreamTable(
+//                getKafkaDataStreamWithEventTime("test", "localhost:9092", "latest")
+//                        .assignTimestampsAndWatermarks(
+//                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetMsgEventtime>(Time.seconds(10)) {
+//                                    @Override
+//                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetMsgEventtime element) {
+//                                        return element.etime();
+//                                    }
+//                                }),
+//                "topic,offset,msg,etime.rowtime");// offset是关键字
+//        tableEnv.createTemporaryView("test", a);
+//        tableEnv.toAppendStream(a, Row.class).print();
+
+        // eventtime
+        tableEnv.sqlUpdate(DDLSourceSQLManager.createStreamFromKafkaEventTime(
                 "localhost:9092",
                 "localhost:2181",
                 "test", "test2", "test2"));
+
         tableEnv.toAppendStream(tableEnv.from("test2"), Row.class).print();
 
 
