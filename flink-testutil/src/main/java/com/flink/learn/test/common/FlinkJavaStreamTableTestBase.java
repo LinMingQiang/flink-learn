@@ -2,6 +2,7 @@ package com.flink.learn.test.common;
 
 import com.flink.common.core.EnvironmentalKey;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
+import com.flink.common.deserialize.TopicOffsetEventTimeMsgDeserialize;
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize;
 import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.flink.common.java.core.FlinkEvnBuilder;
@@ -9,6 +10,7 @@ import com.flink.common.kafka.KafkaManager;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
 import org.apache.flink.table.api.Table;
@@ -66,6 +68,22 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
         return kafkasource;
     }
 
+    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsgEventtime> getKafkaSourceWithEventtime(
+            String topic,
+            String broker,
+            String reset) {
+        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsgEventtime> kafkasource = KafkaManager.getKafkaSource(
+                topic,
+                broker,
+                new TopicOffsetEventTimeMsgDeserialize());
+        kafkasource.setCommitOffsetsOnCheckpoints(true);
+        if (reset == "earliest") {
+            kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
+        } else if (reset == "latest") {
+            kafkasource.setStartFromLatest();
+        }
+        return kafkasource;
+    }
 
     public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithTS(
             String topic,
@@ -89,9 +107,20 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
         return tableEnv.fromDataStream(source, fields);
     }
 
+    public static Table getStreamTable(SingleOutputStreamOperator source, String fields) {
+        return tableEnv.fromDataStream(source, fields);
+    }
+
     public static DataStreamSource getKafkaDataStream(String topic,
                                                       String broker,
                                                       String reset) {
         return streamEnv.addSource(getKafkaSource(topic, broker, reset));
+    }
+
+
+    public static DataStreamSource getKafkaDataStreamWithEventTime(String topic,
+                                                      String broker,
+                                                      String reset) {
+        return streamEnv.addSource(getKafkaSourceWithEventtime(topic, broker, reset));
     }
 }
