@@ -1,8 +1,14 @@
 package com.flink.common.yarn.api;
 
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 
 public class YarnClientHandler {
@@ -24,6 +30,25 @@ public class YarnClientHandler {
         yarnClient.start();
         yarnClient.init(conf);
     }
+
+    /**
+     *  获取application的信息
+     * @param states
+     * @return
+     * @throws IOException
+     * @throws YarnException
+     */
+    public List<ApplicationReport> getApplications(String states) throws IOException, YarnException {
+        if(states == null || states.isEmpty()) {
+            return yarnClient.getApplications();
+        } else {
+            switch (states.toUpperCase()){
+                case "RUNNING" : return yarnClient.getApplications(EnumSet.of(YarnApplicationState.RUNNING));
+                default :   return yarnClient.getApplications();
+            }
+        }
+    }
+
 
     private static class YarnClientHandlerInstans{
         private static YarnClientHandler INSTANCE = null;
