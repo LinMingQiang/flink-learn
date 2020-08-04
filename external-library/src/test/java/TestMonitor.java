@@ -1,7 +1,50 @@
+import com.flink.common.rest.httputil.OkHttp3Client;
 import com.flink.common.yarn.api.YarnClientHandler;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 
+import java.io.IOException;
+import java.util.List;
+import org.junit.*;
 public class TestMonitor {
-    public static void main(String[] args) {
+
+
+
+
+    @Test
+    public void testHttp() throws IOException {
+        System.out.println(OkHttp3Client.get("http://www.baidu.com"));
+
+//        OkHttp3Client.asynGet("http://www.baidu.com"
+//        , new Callback(){
+//
+//                    @Override
+//                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+//                        String data = response.body().string();
+//                        try {
+//                            Thread.sleep(1000L);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                        System.out.println(data);
+//                    }
+//
+//                    @Override
+//                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//
+//                    }
+//                });
+//        System.out.println(">>>>>>>>");
+    }
+
+
+    @Test
+    public void testYarnMonitor() throws IOException, YarnException {
         YarnClientHandler yarnclient = YarnClientHandler.getInstance(null);
+
+        List<ApplicationReport> r = yarnclient.getApplications("RUNNING");
+        r.forEach(x -> {
+            x.getApplicationId().toString();
+        });
     }
 }
