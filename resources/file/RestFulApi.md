@@ -5,6 +5,10 @@ http://10-21-129-141-jhdxyjd.mob.local:10880/proxy/application_1594985361863_011
 http://10-21-129-141-jhdxyjd.mob.local:10880/proxy/application_1594985361863_0110/taskmanagers
 http://10-21-129-141-jhdxyjd.mob.local:10880/proxy/application_1594985361863_0110/jobs/27ab25d708efcbaf6438c5d337bef5ea
 http://10-21-129-141-jhdxyjd.mob.local:10880/proxy/application_1594985361863_0110/jobs/27ab25d708efcbaf6438c5d337bef5ea/checkpoints
+http://10-21-129-141-jhdxyjd.mob.local:10880/proxy/application_1594985361863_0110/jobs/27ab25d708efcbaf6438c5d337bef5ea/exceptions
+
+http://10-21-129-141-jhdxyjd.mob.local:10880/proxy/application_1594985361863_0110/jobs/27ab25d708efcbaf6438c5d337bef5ea/yarn-cancel
+
 http://10-21-129-141-jhdxyjd.mob.local:10880/proxy/application_1594985361863_0110/jobmanager/config
 
 
