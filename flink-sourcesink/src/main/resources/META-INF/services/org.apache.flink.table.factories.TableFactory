@@ -1,2 +1,6 @@
 com.flink.common.source.java.factory.PrintlnAppendStreamFactory
+com.flink.common.source.java.factory.PrintlnRetractStreamFactory
+com.flink.common.source.java.factory.PrintlnUpsertStreamFactory
 com.flink.common.source.java.factory.HbaseRetractStreamFactory
+com.flink.common.source.java.factory.HbaseLookUpFactory
+com.flink.common.java.format.CustomJsonRowFormatFactory

@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class FlinkLearnStreamTableDDLTest extends FlinkJavaStreamTableTestBase {
     @Test
-    public void testDDL() throws Exception {
+    public void testDDLSample() throws Exception {
         tableEnv.sqlUpdate(
                 DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
                         "localhost:2181",
@@ -22,5 +22,11 @@ public class FlinkLearnStreamTableDDLTest extends FlinkJavaStreamTableTestBase {
                 .print();
         // insertIntoCsvTbl(tEnv)
         tableEnv.execute("FlinkLearnStreamDDLSQLEntry");
+    }
+
+
+    @Test
+    public void testDDLWindow(){
+
     }
 }

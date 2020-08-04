@@ -11,7 +11,7 @@ class TopicOffsetTimeStampMsgDeserialize
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]) = {
     KafkaTopicOffsetTimeMsg(new String(record.topic()),
       record.offset(),
-      record.timestamp(),
+      new String(record.value()).toLong,
       new String(record.value()))
   }
 

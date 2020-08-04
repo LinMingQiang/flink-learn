@@ -40,6 +40,56 @@ object DDLSourceSQLManager {
                               |)""".stripMargin
 
   // -- earliest-offset /  group-offsets
+  def createStreamFromKafkaProcessTime(broker: String,
+                                       zk: String,
+                                       topic: String,
+                                       tableName: String,
+                                       groupID: String): String = {
+    s"""CREATE TABLE $tableName (
+       |    id VARCHAR,
+       |    name VARCHAR,
+       |    age INT,
+       |    proctime as PROCTIME()
+       |) WITH (
+       |    'connector.type' = 'kafka',
+       |    'connector.version' = '0.10',
+       |    'connector.topic' = '$topic',
+       |    'connector.startup-mode' = 'latest-offset',
+       |    'connector.properties.zookeeper.connect' = '$zk',
+       |    'connector.properties.bootstrap.servers' = '$broker',
+       |    'connector.properties.group.id' = '$groupID',
+       |    'update-mode' = 'append',
+       |    'format.type' = 'json',
+       |    'format.derive-schema' = 'true'
+       |)""".stripMargin
+  }
+
+
+  // -- earliest-offset /  group-offsets
+  def createStreamFromKafkaEventTime(broker: String,
+                                       zk: String,
+                                       topic: String,
+                                       tableName: String,
+                                       groupID: String): String = {
+    s"""CREATE TABLE $tableName (
+       |    id VARCHAR,
+       |    name VARCHAR,
+       |    age INT,
+       |    etime TIMESTAMP(3),
+       |    WATERMARK FOR etime AS etime - INTERVAL '5' SECOND
+       |) WITH (
+       |    'connector.type' = 'kafka',
+       |    'connector.version' = '0.10',
+       |    'connector.topic' = '$topic',
+       |    'connector.startup-mode' = 'latest-offset',
+       |    'connector.properties.zookeeper.connect' = '$zk',
+       |    'connector.properties.bootstrap.servers' = '$broker',
+       |    'connector.properties.group.id' = '$groupID',
+       |    'update-mode' = 'append',
+       |    'format.type' = 'json',
+       |    'format.derive-schema' = 'true'
+       |)""".stripMargin
+  }
   /**
     *
     * @param topic
@@ -104,6 +154,18 @@ def createCustomSinkTbl(printlnSinkTbl: String): String ={
      |'println.prefix'='>> : '
      |)""".stripMargin
 }
+
+
+  def createCustomPrintlnRetractSinkTbl(printlnSinkTbl: String): String ={
+    s"""CREATE TABLE ${printlnSinkTbl} (
+       |topic VARCHAR,
+       |msg VARCHAR,
+       |ll BIGINT
+       |) WITH (
+       |'connector.type' = 'printsink_retract',
+       |'println.prefix'='>> : '
+       |)""".stripMargin
+  }
 
   def createCustomHbaseSinkTbl(hbasesinkTbl: String): String ={
     s"""CREATE TABLE ${hbasesinkTbl} (

@@ -15,8 +15,12 @@ import java.sql.Timestamp;
 import java.util.*;
 
 import static org.apache.flink.table.descriptors.ConnectorDescriptorValidator.CONNECTOR_TYPE;
+import static org.apache.flink.table.descriptors.FormatDescriptorValidator.FORMAT;
+import static org.apache.flink.table.descriptors.KafkaValidator.*;
+import static org.apache.flink.table.descriptors.KafkaValidator.CONNECTOR_PROPERTIES;
 import static org.apache.flink.table.descriptors.Schema.*;
 import static org.apache.flink.table.descriptors.Schema.SCHEMA_NAME;
+import static org.apache.flink.table.descriptors.StreamTableDescriptorValidator.UPDATE_MODE;
 
 public class HbaseRetractStreamFactory implements StreamTableSinkFactory<Tuple2<Boolean, Row>> {
     @Override
@@ -51,9 +55,17 @@ public class HbaseRetractStreamFactory implements StreamTableSinkFactory<Tuple2<
     @Override
     public List<String> supportedProperties() {
         ArrayList properties = new ArrayList<>();
+        // update mode
+        properties.add(UPDATE_MODE);
+        properties.add(FORMAT + ".*"); // 用以支持format的配置，当用connect的时候需要，否则报错
+        properties.add(CONNECTOR_PROPERTIES);
+        properties.add(CONNECTOR_PROPERTIES + ".#." + CONNECTOR_PROPERTIES_KEY);
+        properties.add(CONNECTOR_PROPERTIES + ".#." + CONNECTOR_PROPERTIES_VALUE);
+        properties.add(CONNECTOR_PROPERTIES + ".*");
         // schema
         properties.add(SCHEMA + ".#." + SCHEMA_TYPE);
         properties.add(SCHEMA + ".#." + SCHEMA_DATA_TYPE);
         properties.add(SCHEMA + ".#." + SCHEMA_NAME);
-        return properties;    }
+        return properties;
+    }
 }

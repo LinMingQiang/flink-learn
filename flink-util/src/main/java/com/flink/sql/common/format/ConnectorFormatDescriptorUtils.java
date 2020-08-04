@@ -8,19 +8,17 @@ public class ConnectorFormatDescriptorUtils {
 
 
     /**
-     * @param kafkaConnector
      * @return
      */
-    public static Json kafkaConnJsonFormat(Kafka kafkaConnector) {
+    public static Json kafkaConnJsonFormat() {
         return new Json()
                 .failOnMissingField(false);
     }
 
 
     /**
-     * @param kafkaConnector
      */
-    public static Csv kafkaConnCsvFormat(Kafka kafkaConnector) {
+    public static Csv kafkaConnCsvFormat() {
         return new Csv()
                 .deriveSchema()
                 .fieldDelimiter(',')
