@@ -1,4 +1,10 @@
-
+#! /bin/sh
+set -x -e
+export LANG=en_US.UTF-8
+MOBSSP_HOME="$(cd "`dirname "$0"`"/../..; pwd)"
+source ${MOBSSP_HOME}/conf/mobssp-env.sh
+javaopt="-Dlog4j.configuration=file:./log4j.properties"
+echo $javaopt
 # -p 并行度 5
 # -yn taskmanager  yarn 的 container 的数量 4
 # -yjm JobManager 内存
@@ -10,7 +16,7 @@
 # https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-hadoop-2-uber
 /home/marketplus/flink-1.10.1/bin/flink run \
  -m yarn-cluster  \
- --yarnname Adplatform_ssp_flink_report_${MOBSSP_ENV} \
+ --yarnname Adplatform_ssp_flink_report_${PRO_ENV} \
  -yD env.java.opts=$javaopt \
  -p 5 -yjm 1024 -ytm 1024 -ys 2 \
  -c com.mob.adplat.entry.MobsspFlinkStreamReport2ESEntry \

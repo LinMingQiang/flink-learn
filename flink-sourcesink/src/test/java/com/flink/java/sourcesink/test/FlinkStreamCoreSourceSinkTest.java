@@ -124,4 +124,23 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
         tableEnv.execute("");
     }
 
+
+
+    @Test
+    public void testCustomJsonFormat() throws Exception {
+        // {"id":"id2","name":"name}
+        tableEnv.sqlUpdate(
+                DDLSourceSQLManager.createStreamFromKafkaUseCustomFormat("localhost:9092",
+                        "localhost:2181",
+                        "test",
+                        "test",
+                        ","));
+
+        tableEnv.toAppendStream(
+                tableEnv.from("test"), Row.class)
+                .print();
+
+        tableEnv.execute("");
+    }
+
 }

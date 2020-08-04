@@ -69,6 +69,29 @@ object DDLSourceSQLManager {
        |)""".stripMargin
   }
 
+  def createStreamFromKafkaUseCustomFormat(broker: String,
+                            zk: String,
+                            topic: String,
+                            tableName: String,
+                            groupID: String): String = {
+    s"""CREATE TABLE $tableName (
+       |    id VARCHAR,
+       |    name VARCHAR,
+       |    age INT
+       |) WITH (
+       |    'connector.type' = 'kafka',
+       |    'connector.version' = '0.10',
+       |    'connector.topic' = '$topic',
+       |    'connector.startup-mode' = 'latest-offset',
+       |    'connector.properties.zookeeper.connect' = '$zk',
+       |    'connector.properties.bootstrap.servers' = '$broker',
+       |    'connector.properties.group.id' = '$groupID',
+       |    'update-mode' = 'append',
+       |    'format.type' = 'custom-json',
+       |    'format.derive-schema' = 'true'
+       |)""".stripMargin
+  }
+
   def createStreamFromKafkaProcessTime(broker: String,
                             zk: String,
                             topic: String,
