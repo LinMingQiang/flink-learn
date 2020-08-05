@@ -12,6 +12,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>fastjson</artifactId>
+      <version>1.2.60</version>
+    </dependency>
+    <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
       <version>4.2.2</version>
@@ -53,7 +58,29 @@
   </dependencies>
 
   <build>
+    <filters>
+      <filter>
+        src/main/resources/profile/${env}_env.properties
+      </filter>
+    </filters>
+    <resources>
+      <resource>
+        <directory>src/main/resources/conf</directory>
+        <filtering>true</filtering>
+        <excludes>
+          <exclude>*.sql</exclude>
+          <exclude>*.txt</exclude>
+        </excludes>
+      </resource>
+    </resources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
