@@ -26,8 +26,6 @@ public class OkHttp3Client {
          Response response = call.execute();
         // String str = response.body().string();
         String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
-        System.out.println(str);
-
         return str;
     }
 
