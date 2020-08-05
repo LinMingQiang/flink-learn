@@ -11,7 +11,6 @@ public class OkHttp3Client {
      * @param url
      */
     public static String get(String url) throws IOException {
-        System.out.println(url);
         OkHttpClient okHttpClient = new OkHttpClient();
         Request request = new Request
                 .Builder()
@@ -21,7 +20,6 @@ public class OkHttp3Client {
         Call call = okHttpClient.newCall(request);
         Response response = call.execute();
         String str = response.body().string();
-        System.out.println(str);
         return str;
     }
 
