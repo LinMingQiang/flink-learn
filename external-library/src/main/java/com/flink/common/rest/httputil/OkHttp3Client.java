@@ -1,8 +1,13 @@
 package com.flink.common.rest.httputil;
 
 import okhttp3.*;
+import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
 
 public class OkHttp3Client {
 
@@ -18,8 +23,11 @@ public class OkHttp3Client {
                 .method("GET", null)
                 .build();
         Call call = okHttpClient.newCall(request);
-        Response response = call.execute();
-        String str = response.body().string();
+         Response response = call.execute();
+        // String str = response.body().string();
+        String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
+        System.out.println(str);
+
         return str;
     }
 

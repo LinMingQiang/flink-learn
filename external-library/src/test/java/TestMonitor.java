@@ -46,6 +46,15 @@ public class TestMonitor {
 //        System.out.println(">>>>>>>>");
     }
 
+    @Test
+    public void testYarnAllappInfo() throws IOException, YarnException {
+        YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+        List<ApplicationInfo> r = yarnclient.getApplications(null, null);
+        System.out.println(r.size());
+
+       // r.forEach(x -> System.out.println(x));
+
+    }
 
     @Test
     public void testYarnMonitor() throws IOException, YarnException {
@@ -54,7 +63,6 @@ public class TestMonitor {
         r.forEach(x -> System.out.println(x));
     }
 
-// application_1594985361863_0110/jobs/27ab25d708efcbaf6438c5d337bef5ea/exceptions
     @Test
     public void testFlinkjobs() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
