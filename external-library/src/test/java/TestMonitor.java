@@ -11,6 +11,8 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.*;
 public class TestMonitor {
 
@@ -81,9 +83,9 @@ public class TestMonitor {
     @Test
     public void testFlinkjobs() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
-        List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
-        yarnclient.getFlinkJobs(r.get(0).id);
-
+       //  List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
+        Map<String, List<FlinkJobsInfo>> m = yarnclient.getFlinkAllJobs("RUNNING");
+       m.forEach( (k, v)-> System.out.println(k + "->" + v));
 
     }
 
@@ -103,4 +105,7 @@ public class TestMonitor {
         FlinkJobsExceptionInfo exceptionInfo = yarnclient.getFlinkJobExceptions(appid, jobId);
         System.out.println(exceptionInfo);
     }
+
+
+
 }

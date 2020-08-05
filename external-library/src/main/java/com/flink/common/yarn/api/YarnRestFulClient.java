@@ -10,7 +10,9 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.flink.common.java.bean.RestfulUrlParameter.*;
 
@@ -108,6 +110,28 @@ public class YarnRestFulClient {
 
     }
 
+    public void getFlinkJobCheckpoint(){
+
+    }
+
+    /**
+     *
+     * @param states
+     * @return
+     * @throws IOException
+     * @throws YarnException
+     */
+    public Map<String, List<FlinkJobsInfo>> getFlinkAllJobs(String states) throws IOException, YarnException {
+        Map<String, List<FlinkJobsInfo>> re = new HashMap<>();
+        this.getApplications(states, "flink").forEach(x -> {
+            try {
+                re.put(x.id, this.getFlinkJobs(x.id));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return re;
+    }
 
     /**
      * 单例模式-。-
