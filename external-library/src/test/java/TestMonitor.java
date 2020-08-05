@@ -46,6 +46,11 @@ public class TestMonitor {
 //        System.out.println(">>>>>>>>");
     }
 
+    /**
+     * 获取所有app信息
+     * @throws IOException
+     * @throws YarnException
+     */
     @Test
     public void testYarnAllappInfo() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
@@ -56,6 +61,11 @@ public class TestMonitor {
 
     }
 
+    /**
+     * 获取running的flink的app信息
+     * @throws IOException
+     * @throws YarnException
+     */
     @Test
     public void testYarnMonitor() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
@@ -63,6 +73,11 @@ public class TestMonitor {
         r.forEach(x -> System.out.println(x));
     }
 
+    /**
+     * 获取 flink某app的job信息
+     * @throws IOException
+     * @throws YarnException
+     */
     @Test
     public void testFlinkjobs() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
@@ -73,6 +88,11 @@ public class TestMonitor {
     }
 
 
+    /**
+     * 获取某flink某jid的报错信息
+     * @throws IOException
+     * @throws YarnException
+     */
     @Test
     public void testFlinkJobException() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
