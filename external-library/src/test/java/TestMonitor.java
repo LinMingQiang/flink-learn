@@ -1,7 +1,11 @@
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.flink.common.java.bean.ApplicationInfo;
+import com.flink.common.java.bean.FlinkJobsExceptionInfo;
+import com.flink.common.java.bean.FlinkJobsInfo;
 import com.flink.common.rest.httputil.OkHttp3Client;
 import com.flink.common.yarn.api.YarnClientHandler;
+import com.flink.common.yarn.api.YarnRestFulClient;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
@@ -45,10 +49,30 @@ public class TestMonitor {
 
     @Test
     public void testYarnMonitor() throws IOException, YarnException {
-        YarnClientHandler yarnclient = YarnClientHandler.getInstance(null);
-        List<ApplicationReport> r = yarnclient.getApplications("RUNNING");
-        r.forEach(x -> {
-            x.getApplicationId().toString();
-        });
+        YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+        List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
+        r.forEach(x -> System.out.println(x));
+    }
+
+// application_1594985361863_0110/jobs/27ab25d708efcbaf6438c5d337bef5ea/exceptions
+    @Test
+    public void testFlinkjobs() throws IOException, YarnException {
+        YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+        List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
+        yarnclient.getFlinkJobs(r.get(0).id);
+
+
+    }
+
+
+    @Test
+    public void testFlinkJobException() throws IOException, YarnException {
+        YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+        List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
+        String appid = r.get(0).id;
+        List<FlinkJobsInfo> flinkJobs = yarnclient.getFlinkJobs(appid);
+        String jobId = flinkJobs.get(0).jid;
+        FlinkJobsExceptionInfo exceptionInfo = yarnclient.getFlinkJobExceptions(appid, jobId);
+        System.out.println(exceptionInfo);
     }
 }
