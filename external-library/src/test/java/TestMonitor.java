@@ -1,3 +1,5 @@
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.flink.common.rest.httputil.OkHttp3Client;
 import com.flink.common.yarn.api.YarnClientHandler;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -13,8 +15,11 @@ public class TestMonitor {
 
     @Test
     public void testHttp() throws IOException {
-        System.out.println(OkHttp3Client.get("http://www.baidu.com"));
+        JSONObject json = JSON.parseObject(OkHttp3Client.get("http://localhost:10880/ws/v1/cluster/apps?state=RUNNING"));
 
+        json.getJSONObject("apps").getJSONArray("app").forEach(x -> {
+            System.out.println(JSON.parseObject(x.toString()).getString("id"));
+        });
 //        OkHttp3Client.asynGet("http://www.baidu.com"
 //        , new Callback(){
 //
@@ -41,7 +46,6 @@ public class TestMonitor {
     @Test
     public void testYarnMonitor() throws IOException, YarnException {
         YarnClientHandler yarnclient = YarnClientHandler.getInstance(null);
-
         List<ApplicationReport> r = yarnclient.getApplications("RUNNING");
         r.forEach(x -> {
             x.getApplicationId().toString();
