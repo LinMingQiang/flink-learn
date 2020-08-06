@@ -10,7 +10,7 @@
         <module>flink-testutil</module>
         <module>flink-sourcesink</module>
         <module>flink-cep</module>
-        <module>flink-demo</module>
+        <module>flink-core</module>
         <module>es-shade</module>
         <module>resources</module>
         <module>flink-sql</module>
