@@ -17,4 +17,13 @@ public class RestfulUrlParameter {
                 + jid
                 + "/exceptions";
     }
+
+    public static String FLINK_JOBS_CHECKPOINT(String yarnPre, String appid, String jid){
+        return yarnPre
+                + "/"
+                + appid
+                + "/jobs/"
+                + jid
+                + "/checkpoints";
+    }
 }
