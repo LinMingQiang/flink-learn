@@ -81,7 +81,7 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>demo-skip-tests</id>
+            <id>core-skip-tests</id>
             <build>
                 <plugins>
                     <plugin>
