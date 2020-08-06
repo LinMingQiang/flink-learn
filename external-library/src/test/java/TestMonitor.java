@@ -1,6 +1,7 @@
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.flink.common.java.bean.ApplicationInfo;
+import com.flink.common.java.bean.FLinkJobsCheckpointInfo;
 import com.flink.common.java.bean.FlinkJobsExceptionInfo;
 import com.flink.common.java.bean.FlinkJobsInfo;
 import com.flink.common.rest.httputil.OkHttp3Client;
@@ -83,7 +84,6 @@ public class TestMonitor {
     @Test
     public void testFlinkjobs() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
-       //  List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
         Map<String, List<FlinkJobsInfo>> m = yarnclient.getFlinkAllJobs("RUNNING");
        m.forEach( (k, v)-> System.out.println(k + "->" + v));
 
@@ -106,6 +106,17 @@ public class TestMonitor {
         System.out.println(exceptionInfo);
     }
 
+    @Test
+    public void testFlinkJobsCheckpoint() throws IOException, YarnException {
+        YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+        List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
+        String appid = r.get(0).id;
+        List<FlinkJobsInfo> flinkJobs = yarnclient.getFlinkJobs(appid);
+        String jobId = flinkJobs.get(0).jid;
+        FLinkJobsCheckpointInfo ckpinfo = yarnclient.getFlinkJobCheckpoint(appid, jobId);
+        System.out.println(ckpinfo.history.size());
+        ckpinfo.history.forEach(x -> System.out.println(x));
 
+    }
 
 }

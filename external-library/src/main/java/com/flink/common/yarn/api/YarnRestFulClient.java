@@ -3,6 +3,7 @@ package com.flink.common.yarn.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.flink.common.java.bean.ApplicationInfo;
+import com.flink.common.java.bean.FLinkJobsCheckpointInfo;
 import com.flink.common.java.bean.FlinkJobsExceptionInfo;
 import com.flink.common.java.bean.FlinkJobsInfo;
 import com.flink.common.rest.httputil.OkHttp3Client;
@@ -98,7 +99,6 @@ public class YarnRestFulClient {
     }
 
     /**
-     *
      * @param appid
      * @param jid
      * @return
@@ -110,14 +110,23 @@ public class YarnRestFulClient {
 
     }
 
-    public void getFlinkJobCheckpoint(){
+    /**
+     *
+     * @param appid
+     * @param jid
+     * @return
+     * @throws IOException
+     */
+    public FLinkJobsCheckpointInfo getFlinkJobCheckpoint(String appid, String jid) throws IOException {
+        return JSON.parseObject(OkHttp3Client.get(
+                FLINK_JOBS_CHECKPOINT(FLINK_REST_PREFIX, appid, jid)), FLinkJobsCheckpointInfo.class);
+
 
     }
 
     /**
-     *
      * @param states
-     * @return
+     * @return Map<String, List < FlinkJobsInfo>> ： appid->jobid
      * @throws IOException
      * @throws YarnException
      */
