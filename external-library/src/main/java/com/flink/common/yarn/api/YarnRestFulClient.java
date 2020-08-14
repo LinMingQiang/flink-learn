@@ -2,10 +2,7 @@ package com.flink.common.yarn.api;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.flink.common.java.bean.ApplicationInfo;
-import com.flink.common.java.bean.FLinkJobsCheckpointInfo;
-import com.flink.common.java.bean.FlinkJobsExceptionInfo;
-import com.flink.common.java.bean.FlinkJobsInfo;
+import com.flink.common.java.bean.*;
 import com.flink.common.rest.httputil.OkHttp3Client;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
@@ -111,6 +108,7 @@ public class YarnRestFulClient {
     }
 
     /**
+     * 获取flink作业的ckp
      *
      * @param appid
      * @param jid
@@ -120,11 +118,21 @@ public class YarnRestFulClient {
     public FLinkJobsCheckpointInfo getFlinkJobCheckpoint(String appid, String jid) throws IOException {
         return JSON.parseObject(OkHttp3Client.get(
                 FLINK_JOBS_CHECKPOINT(FLINK_REST_PREFIX, appid, jid)), FLinkJobsCheckpointInfo.class);
+    }
 
 
+    public List<FlinkTaskManagerInfo> getFlinkJobTasks(String appid) throws IOException {
+        JSONObject json = JSON.parseObject(OkHttp3Client.get(FLINK_TASK_MANAGER(FLINK_REST_PREFIX, appid)));
+        List<FlinkTaskManagerInfo> re = new ArrayList<>();
+        for (Object taskmanagersInfo : json.getJSONArray("taskmanagers")) {
+            re.add(JSON.parseObject(taskmanagersInfo.toString(), FlinkTaskManagerInfo.class));
+        }
+        return re;
     }
 
     /**
+     * 获取全部的flink作业
+     *
      * @param states
      * @return Map<String, List < FlinkJobsInfo>> ： appid->jobid
      * @throws IOException

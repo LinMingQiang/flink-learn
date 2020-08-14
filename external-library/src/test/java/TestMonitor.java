@@ -119,4 +119,18 @@ public class TestMonitor {
 
     }
 
+
+    @Test
+    public void testFlinkTaskmanager() throws IOException, YarnException {
+        YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+        List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
+        String appid = r.get(0).id;
+        yarnclient.getFlinkJobTasks(appid).forEach(x -> {
+            System.out.println(x);
+        });
+    }
+
+
+
+
 }
