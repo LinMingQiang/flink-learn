@@ -35,13 +35,14 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
         tableEnv.createTemporaryView("test", a);
 
 
-        tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSinkTbl"));
-        tableEnv.sqlQuery("select topic,msg,count(1) as ll from test group by topic,msg").insertInto("printlnSinkTbl");
+        tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSinkTbl"));
+        tableEnv.sqlQuery("select topic,msg,count(1) as ll from test group by topic,msg")
+                .insertInto("printlnSinkTbl");
 
 //        tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomSinkTbl("printlnSinkTbl"));
 //        tableEnv.insertInto("printlnSinkTbl", tableEnv.sqlQuery("select * from test"));
 
-        tableEnv.execute("");
+         tableEnv.execute("");
     }
 
     /**
