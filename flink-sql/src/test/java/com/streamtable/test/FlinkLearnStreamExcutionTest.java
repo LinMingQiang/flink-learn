@@ -27,6 +27,7 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
+import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
@@ -47,17 +48,20 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
         Table a = getStreamTable(
                 getKafkaDataStream("test", "localhost:9092", "latest"),
                 "topic,offset,msg");
-        a.printSchema();
+       // a.printSchema();
         tableEnv.createTemporaryView("test", a);
         // 具有group by 需要用到state 用 toRetractStream
-        tableEnv.toRetractStream(
-                tableEnv.sqlQuery("select topic,count(1) from test group by topic"),
-                Row.class).print();
+//        tableEnv.toRetractStream(
+//                tableEnv.sqlQuery("select topic,count(1) from test group by topic"),
+//                Row.class)
+//                .print();
         // 只追加数据，没有回溯历史数据可以用 append
         tableEnv.toAppendStream(
-                tableEnv.sqlQuery("select * from test"),
-                Row.class).print();
-        tableEnv.execute("");
+                tableEnv.sqlQuery("select msg from test"),
+                Row.class)
+                .print();
+
+        tableEnv.execute("jobname");
     }
 
     @Test
