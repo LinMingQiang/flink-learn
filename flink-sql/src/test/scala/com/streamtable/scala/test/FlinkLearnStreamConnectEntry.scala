@@ -5,7 +5,8 @@ import com.flink.common.manager.{SchemaManager, TableSourceConnectorManager}
 import com.flink.learn.test.common.FlinkStreamTableCommonSuit
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils
 import org.apache.flink.api.scala._
-import org.apache.flink.table.api.scala._
+import org.apache.flink.table.api.bridge.scala._
+
 import org.apache.flink.types.Row
 
 class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {

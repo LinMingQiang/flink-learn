@@ -51,10 +51,6 @@ public class PrintlnUpsertStreamTableSink implements UpsertStreamTableSink<Row> 
     }
 
     @Override
-    public void emitDataStream(DataStream<Tuple2<Boolean, Row>> dataStream) {
-
-    }
-    @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> dataStream) {
         return dataStream.addSink(new SinkFunction<Tuple2<Boolean, Row>>() {
             @Override

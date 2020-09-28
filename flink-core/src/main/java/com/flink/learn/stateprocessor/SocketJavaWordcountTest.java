@@ -34,7 +34,7 @@ public class SocketJavaWordcountTest {
                 CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //env.setStateBackend(new FsStateBackend(checkpointPath))
         RocksDBStateBackend rocksDBStateBackend = new RocksDBStateBackend(FlinkLearnPropertiesUtil.FLINK_DEMO_CHECKPOINT_PATH(), true);
-        rocksDBStateBackend.enableTtlCompactionFilter(); // 启用ttl后台增量清除功能
+        // rocksDBStateBackend.enableTtlCompactionFilter(); // 启用ttl后台增量清除功能
         env.setStateBackend(rocksDBStateBackend);
 
         DataStream<String> source = env.socketTextStream("localhost", 9877);
