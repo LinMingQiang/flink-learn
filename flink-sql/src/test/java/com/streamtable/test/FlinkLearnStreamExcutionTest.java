@@ -24,6 +24,7 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
@@ -48,20 +49,33 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
         Table a = getStreamTable(
                 getKafkaDataStream("test", "localhost:9092", "latest"),
                 "topic,offset,msg");
-       // a.printSchema();
+        // a.printSchema();
         tableEnv.createTemporaryView("test", a);
-        // 具有group by 需要用到state 用 toRetractStream
-//        tableEnv.toRetractStream(
-//                tableEnv.sqlQuery("select topic,count(1) from test group by topic"),
-//                Row.class)
-//                .print();
-        // 只追加数据，没有回溯历史数据可以用 append
-        tableEnv.toAppendStream(
-                tableEnv.sqlQuery("select msg from test"),
+        tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSink_retract"));
+        tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg")
+                .insertInto("printlnSink_retract");
+        // 这里需要用tableEnv.execute("jobname"); 而不是 streamEnv.execute("jobname")
+        tableEnv.execute("jobname");
+    }
+
+    @Test
+    public void testStreamSink() throws Exception {
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg");
+        tableEnv.createTemporaryView("test", a);
+                tableEnv.toRetractStream(
+                tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg"),
                 Row.class)
                 .print();
+        // 只追加数据，没有回溯历史数据可以用 append
+//        tableEnv.toAppendStream(
+//                tableEnv.sqlQuery("select msg from test"),
+//                Row.class)
+//                .print();
+// 1.11 需要用 streamEnv.execute("jobname") 而不是 tableEnv.execute("")
+        streamEnv.execute("jobname");
 
-        tableEnv.execute("jobname");
     }
 
     @Test
