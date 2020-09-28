@@ -8,9 +8,10 @@ import com.flink.learn.test.common.FlinkStreamTableCommonSuit
 import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.table.api.scala._
 import org.apache.flink.types.Row
-
+import org.apache.flink.api.scala._
+import org.apache.flink.table.api._
+import org.apache.flink.table.api.bridge.scala._
 class FlinkLearnStreamDDLSQLEntry extends FlinkStreamTableCommonSuit {
 
 

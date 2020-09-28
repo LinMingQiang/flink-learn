@@ -5,7 +5,7 @@ import com.flink.common.manager.{SchemaManager, TableSourceConnectorManager}
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils
 import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
 import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.table.api.scala.StreamTableEnvironment
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.descriptors.{Csv, FileSystem}
 import org.apache.flink.table.sinks.CsvTableSink
 
@@ -56,7 +56,7 @@ object TableSinkManager {
     * @param writeM
     */
   def registerJavaCsvTableSink(
-      tEnv: org.apache.flink.table.api.java.StreamTableEnvironment,
+      tEnv: org.apache.flink.table.api.bridge.java.StreamTableEnvironment,
       tblName: String,
       col: Array[String],
       colType: Array[TypeInformation[_]],
@@ -83,7 +83,7 @@ object TableSinkManager {
     * @param tEnv
     */
   def registAppendStreamTableSink(
-      tEnv: org.apache.flink.table.api.java.StreamTableEnvironment): Unit = {
+      tEnv: org.apache.flink.table.api.bridge.java.StreamTableEnvironment): Unit = {
     tEnv.registerTableSink(
       "test",
       Array("topic", "offset", "msg"),
@@ -97,7 +97,7 @@ object TableSinkManager {
     * @param tablename
     */
   def connctKafkaSink(
-      tEnv: org.apache.flink.table.api.java.StreamTableEnvironment,
+      tEnv: org.apache.flink.table.api.bridge.java.StreamTableEnvironment,
       tablename: String): Unit = {
     val kafkaConnector =
       TableSourceConnectorManager.kafkaConnector("localhost:9092",
@@ -120,7 +120,7 @@ object TableSinkManager {
     * @param tablename
     */
   def connectFileSystemSink(
-      tEnv: org.apache.flink.table.api.java.StreamTableEnvironment,
+      tEnv: org.apache.flink.table.api.bridge.java.StreamTableEnvironment,
       tablename: String): Unit = {
     tEnv
       .connect(new FileSystem()

@@ -5,10 +5,10 @@ import org.apache.flink.streaming.api.scala.{
   DataStream,
   StreamExecutionEnvironment
 }
-import org.apache.flink.table.api.scala.StreamTableEnvironment
-import org.apache.flink.table.api.{EnvironmentSettings, StreamQueryConfig}
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.api.{EnvironmentSettings}
 import org.apache.flink.api.scala._
-import org.apache.flink.table.api.scala._
+import org.apache.flink.table.api._
 object FlinkLearnDataStreamSQLEntry {
   def main(args: Array[String]): Unit = {
 

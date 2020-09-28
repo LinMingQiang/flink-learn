@@ -1,7 +1,6 @@
 package com.flink.common.java.sourcefunc;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.io.jdbc.*;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.types.Row;
@@ -41,9 +40,6 @@ public class HbaseLookupFunction extends TableFunction<Row> {
         return new RowTypeInfo(fieldTypes, fieldNames);
     }
 
-    /**
-     * Builder for a {@link JDBCLookupFunction}.
-     */
     public static class Builder {
         private String[] fieldNames;
         private TypeInformation[] fieldTypes;

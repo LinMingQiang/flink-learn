@@ -1,5 +1,4 @@
 package com.flink.common.core
-import org.apache.flink.table.api.scala.StreamTableEnvironment
 
 import org.apache.flink.api.common.state.StateTtlConfig
 import org.apache.flink.api.common.time.Time
@@ -9,7 +8,8 @@ import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.table.api.EnvironmentSettings
+import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}
+import org.apache.flink.table.api.bridge.scala.{BatchTableEnvironment, StreamTableEnvironment}
 
 object FlinkEvnBuilder {
 
@@ -44,7 +44,7 @@ object FlinkEvnBuilder {
     //env.setStateBackend(new FsStateBackend(checkpointPath))
     val rocksDBStateBackend = new RocksDBStateBackend(checkpointPath, true)
     // rocksDBStateBackend.setDbStoragePath("") // rocksdb本地路径，默认在tm临时路径下
-    rocksDBStateBackend.enableTtlCompactionFilter() // 启用ttl后台增量清除功能
+    rocksDBStateBackend.isIncrementalCheckpointsEnabled() // 启用ttl后台增量清除功能
     // println(rocksDBStateBackend.isIncrementalCheckpointsEnabled)
     // println(rocksDBStateBackend.isTtlCompactionFilterEnabled)
     // state.backend.rocksdb.ttl.compaction.filter.enabled
@@ -83,6 +83,9 @@ object FlinkEvnBuilder {
     ExecutionEnvironment.getExecutionEnvironment
   }
 
+  def buildBatchEnv(e: ExecutionEnvironment): BatchTableEnvironment ={
+    BatchTableEnvironment.create(e)
+  }
   /**
     *
     * @return
@@ -92,8 +95,7 @@ object FlinkEvnBuilder {
       .newBuilder(Time.minutes(timeOut)) // 2个小时
       .updateTtlOnReadAndWrite() // 每次读取或者更新这个key的值的时候都对ttl做更新，所以清理的时间是 lastpdatetime + outtime
       .cleanupFullSnapshot() // 创建完整快照时清理
-      .cleanupInBackground()
-      .cleanupInRocksdbCompactFilter() // 达到100个过期就清理？
+      .cleanupInRocksdbCompactFilter(10000) // 达到100个过期就清理？
       .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
       .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
       .build();

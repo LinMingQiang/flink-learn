@@ -36,11 +36,6 @@ public class HbaseRetractStreamTableSink implements RetractStreamTableSink<Row> 
     }
 
     @Override
-    public void emitDataStream(DataStream<Tuple2<Boolean, Row>> dataStream) {
-        consumeDataStream(dataStream);
-    }
-
-    @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> dataStream) {
         return dataStream.addSink(new HbaseAsyncSinkFunction(1000)).name(this.getClass().getSimpleName());
     }

@@ -1,6 +1,7 @@
 package com.flink.common.java.core;
 
 import org.apache.flink.api.common.time.Time;
+import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -8,7 +9,8 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.BatchTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 import java.io.IOException;
 
@@ -51,7 +53,6 @@ public class FlinkEvnBuilder {
             e.printStackTrace();
         }
         // rocksDBStateBackend.setDbStoragePath("") // rocksdb本地路径，默认在tm临时路径下
-        rocksDBStateBackend.enableTtlCompactionFilter(); // 启用ttl后台增量清除功能
         // println(rocksDBStateBackend.isIncrementalCheckpointsEnabled)
         // println(rocksDBStateBackend.isTtlCompactionFilterEnabled)
         // state.backend.rocksdb.ttl.compaction.filter.enabled
@@ -98,6 +99,17 @@ public class FlinkEvnBuilder {
         return streamTableEnv;
     }
 
+    /**
+     *
+     * @return
+     */
+    public static ExecutionEnvironment buildEnv() {
+        return ExecutionEnvironment.getExecutionEnvironment();
+    }
+
+    public static BatchTableEnvironment buildBatchEnv(ExecutionEnvironment e){
+        return BatchTableEnvironment.create(e);
+    }
 
     public static TableEnvironment buildTableEnv(){
         EnvironmentSettings sett =
