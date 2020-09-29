@@ -1,25 +1,20 @@
 package com.flink.learn.test.common
 
-import com.flink.common.core.{
-  EnvironmentalKey,
-  FlinkEvnBuilder,
-  FlinkLearnPropertiesUtil
-}
+import com.flink.common.core.{EnvironmentalKey, FlinkEvnBuilder, FlinkLearnPropertiesUtil}
 import com.flink.common.core.FlinkLearnPropertiesUtil.{param, CHECKPOINT_PATH}
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.scala.ExecutionEnvironment
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
-import org.apache.flink.table.api.bridge.scala.{
-  BatchTableEnvironment,
-  StreamTableEnvironment
-}
-import org.apache.flink.table.api.TableEnvironment
+import org.apache.flink.table.api.bridge.scala.{BatchTableEnvironment, StreamTableEnvironment}
+import org.apache.flink.table.api.{Table, TableEnvironment}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-
+import org.apache.flink.table.api.bridge.scala._
+import org.apache.flink.table.api._
+import org.apache.flink.api.scala._
 class FlinkStreamTableCommonSuit extends FunSuite with BeforeAndAfterAll {
   var tableEnv: StreamTableEnvironment = null
   var tableE: TableEnvironment = null
@@ -66,14 +61,21 @@ class FlinkStreamTableCommonSuit extends FunSuite with BeforeAndAfterAll {
     */
   def kafkaSource(
       topic: String,
-      broker: String): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
+      broker: String,
+      reset: String): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
     val kafkasource = KafkaManager.getKafkaSource(
       topic,
       broker,
       new TopicOffsetMsgDeserialize())
     kafkasource.setCommitOffsetsOnCheckpoints(true)
-    kafkasource.setStartFromEarliest() //不加这个默认是从上次消费
+    if (reset eq "earliest") kafkasource.setStartFromEarliest //不加这个默认是从上次消费
+    else if (reset eq "latest") kafkasource.setStartFromLatest
     kafkasource
   }
+
+  def getKafkaDataStream(topic: String, broker: String, reset: String): DataStream[KafkaTopicOffsetMsg] =
+    streamEnv.addSource(kafkaSource(topic, broker, reset))
+
+
 
 }

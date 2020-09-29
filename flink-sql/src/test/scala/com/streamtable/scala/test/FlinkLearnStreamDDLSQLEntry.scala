@@ -103,7 +103,7 @@ class FlinkLearnStreamDDLSQLEntry extends FlinkStreamTableCommonSuit {
       .map(_._2)
       .print
     // insertIntoCsvTbl(tEnv)
-    tableEnv.execute("FlinkLearnStreamDDLSQLEntry")
+    streamEnv.execute("FlinkLearnStreamDDLSQLEntry")
   }
 
   /**

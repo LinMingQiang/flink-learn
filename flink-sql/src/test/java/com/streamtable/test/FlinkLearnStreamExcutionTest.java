@@ -1,5 +1,6 @@
 package com.streamtable.test;
 
+import com.flink.common.core.CaseClassManager;
 import com.flink.common.java.connect.PrintlnConnect;
 import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
 import com.flink.common.java.pojo.WordCountPoJo;
@@ -19,6 +20,7 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
@@ -26,6 +28,7 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.expressions.Expression;
@@ -35,6 +38,7 @@ import org.apache.flink.util.OutputTag;
 import org.apache.hadoop.hbase.client.Result;
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,25 +53,58 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
         Table a = getStreamTable(
                 getKafkaDataStream("test", "localhost:9092", "latest"),
                 "topic,offset,msg");
-        // a.printSchema();
         tableEnv.createTemporaryView("test", a);
         tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSink_retract"));
-        tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg")
-                .insertInto("printlnSink_retract");
+        Table b = tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg");
+        //  b.executeInsert("printlnSink_retract");
+        b.insertInto("printlnSink_retract");
         // 这里需要用tableEnv.execute("jobname"); 而不是 streamEnv.execute("jobname")
-        tableEnv.execute("jobname");
+        tableE.execute("jobname");
     }
 
+    /**
+     * table-》stream
+     *
+     * @throws Exception
+     */
     @Test
-    public void testStreamSink() throws Exception {
+    public void testTableToStream2() throws Exception {
         Table a = getStreamTable(
                 getKafkaDataStream("test", "localhost:9092", "latest"),
                 "topic,offset,msg");
         tableEnv.createTemporaryView("test", a);
-                tableEnv.toRetractStream(
+        tableEnv.toRetractStream(
                 tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg"),
                 Row.class)
                 .print();
+        streamEnv.execute("");
+    }
+
+    /**
+     * @throws Exception
+     */
+    @Test
+    public void testStreamJoin() throws Exception {
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg");
+        Table a2 = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg");
+
+        tableEnv.createTemporaryView("test2", a2);
+        tableEnv.createTemporaryView("test", a);
+
+        tableEnv.toRetractStream(
+                tableEnv.sqlQuery("select * from test a join test2 b on a.msg=b.msg"),
+                Row.class)
+                .print();
+
+        tableEnv.toRetractStream(
+                tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg"),
+                Row.class)
+                .print();
+
         // 只追加数据，没有回溯历史数据可以用 append
 //        tableEnv.toAppendStream(
 //                tableEnv.sqlQuery("select msg from test"),
@@ -75,33 +112,28 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
 //                .print();
 // 1.11 需要用 streamEnv.execute("jobname") 而不是 tableEnv.execute("")
         streamEnv.execute("jobname");
-
     }
 
     @Test
-    public void testStreamToTable() throws Exception {
-        // 方法1
-//        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> ds = streamEnv.addSource(
-//                getKafkaSource("test", "localhost:9092", "latest"))
-//        Table a = tableEnv.fromDataStream(
-//                ds
-//                , "topic,offset,msg");
-
-        // 方法2
+    public void testConnectStream() throws Exception {
+        // {"id":"id2","name":"name2","age":1}
         Kafka kafkaConnector =
                 TableSourceConnectorManager.kafkaConnector("localhost:9092", "test", "test", "latest");
         Json jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat();
+        tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSink_retract"));
         tableEnv
                 .connect(kafkaConnector)
                 .withFormat(jsonFormat)
                 .withSchema(SchemaManager.ID_NAME_AGE_SCHEMA())
                 .inAppendMode()
                 .createTemporaryTable("test");
+        Table a =
+                tableEnv.sqlQuery("select id as topic,name as msg,count(*) as ll from test group by id,name")
+                ;
+        a.insertInto("printlnSink_retract");
+        //      tableEnv.toRetractStream(a, Row.class).print();
 
-        tableEnv.toRetractStream(tableEnv.sqlQuery("select * from test"), Row.class)
-                .print();
-
-        tableEnv.execute("");
+         tableEnv.execute("aa");
 
     }
 

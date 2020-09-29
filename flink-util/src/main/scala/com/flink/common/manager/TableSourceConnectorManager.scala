@@ -20,6 +20,7 @@ object TableSourceConnectorManager {
       .version("0.10")
       .topic(topic)
       .property("bootstrap.servers", broker)
+      .property("connector.properties.bootstrap.servers", broker)
       .property("group.id", groupid)
       .property("zookeeper.connect", "localhost:2181")
     from match {
