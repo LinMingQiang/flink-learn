@@ -19,6 +19,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -55,11 +56,14 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 "topic,offset,msg");
         tableEnv.createTemporaryView("test", a);
         tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSink_retract"));
+
+        // 程序直接结束退出
+        // tableEnv.executeSql("insert into printlnSink_retract select topic,msg,count(*) as ll from test group by topic,msg");
+
         Table b = tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg");
-        //  b.executeInsert("printlnSink_retract");
-        b.insertInto("printlnSink_retract");
-        // 这里需要用tableEnv.execute("jobname"); 而不是 streamEnv.execute("jobname")
-        tableE.execute("jobname");
+        // 加tableEnv.execute报错：No operators defined in streaming topology
+        b.executeInsert("printlnSink_retract");
+        // tableEnv.execute("jobname");
     }
 
     /**
@@ -77,6 +81,32 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg"),
                 Row.class)
                 .print();
+        streamEnv.execute("");
+    }
+
+
+    /**
+     * stream 转 table ， table 转stream
+     * @throws Exception
+     */
+    @Test
+    public void testStreamToTable() throws Exception {
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg");
+        tableEnv.createTemporaryView("test", a);
+
+        DataStream stream = tableEnv.toRetractStream(
+                tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg"),
+                Row.class)
+                .filter(x -> x.f0)
+                .map(x -> new Tuple3<String, String, Long>(x.f1.getField(0).toString(), x.f1.getField(1).toString(), Long.valueOf(x.f1.getField(2).toString())))
+                .returns(Types.TUPLE(Types.STRING, Types.STRING, Types.LONG));
+        ;
+        tableEnv.createTemporaryView("tmptale", tableEnv.fromDataStream(stream, "topic,msg,ll"));
+        tableEnv.from("tmptale").printSchema();
+        tableEnv.toRetractStream(tableEnv.from("tmptale"), Row.class).print();
+
         streamEnv.execute("");
     }
 
@@ -128,12 +158,11 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 .inAppendMode()
                 .createTemporaryTable("test");
         Table a =
-                tableEnv.sqlQuery("select id as topic,name as msg,count(*) as ll from test group by id,name")
-                ;
+                tableEnv.sqlQuery("select id as topic,name as msg,count(*) as ll from test group by id,name");
         a.insertInto("printlnSink_retract");
         //      tableEnv.toRetractStream(a, Row.class).print();
 
-         tableEnv.execute("aa");
+        tableEnv.execute("aa");
 
     }
 
