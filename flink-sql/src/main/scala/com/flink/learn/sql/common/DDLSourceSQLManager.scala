@@ -26,15 +26,14 @@ object DDLSourceSQLManager {
        |    name VARCHAR,
        |    age INT
        |) WITH (
-                                 'connector' = 'kafka-0.10',
+       |'connector' = 'kafka-0.10',
        |    'topic' = '$topic',
        |    'scan.startup.mode' = 'latest-offset',
        |    'properties.bootstrap.servers' = '$broker',
        |    'properties.group.id' = '$groupID',
-       |    'type' = 'csv',
-       |    'format.field-delimiter' = '$delimiter',
-       |    'format.derive-schema' = 'true',
-       |    'format.ignore-parse-errors' = 'true'
+       |    'format' = 'csv',
+       |    'csv.field-delimiter' = '$delimiter',
+       |    'csv.ignore-parse-errors' = 'true'
        |)""".stripMargin
 
   // -- earliest-offset /  group-offsets
