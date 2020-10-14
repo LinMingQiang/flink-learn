@@ -63,7 +63,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
                         .map(x -> new TestPoJo(x.f1.getField(0).toString(), x.f1.getField(1).toString(), Long.valueOf(x.f1.getField(2).toString())))
                         .returns(Types.POJO(TestPoJo.class));
 
-        tableEnv.createTemporaryView("tmptale", tableEnv.fromDataStream(b, "topic,msg,ll"));
+        tableEnv.createTemporaryView("tmptale", tableEnv.fromDataStream(b));
 
        // 只能tableEnv.execute("");
         tableEnv.sqlQuery("select topic,msg,ll from tmptale")
