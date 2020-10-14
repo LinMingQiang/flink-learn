@@ -63,7 +63,7 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
         Table b = tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg");
         // 加tableEnv.execute报错：No operators defined in streaming topology
         b.executeInsert("printlnSink_retract");
-        // tableEnv.execute("jobname");
+         streamEnv.execute("jobname");
     }
 
     /**
