@@ -363,4 +363,6 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
         tableEnv.execute("");
 
     }
+
+
 }

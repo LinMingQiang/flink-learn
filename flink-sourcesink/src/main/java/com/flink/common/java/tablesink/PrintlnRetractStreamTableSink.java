@@ -48,7 +48,7 @@ public class PrintlnRetractStreamTableSink implements RetractStreamTableSink<Row
 
     @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> dataStream) {
-        return dataStream.addSink(new SinkFunction<Tuple2<Boolean, Row>>() {
+        return dataStream.filter(x -> x.f0).addSink(new SinkFunction<Tuple2<Boolean, Row>>() {
             @Override
             public void invoke(Tuple2<Boolean, Row> value, Context context) throws Exception {
                 System.out.println("Factory Print : " + value.f1);
