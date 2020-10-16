@@ -22,9 +22,8 @@ object DDLSourceSQLManager {
                                 delimiter: String,
                                 groupID: String) =
     s"""CREATE TABLE $tableName (
-       |    id VARCHAR,
-       |    name VARCHAR,
-       |    age INT
+       |    topic VARCHAR,
+       |    msg VARCHAR
        |) WITH (
        |'connector' = 'kafka-0.10',
        |    'topic' = '$topic',
