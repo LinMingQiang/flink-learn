@@ -36,6 +36,7 @@ class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
 
   /**
    * scala报 No operators defined in streaming topology. Cannot generate StreamGraph.
+   * 未解决
    */
   test("stream") {
     val tableA = tableEnv.fromDataStream(

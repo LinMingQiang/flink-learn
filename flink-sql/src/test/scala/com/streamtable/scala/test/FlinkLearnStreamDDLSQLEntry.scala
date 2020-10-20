@@ -3,7 +3,7 @@ package com.streamtable.scala.test
 import com.flink.commom.scala.streamsink.TableSinkManager
 import com.flink.learn.sql.common.{DDLQueryOrSinkSQLManager, DDLSourceSQLManager}
 import com.flink.learn.sql.func.DdlTableFunction.Split
-import com.flink.learn.sql.func.{StrToLowOrUpScalarFunction, WeightedAvgAggregateFunction}
+import com.flink.learn.sql.func.{StrToLowOrUpScalarFunction, TimestampYearHour, WeightedAvgAggregateFunction}
 import com.flink.learn.test.common.FlinkStreamTableCommonSuit
 import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
 import org.apache.flink.api.scala._
@@ -124,5 +124,23 @@ class FlinkLearnStreamDDLSQLEntry extends FlinkStreamTableCommonSuit {
       s"""insert into csvSinkTbl select * from ssp_sdk_report""")
     // tEnv.sqlQuery(s"""select id,count(*) num from test group by id""").insertInto("csvSinkTbl")
     tableEnv.execute("FlinkLearnStreamDDLSQLEntry")
+  }
+
+
+  test("udf"){
+    val a = tableEnv.fromDataStream(
+      getKafkaDataStream("test", "localhost:9092", "latest"),
+      'topic,
+      'offset,
+      'msg)
+    tableEnv.createTemporaryView("test", a)
+    tableEnv.createTemporarySystemFunction("timestampYearHour", classOf[TimestampYearHour])
+    val b = tableEnv.sqlQuery("select msg,timestampYearHour(100000000) as day_month_hour from test")
+
+    b.toRetractStream[Row].print
+
+    tableEnv.execute("")
+
+
   }
 }
