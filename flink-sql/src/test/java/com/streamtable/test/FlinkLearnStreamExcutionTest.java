@@ -1,46 +1,36 @@
 package com.streamtable.test;
 
-import com.flink.common.core.CaseClassManager;
-import com.flink.common.java.connect.PrintlnConnect;
 import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
+import com.flink.common.java.pojo.TestRowPoJo;
 import com.flink.common.java.pojo.WordCountPoJo;
 import com.flink.common.java.tablesink.HbaseRetractStreamTableSink;
-import com.flink.common.kafka.KafkaManager;
 import com.flink.common.manager.SchemaManager;
 import com.flink.common.manager.TableSourceConnectorManager;
 import com.flink.java.function.common.util.AbstractHbaseQueryFunction;
 import com.flink.java.function.process.HbaseQueryProcessFunction;
 import com.flink.learn.sql.common.DDLSourceSQLManager;
+import com.flink.common.java.pojo.DayMonthHour;
+import com.flink.learn.sql.func.TimestampYearHour;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
-import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
 import org.apache.hadoop.hbase.client.Result;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
@@ -365,4 +355,23 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
     }
 
 
+    @Test
+    public void testRowPoJo() throws Exception {
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg")
+                .renameColumns("offset as offsets");
+        tableEnv.createTemporaryView("test", a);
+        tableEnv.createTemporarySystemFunction("timestampYearHour", TimestampYearHour.class);
+  // oay_month_hour必须是放在字段排序后的位置，否则cast错误
+//        Table b = tableEnv.sqlQuery("select msg,offsets,timestampYearHour(100000000) as oay_month_hour,topic from test");
+//        tableEnv.toRetractStream(b,
+//                TestRowPoJo.class)
+//                .print();
+        Table b = tableEnv.sqlQuery("select msg,timestampYearHour(100000000) as oay_month_hour,offsets,topic from test");
+        tableEnv.toRetractStream(b,
+                TestRowPoJo.class)
+                .print();
+        streamEnv.execute("");
+    }
 }

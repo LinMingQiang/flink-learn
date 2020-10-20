@@ -1,4 +1,4 @@
-package com.streamtable.test;
+package com.flink.common.java.pojo;
 
 public class TestPoJo {
 
