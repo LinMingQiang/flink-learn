@@ -11,6 +11,7 @@ import org.apache.flink.addons.hbase.HBaseTableSource;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.formats.csv.CsvRowFormatFactory;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Table;
@@ -25,7 +26,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
     /**
      * 自定义的sinkfactory
      * 百度SPI
-     *  要一次创建 META-INF 再创建services
+     * 要一次创建 META-INF 再创建services
      * 1： 需要再resources/META-INF.services/下创建一个接口名-(org.apache.flink.table.factories.TableFactory)的SPI文件（不是txt）
      * 2：在文件里面写上自己实现的类路径
      * 3：实现PrintlnAppendStreamFactory。
@@ -41,7 +42,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
                         "test2",
                         ",",
                         "test"));
-        tableEnv.createTemporaryView("test" , tableEnv.from("test2")
+        tableEnv.createTemporaryView("test", tableEnv.from("test2")
                 .renameColumns("id as topic")
                 .renameColumns("name as msg")
                 .renameColumns("age as ll"));
@@ -50,7 +51,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
 //                getKafkaDataStream("test", "localhost:9092", "latest"),
 //                "topic,offset,msg")
 //                .renameColumns("offset as ll"); // offset是关键字
-     //   tableEnv.createTemporaryView("test", a);
+        //   tableEnv.createTemporaryView("test", a);
 
 
         tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSinkTbl"));
@@ -65,7 +66,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
 
         tableEnv.createTemporaryView("tmptale", tableEnv.fromDataStream(b));
 
-       // 只能tableEnv.execute("");
+        // 只能tableEnv.execute("");
         tableEnv.sqlQuery("select topic,msg,ll from tmptale")
                 .insertInto("printlnSinkTbl");
         // 只能streamEnv.execute("");
@@ -170,7 +171,44 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
                 tableEnv.from("test"), Row.class)
                 .print();
 
-        tableEnv.execute("");
+        streamEnv.execute("");
     }
+
+    @Test
+    public void testCSV() throws Exception {
+        // {"id":"id2","name":"name}
+        tableEnv.sqlUpdate(
+                DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
+                        "localhost:2181",
+                        "test",
+                        "test",
+                        ",",
+                        "test"));
+
+        tableEnv.toAppendStream(
+                tableEnv.from("test"), Row.class)
+                .print();
+
+        streamEnv.execute("");
+    }
+
+    @Test
+    public void testCustomCSV() throws Exception {
+        // {"id":"id2","name":"name}
+        tableEnv.sqlUpdate(
+                DDLSourceSQLManager.createStreamFromKafka_CUSTOMCSV("localhost:9092",
+                        "localhost:2181",
+                        "test",
+                        "test",
+                        ",",
+                        "test"));
+
+        tableEnv.toAppendStream(
+                tableEnv.from("test"), Row.class)
+                .print();
+
+        streamEnv.execute("");
+    }
+
 
 }

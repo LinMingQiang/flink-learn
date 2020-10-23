@@ -39,6 +39,32 @@ object DDLSourceSQLManager {
                               |    'format.ignore-parse-errors' = 'true'
                               |)""".stripMargin
 
+
+  def createStreamFromKafka_CUSTOMCSV(broker: String,
+                                zk: String,
+                                topic: String,
+                                tableName: String,
+                                delimiter: String,
+                                groupID: String) =
+    s"""CREATE TABLE $tableName (
+       |    id VARCHAR,
+       |    name VARCHAR,
+       |    age INT
+       |) WITH (
+       |    'connector.type' = 'kafka',
+       |    'connector.version' = '0.10',
+       |    'connector.topic' = '$topic',
+       |    'connector.startup-mode' = 'latest-offset',
+       |    'connector.properties.zookeeper.connect' = '$zk',
+       |    'connector.properties.bootstrap.servers' = '$broker',
+       |    'connector.properties.group.id' = '$groupID',
+       |    'update-mode' = 'append',
+       |    'format.type' = 'custom-csv',
+       |    'format.field-delimiter' = '$delimiter',
+       |    'format.derive-schema' = 'true',
+       |    'format.ignore-parse-errors' = 'true'
+       |)""".stripMargin
+
   // -- earliest-offset /  group-offsets
   /**
     *

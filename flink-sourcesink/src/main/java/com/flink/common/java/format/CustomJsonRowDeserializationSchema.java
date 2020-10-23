@@ -121,7 +121,9 @@ public class CustomJsonRowDeserializationSchema implements DeserializationSchema
 	@Override
 	public Row deserialize(byte[] message) throws IOException {
 		try {
+			System.out.println(new String(message));;
 			final JsonNode root = objectMapper.readTree(message);
+
 			return (Row) runtimeConverter.convert(objectMapper, root);
 		} catch (Throwable t) {
 			System.out.println(new String(message));
