@@ -11,6 +11,7 @@ import com.flink.java.function.process.HbaseQueryProcessFunction;
 import com.flink.learn.sql.common.DDLSourceSQLManager;
 import com.flink.common.java.pojo.DayMonthHour;
 import com.flink.learn.sql.func.TimestampYearHour;
+import com.flink.learn.sql.func.TimestampYearHourTableFunc;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
 import org.apache.flink.api.common.typeinfo.TypeHint;
@@ -363,14 +364,30 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 .renameColumns("offset as offsets");
         tableEnv.createTemporaryView("test", a);
         tableEnv.createTemporarySystemFunction("timestampYearHour", TimestampYearHour.class);
-  // oay_month_hour必须是放在字段排序后的位置，否则cast错误
+        // oay_month_hour必须是放在字段排序后的位置，否则cast错误
 //        Table b = tableEnv.sqlQuery("select msg,offsets,timestampYearHour(100000000) as oay_month_hour,topic from test");
 //        tableEnv.toRetractStream(b,
 //                TestRowPoJo.class)
 //                .print();
-        Table b = tableEnv.sqlQuery("select msg,timestampYearHour(100000000) as oay_month_hour,offsets,topic from test");
+         Table b = tableEnv.sqlQuery("select msg,timestampYearHour(100000000) as oay_month_hour,offsets,topic from test");
         tableEnv.toRetractStream(b,
                 TestRowPoJo.class)
+                .print();
+        streamEnv.execute("");
+    }
+
+
+    @Test
+    public void testTableFunction() throws Exception {
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg")
+                .renameColumns("offset as offsets");
+        tableEnv.createTemporaryView("test", a);
+        tableEnv.createTemporarySystemFunction("TimestampYearHourTableFunc", TimestampYearHourTableFunc.class);
+        Table b = tableEnv.sqlQuery("select msg,d,m,h,offsets,topic from test, LATERAL TABLE(TimestampYearHourTableFunc(100000000))");
+        tableEnv.toRetractStream(b,
+                Row.class)
                 .print();
         streamEnv.execute("");
     }
