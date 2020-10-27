@@ -15,6 +15,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Objects;
+
 import org.apache.flink.annotation.PublicEvolving;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.typeinfo.BasicArrayTypeInfo;
@@ -52,27 +53,32 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
 
     public Row deserialize(byte[] message) throws IOException {
         try {
-            JsonNode root = (JsonNode)this.objectReader.readValue(message);
+            JsonNode root = (JsonNode) this.objectReader.readValue(message);
             System.out.println(root);
-            return (Row)this.runtimeConverter.convert(root);
+            return (Row) this.runtimeConverter.convert(root);
         } catch (Throwable var3) {
-            String[] arr = new String(message).split(",");
-            TypeInformation<?>[] fieldTypes = rowTypeInfo.getFieldTypes();
-            String[] fieldNames = rowTypeInfo.getFieldNames();
-            Row row=new Row(fieldNames.length);
-            for (int i = 0; i < fieldTypes.length; i++) {
-                if(fieldTypes[i].equals(Types.STRING)) {
-                    row.setField(i, arr[i]);
-                } else if(fieldTypes[i].equals(Types.LONG)) {
+            Row row = null;
+            try {
+                String[] arr = new String(message).split(",");
+                TypeInformation<?>[] fieldTypes = rowTypeInfo.getFieldTypes();
+                String[] fieldNames = rowTypeInfo.getFieldNames();
+                new Row(fieldNames.length);
+                for (int i = 0; i < fieldTypes.length; i++) {
+                    if (fieldTypes[i].equals(Types.STRING)) {
+                        row.setField(i, arr[i]);
+                    } else if (fieldTypes[i].equals(Types.LONG)) {
                         row.setField(i, Long.valueOf(arr[i]));
-                } else if(fieldTypes[i].equals(Types.INT)){
-                    row.setField(i, Integer.valueOf(arr[i]));
+                    } else if (fieldTypes[i].equals(Types.INT)) {
+                        row.setField(i, Integer.valueOf(arr[i]));
+                    }
                 }
-            }
-            if (this.ignoreParseErrors) {
                 return row;
-            } else {
-                throw new IOException("Failed to deserialize CSV row '" + new String(message) + "'.", var3);
+            } catch (Throwable var4) {
+                if (this.ignoreParseErrors) {
+                    return row;
+                } else {
+                    throw new IOException("Failed to deserialize CSV row '" + new String(message) + "'.", var3);
+                }
             }
         }
     }
@@ -89,7 +95,7 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
         if (this == o) {
             return true;
         } else if (o != null && o.getClass() == this.getClass()) {
-            CsvCustomRowDeserializationSchema that = (CsvCustomRowDeserializationSchema)o;
+            CsvCustomRowDeserializationSchema that = (CsvCustomRowDeserializationSchema) o;
             CsvSchema otherSchema = that.csvSchema;
             return this.typeInfo.equals(that.typeInfo) && this.ignoreParseErrors == that.ignoreParseErrors && this.csvSchema.getColumnSeparator() == otherSchema.getColumnSeparator() && this.csvSchema.allowsComments() == otherSchema.allowsComments() && this.csvSchema.getArrayElementSeparator().equals(otherSchema.getArrayElementSeparator()) && this.csvSchema.getQuoteChar() == otherSchema.getQuoteChar() && this.csvSchema.getEscapeChar() == otherSchema.getEscapeChar() && Arrays.equals(this.csvSchema.getNullValue(), otherSchema.getNullValue());
         } else {
@@ -111,7 +117,7 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
     static CsvCustomRowDeserializationSchema.RuntimeConverter[] createFieldRuntimeConverters(boolean ignoreParseErrors, TypeInformation<?>[] fieldTypes) {
         CsvCustomRowDeserializationSchema.RuntimeConverter[] fieldConverters = new CsvCustomRowDeserializationSchema.RuntimeConverter[fieldTypes.length];
 
-        for(int i = 0; i < fieldTypes.length; ++i) {
+        for (int i = 0; i < fieldTypes.length; ++i) {
             fieldConverters[i] = createNullableRuntimeConverter(fieldTypes[i], ignoreParseErrors);
         }
 
@@ -124,7 +130,7 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
             int nodeSize = node.size();
             validateArity(rowArity, nodeSize, ignoreParseErrors);
             Row row = new Row(rowArity);
-            for(int i = 0; i < Math.min(rowArity, nodeSize); ++i) {
+            for (int i = 0; i < Math.min(rowArity, nodeSize); ++i) {
                 if (isTopLevel) {
                     row.setField(i, fieldConverters[i].convert(node.get(fieldNames[i])));
                 } else {
@@ -223,13 +229,13 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
                 return Timestamp.valueOf(node.asText()).toLocalDateTime();
             };
         } else if (info instanceof RowTypeInfo) {
-            RowTypeInfo rowTypeInfo = (RowTypeInfo)info;
+            RowTypeInfo rowTypeInfo = (RowTypeInfo) info;
             return createRowRuntimeConverter(rowTypeInfo, ignoreParseErrors, false);
         } else if (info instanceof BasicArrayTypeInfo) {
-            return createObjectArrayRuntimeConverter(((BasicArrayTypeInfo)info).getComponentInfo(), ignoreParseErrors);
+            return createObjectArrayRuntimeConverter(((BasicArrayTypeInfo) info).getComponentInfo(), ignoreParseErrors);
         } else if (info instanceof ObjectArrayTypeInfo) {
-            return createObjectArrayRuntimeConverter(((ObjectArrayTypeInfo)info).getComponentInfo(), ignoreParseErrors);
-        } else if (info instanceof PrimitiveArrayTypeInfo && ((PrimitiveArrayTypeInfo)info).getComponentType() == Types.BYTE) {
+            return createObjectArrayRuntimeConverter(((ObjectArrayTypeInfo) info).getComponentInfo(), ignoreParseErrors);
+        } else if (info instanceof PrimitiveArrayTypeInfo && ((PrimitiveArrayTypeInfo) info).getComponentType() == Types.BYTE) {
             return createByteArrayRuntimeConverter(ignoreParseErrors);
         } else {
             throw new RuntimeException("Unsupported type information '" + info + "'.");
@@ -241,9 +247,9 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
         CsvCustomRowDeserializationSchema.RuntimeConverter elementConverter = createNullableRuntimeConverter(elementType, ignoreParseErrors);
         return (node) -> {
             int nodeSize = node.size();
-            Object[] array = (Object[])((Object[])Array.newInstance(elementClass, nodeSize));
+            Object[] array = (Object[]) ((Object[]) Array.newInstance(elementClass, nodeSize));
 
-            for(int i = 0; i < nodeSize; ++i) {
+            for (int i = 0; i < nodeSize; ++i) {
                 array[i] = elementConverter.convert(node.get(i));
             }
 
@@ -286,8 +292,8 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
             if (!(typeInfo instanceof RowTypeInfo)) {
                 throw new IllegalArgumentException("Row type information expected.");
             } else {
-                this.typeInfo = (RowTypeInfo)typeInfo;
-                this.csvSchema = CsvRowSchemaConverter.convert((RowTypeInfo)typeInfo);
+                this.typeInfo = (RowTypeInfo) typeInfo;
+                this.csvSchema = CsvRowSchemaConverter.convert((RowTypeInfo) typeInfo);
             }
         }
 
