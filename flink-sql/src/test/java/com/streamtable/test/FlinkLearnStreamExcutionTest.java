@@ -385,7 +385,10 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 .renameColumns("offset as offsets");
         tableEnv.createTemporaryView("test", a);
         tableEnv.createTemporarySystemFunction("TimestampYearHourTableFunc", TimestampYearHourTableFunc.class);
-        Table b = tableEnv.sqlQuery("select msg,d,m,h,offsets,topic from test, LATERAL TABLE(TimestampYearHourTableFunc(100000000))");
+        Table b = tableEnv.sqlQuery("select tttable.*,tmpTable.*,tmpTable2.* from test as tttable," +
+                " LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable(d, m, h)," +
+                "LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable2(d1, m1, h1)");
+        b.printSchema();
         tableEnv.toRetractStream(b,
                 Row.class)
                 .print();
