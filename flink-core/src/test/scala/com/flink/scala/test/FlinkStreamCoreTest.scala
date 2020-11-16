@@ -6,8 +6,9 @@ import com.alibaba.fastjson.JSON
 import com.flink.common.core.FlinkEvnBuilder
 import com.flink.common.core.FlinkLearnPropertiesUtil._
 import com.flink.common.deserialize.TopicMessageDeserialize
+import com.flink.common.java.timemaker.MyTimestampsAndWatermark_radom
 import com.flink.common.kafka.KafkaManager
-import com.flink.common.kafka.KafkaManager.KafkaMessge
+import com.flink.common.kafka.KafkaManager.{KafkaMessge, KafkaTopicOffsetMsg}
 import com.flink.learn.bean.CaseClassUtil.SessionLogInfo
 import com.flink.learn.bean.{AdlogBean, CaseClassUtil, StatisticalIndic}
 import com.flink.learn.richf.{AdlogPVRichFlatMapFunction, SessiontProcessFunction, SessionWindowRichF, WordCountRichFunction}
@@ -18,10 +19,10 @@ import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, TumblingProcessingTimeWindows}
+import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, ProcessingTimeSessionWindows, TumblingEventTimeWindows, TumblingProcessingTimeWindows}
 import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor
 import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger
+import org.apache.flink.streaming.api.windowing.triggers.{EventTimeTrigger, ProcessingTimeTrigger}
 
 class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
 
@@ -86,13 +87,20 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
    */
   test("tumblingWindows") {
     env
-      .addSource(kafkaSource(TEST_TOPIC, BROKER))
-      .map(x => (x.msg.split("|")(7), 1))
+      .addSource(kafkaSource("test", "localhost:9092"))
+      .assignTimestampsAndWatermarks(
+        new BoundedOutOfOrdernessTimestampExtractor[KafkaTopicOffsetMsg](Time.seconds(2)) {
+        override def extractTimestamp(element: KafkaTopicOffsetMsg): Long =
+          {
+            System.currentTimeMillis()}
+      })
+      .map(x => (x.msg, 1))
       .setParallelism(1)
       .keyBy(0)
-      // .window(ProcessingTimeSessionWindows.withGap(Time.seconds(10))) // 算session
-      .window(TumblingProcessingTimeWindows.of(Time.seconds(4))) // = .timeWindow(Time.seconds(60))
-      .evictor(TimeEvictor.of(Time.seconds(2))) // 只保留 窗口内最近2s的数据做计算
+      // .window(ProcessingTimeSessionWindows.withGap(Time.seconds(5))) // 算session
+     .window(TumblingEventTimeWindows.of(Time.seconds(4))) // = .timeWindow(Time.seconds(60))
+     // .evictor(TimeEvictor.of(Time.seconds(2))) // 只保留 窗口内最近2s的数据做计算
+     // .trigger(ProcessingTimeTrigger.create())
       .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
       .sum(1) // 10s窗口的数据
       .print

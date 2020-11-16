@@ -17,6 +17,7 @@ echo $javaopt
 /home/marketplus/flink-1.10.1/bin/flink run \
  -m yarn-cluster  \
  --yarnname Adplatform_ssp_flink_report_${PRO_ENV} \
+  -yD env.java.opts="-XX:MaxDirectMemorySize=500M" \
  -yD env.java.opts=$javaopt \
  -p 5 -yjm 1024 -ytm 1024 -ys 2 \
  -c com.mob.adplat.entry.MobsspFlinkStreamReport2ESEntry \

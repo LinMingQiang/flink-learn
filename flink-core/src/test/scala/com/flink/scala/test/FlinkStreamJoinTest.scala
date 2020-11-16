@@ -48,7 +48,7 @@ class FlinkStreamJoinTest extends FlinkStreamCommonSuit {
   }
 
   /**
-    * 不同于什么的join（基于窗口的join，不能跨窗口）。
+    * 不同于join（基于窗口的join，不能跨窗口）。
     * intervalJoin是基于时间边界的，主表join 某个时间边界内的数据
     * 必须设置     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
     */

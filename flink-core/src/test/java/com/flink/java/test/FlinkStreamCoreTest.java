@@ -43,6 +43,8 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
         sourceStream.keyBy(x -> x.word)
                 .sum("num")
                 .print();
+
+
         // 错误数据输出
         sourceStream
                 .getSideOutput(rejectedWordsTag)

@@ -69,7 +69,19 @@
                                         <exclude>pom.xml</exclude>
                                     </excludes>
                                 </resource>
+                                <resource>
+                                    <directory>${project.basedir}/conf</directory>
+                                    <includes>
+                                        <include>**/*.p12</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
                             </resources>
+                            <nonFilteredFileExtensions>
+                                <nonFilteredFileExtension>pkcs12</nonFilteredFileExtension>
+                                <nonFilteredFileExtension>jks</nonFilteredFileExtension>
+                                <nonFilteredFileExtension>p12</nonFilteredFileExtension>
+                            </nonFilteredFileExtensions>
                         </configuration>
                     </execution>
                 </executions>
