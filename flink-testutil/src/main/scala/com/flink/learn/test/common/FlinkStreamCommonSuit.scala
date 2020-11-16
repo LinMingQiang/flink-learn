@@ -19,7 +19,7 @@ class FlinkStreamCommonSuit extends FunSuite with BeforeAndAfterAll {
     //      Map(new KafkaTopicPartition("maxwell_new", 0) -> 1L.asInstanceOf[java.lang.Long]));
     env = FlinkEvnBuilder.buildStreamingEnv(param,
                                             FLINK_DEMO_CHECKPOINT_PATH,
-      -1) // 1 min
+      1000000) // 1 min
   }
 
   protected override def afterAll(): Unit = {

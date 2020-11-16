@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.apache.flink.table.types.utils.TypeConversions.fromLegacyInfoToDataType;
-
 public class PrintlnRetractStreamTableSink implements RetractStreamTableSink<Row> {
     private String[] fieldNames;
     private DataType[] fieldTypes;
