@@ -24,7 +24,7 @@ import static org.apache.flink.table.descriptors.StreamTableDescriptorValidator.
 public class PrintlnRetractStreamFactory implements StreamTableSinkFactory<Tuple2<Boolean, Row>> {
 
     @Override
-    public StreamTableSink<Tuple2<Boolean, Row>> createStreamTableSink(Map<String, String> properties) {
+    public StreamTableSink<Tuple2<Boolean, Row>> createTableSink(Map<String, String> properties) {
         DescriptorProperties descriptorProperties = new DescriptorProperties(true);
         descriptorProperties.putProperties(properties);
         TableSchema tableSchema = descriptorProperties.getTableSchema(SCHEMA);
