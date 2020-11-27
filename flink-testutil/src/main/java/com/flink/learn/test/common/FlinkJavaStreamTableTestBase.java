@@ -31,7 +31,6 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
 
     @Before
     public void before() throws Exception {
-        System.out.println("! INITIALIZE ExecutionEnvironment SUCCESS !");
         FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
                 "FlinkLearnStreamDDLSQLEntry");
         bEnv = ExecutionEnvironment.getExecutionEnvironment();
@@ -47,7 +46,7 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
 
     @After
     public void after() {
-        System.out.println("<<<<<<<<<<<<<<<<<<<");
+        System.out.println("Test End");
     }
 
 

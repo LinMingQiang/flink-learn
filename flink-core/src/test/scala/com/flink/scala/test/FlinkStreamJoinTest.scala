@@ -25,6 +25,7 @@ class FlinkStreamJoinTest extends FlinkStreamCommonSuit {
       .map(x => Wordcount(x.msg, 22L, new Date().getTime))
       .assignTimestampsAndWatermarks(new MyTimestampsAndWatermarks(10000L))
 
+
     source1
       .join(source2)
       .where(_.word)

@@ -15,14 +15,18 @@ import com.flink.learn.richf.{AdlogPVRichFlatMapFunction, SessiontProcessFunctio
 import com.flink.learn.sink.{OperatorStateBufferingSink, StateRecoverySinkCheckpointFunc}
 import com.flink.learn.test.common.FlinkStreamCommonSuit
 import com.flink.learn.time.MyTimestampsAndWatermarks2
+import org.apache.flink.api.java.tuple.Tuple
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.scala.function.ProcessWindowFunction
 import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, ProcessingTimeSessionWindows, TumblingEventTimeWindows, TumblingProcessingTimeWindows}
 import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.triggers.{EventTimeTrigger, ProcessingTimeTrigger}
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow
+import org.apache.flink.util.Collector
 
 class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
 
@@ -31,10 +35,11 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
   test("wordCount") {
     env
       .addSource(kafkaSource(TEST_TOPIC, BROKER))
-      .flatMap(_.msg.split("\\|", -1))
+      .flatMap(_.msg.split(",", -1))
       .map(x => (x, 1))
       .keyBy(0)
-      .flatMap(new WordCountRichFunction)
+      .sum(1)
+      // .flatMap(new WordCountRichFunction)
       .print
     env.execute("lmq-flink-demo") //程序名
   }
@@ -95,14 +100,22 @@ class FlinkStreamCoreTest extends FlinkStreamCommonSuit {
             System.currentTimeMillis()}
       })
       .map(x => (x.msg, 1))
-      .setParallelism(1)
       .keyBy(0)
-      // .window(ProcessingTimeSessionWindows.withGap(Time.seconds(5))) // 算session
-     .window(TumblingEventTimeWindows.of(Time.seconds(4))) // = .timeWindow(Time.seconds(60))
-     // .evictor(TimeEvictor.of(Time.seconds(2))) // 只保留 窗口内最近2s的数据做计算
-     // .trigger(ProcessingTimeTrigger.create())
-      .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
-      .sum(1) // 10s窗口的数据
+     // .window(ProcessingTimeSessionWindows.withGap(Time.seconds(5))) // 算session
+     // .window(TumblingEventTimeWindows.of(Time.seconds(4))) // = .timeWindow(Time.seconds(60))
+      .window(TumblingProcessingTimeWindows.of(Time.seconds(4))) // = .timeWindow(Time.seconds(60))
+      // .evictor(TimeEvictor.of(Time.seconds(2))) // 只保留 窗口内最近2s的数据做计算
+      .trigger(ProcessingTimeTrigger.create())
+      .process(new ProcessWindowFunction[(String, Int),String , Tuple, TimeWindow]{
+        override def process(key: Tuple,
+                             context: Context,
+                             elements: Iterable[(String, Int)],
+                             out: Collector[String]): Unit = {
+          out.collect(elements.mkString(","))
+        }
+      })
+      // .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
+     // .sum(1)
       .print
     // .setParallelism(2)
 
