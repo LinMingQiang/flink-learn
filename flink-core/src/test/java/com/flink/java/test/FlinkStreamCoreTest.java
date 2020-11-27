@@ -44,7 +44,6 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
                 .sum("num")
                 .print();
 
-
         // 错误数据输出
         sourceStream
                 .getSideOutput(rejectedWordsTag)
@@ -64,7 +63,10 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
                 "test", "localhost:9092", "latest");
         AsyncDataStream.unorderedWait(
                 stream,
-                new AsyncIODatabaseRequest(), 4, TimeUnit.SECONDS, 3) // 100异步最大个数，超过100个请求将构成反压。
+                new AsyncIODatabaseRequest(),
+                4,
+                TimeUnit.SECONDS,
+                3) // 100异步最大个数，超过100个请求将构成反压。
                 .print();
         streamEnv.execute("lmq-flink-demo"); //程序名
     }
@@ -89,7 +91,8 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
                             }
                         });
         DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> s2 = streamEnv.addSource(getKafkaSourceWithTS("test2", "localhost:9092", "latest"));
-        SingleOutputStreamOperator resultStream = sourceStream.connect(s2)
+        SingleOutputStreamOperator resultStream =
+                sourceStream.connect(s2)
                 .keyBy(KafkaManager.KafkaTopicOffsetTimeMsg::msg, KafkaManager.KafkaTopicOffsetTimeMsg::msg)
                 .process(new StreamConnectCoProcessFunc(rejectedWordsTag));
 
@@ -98,6 +101,5 @@ public class FlinkStreamCoreTest extends FlinkJavaStreamTableTestBase {
         resultStream.getSideOutput(rejectedWordsTag).print();
 
         streamEnv.execute("");
-        // .map(CoMapFunction<> value -> null);
     }
 }
