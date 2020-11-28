@@ -1,7 +1,7 @@
 package com.flink.java.function.process;
 
-import com.flink.common.java.pojo.WordCountPoJo;
 import com.flink.common.kafka.KafkaManager;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.state.ValueState;
@@ -24,6 +24,11 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
         this.errV1 = errV1;
     }
 
+    /**
+     * 初始化
+     * @param parameters
+     * @throws Exception
+     */
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
@@ -35,35 +40,52 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
                         TypeInformation.of(KafkaManager.KafkaTopicOffsetTimeMsg.class)));
     }
 
+    /**
+     * register time server 触发时执行
+     * @param timestamp
+     * @param ctx
+     * @param out
+     * @throws Exception
+     */
     @Override
     public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out) throws Exception {
         if (v2.value() != null) {
             v1.get().forEach(x -> {
                 try {
-                    out.collect(x.msg() + " : " + v2.value().msg());
+                    out.collect("等待后Join ：" + x.msg() + " - " + v2.value().msg());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
         } else {
             v1.get().forEach(x -> {
-                    ctx.output(errV1, x.toString());
+                if(x.ts() <= timestamp){
+                    ctx.output(errV1, "过期未Join : " + x);
+                }
             });
         }
         v1.clear();
     }
 
+    /**
+     *
+     * @param value
+     * @param ctx
+     * @param out
+     * @throws Exception
+     */
     @Override
     public void processElement1(KafkaManager.KafkaTopicOffsetTimeMsg value, Context ctx, Collector<String> out) throws Exception {
+        System.out.println(value+ "  v1 wtm : " + DateFormatUtils.format(ctx.timerService().currentWatermark(), "yyyy-mm-dd HH:mm:ss"));
         if (v2.value() == null) {
             v1.add(value);
-            System.out.println("c : " + ctx.getCurrentKey() + " : " + value);
-            ctx.timerService().registerProcessingTimeTimer(value.ts() + 10000L); // 10s钟
+            System.out.println("未Join到等待 : " + ctx.getCurrentKey());
+            ctx.timerService().registerEventTimeTimer(value.ts()); // 当wartermark超过这个时间的时候就触发ontimer
         } else {
-            out.collect(value.msg() + " : " + v2.value().msg());
+            out.collect("join到 ：" + value.msg() + " - " + v2.value().msg());
             v1.get().forEach(x -> {
                 try {
-                    out.collect(x.msg() + " : " + v2.value().msg());
+                    out.collect("历史的也跟着一起触发Join ：" + x.msg() + " - " + v2.value().msg());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -72,8 +94,24 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
         }
     }
 
+    /**
+     * 维表数据做记录
+     * @param value
+     * @param ctx
+     * @param out
+     * @throws Exception
+     */
     @Override
     public void processElement2(KafkaManager.KafkaTopicOffsetTimeMsg value, Context ctx, Collector<String> out) throws Exception {
+        System.out.println(value +  "  v2 wtm : " + DateFormatUtils.format(ctx.timerService().currentWatermark(), "yyyy-mm-dd HH:mm:ss"));
         v2.update(value);
+        v1.get().forEach(x -> {
+            try {
+                out.collect("历史的也跟着一起触发Join ：" + x.msg() + " - " + v2.value().msg());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        v1.clear();
     }
 }
