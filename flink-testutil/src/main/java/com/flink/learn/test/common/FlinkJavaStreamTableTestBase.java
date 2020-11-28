@@ -28,7 +28,7 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
     public static TableEnvironment tableE = null;
     public static StreamExecutionEnvironment streamEnv = null;
     public static ExecutionEnvironment bEnv = null;
-
+    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> baseKafkaSource;
     @Before
     public void before() throws Exception {
         FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
@@ -42,6 +42,7 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
                 Time.minutes(6));
 
         tableE = FlinkEvnBuilder.buildTableEnv();
+        baseKafkaSource= getKafkaDataStream("test", "localhost:9092", "latest");
     }
 
     @After
