@@ -29,7 +29,7 @@ public class FlinkCoreOperatorEntry {
                 "WordCountEntry");
         streamEnv = FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param(),
                 FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
-                10000L);
+                FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());
 //        StreamTableEnvironment tableEnv = FlinkEvnBuilder.buildStreamTableEnv(
 //                streamEnv,
 //                Time.minutes(1),
