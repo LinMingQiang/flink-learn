@@ -93,7 +93,7 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 .filter(x -> x.f0)
                 .map(x -> new Tuple3<String, String, Long>(x.f1.getField(0).toString(), x.f1.getField(1).toString(), Long.valueOf(x.f1.getField(2).toString())))
                 .returns(Types.TUPLE(Types.STRING, Types.STRING, Types.LONG));
-        ;
+
         tableEnv.createTemporaryView("tmptale", tableEnv.fromDataStream(stream, "topic,msg,ll"));
         tableEnv.from("tmptale").printSchema();
         tableEnv.toRetractStream(tableEnv.from("tmptale"), Row.class).print();
@@ -311,12 +311,12 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
     public void testTimeAttributes() throws Exception {
         // {"id":"id2","name":"name","age":1}
         // 方法1 ： Processtime
-//        Table a = getStreamTable(
-//                getKafkaDataStream("test", "localhost:9092", "latest"),
-//                "topic,offset,msg,pt.proctime")
-//                .renameColumns("offset as ll"); // offset是关键字
-//        tableEnv.createTemporaryView("test", a);
-//        tableEnv.toAppendStream(a, Row.class).print();
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg,pt.proctime")
+                .renameColumns("offset as ll"); // offset是关键字
+        tableEnv.createTemporaryView("test", a);
+        tableEnv.toAppendStream(a, Row.class).print();
 //
 //
 //        // 方法2 ： Processtime

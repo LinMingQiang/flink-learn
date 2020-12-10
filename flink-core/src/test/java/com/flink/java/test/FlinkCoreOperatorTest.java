@@ -90,6 +90,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
     }
 
     /**
+     * watermark是广播发送的，watermark是广播发送的，watermark是广播发送的
      * 可用于双流join。假设 Test2为维表（永久保存状态）
      * 双流connect 必须都有watermark，否则一个产生不了watermark，不会触发 registerEventimeTimer
      * 输入a: a1 a2 a3 ，a流的wtm = a3 。但是因为是双流 ，所以wtm取最小的 = b = min
