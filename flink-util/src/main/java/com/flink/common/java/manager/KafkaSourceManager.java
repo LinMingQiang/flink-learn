@@ -1,6 +1,6 @@
 package com.flink.common.java.manager;
 
-import com.flink.common.deserialize.TopicOffsetEventTimeMsgDeserialize;
+import com.flink.common.deserialize.TopicOffsetJsonEventtimeDeserialize;
 import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.flink.common.kafka.KafkaManager;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;

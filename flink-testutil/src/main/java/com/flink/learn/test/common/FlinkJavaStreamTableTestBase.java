@@ -2,7 +2,7 @@ package com.flink.learn.test.common;
 
 import com.flink.common.core.EnvironmentalKey;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.flink.common.deserialize.TopicOffsetEventTimeMsgDeserialize;
+import com.flink.common.deserialize.TopicOffsetJsonEventtimeDeserialize;
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize;
 import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.flink.common.java.core.FlinkEvnBuilder;
@@ -29,6 +29,10 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
     public static StreamExecutionEnvironment streamEnv = null;
     public static ExecutionEnvironment bEnv = null;
     public static  DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> baseKafkaSource;
+    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeKafkaSource;
+    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeJsonSource;
+
+
     @Before
     public void before() throws Exception {
         FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
@@ -43,6 +47,9 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
 
         tableE = FlinkEvnBuilder.buildTableEnv();
         baseKafkaSource= getKafkaDataStream("test", "localhost:9092", "latest");
+        baseEventtimeKafkaSource = getKafkaDataStreamWithEventTime("test", "localhost:9092", "latest");
+        baseEventtimeJsonSource = getKafkaDataStreamWithJsonEventTime("test", "localhost:9092", "latest");
+
     }
 
     @After
@@ -51,39 +58,9 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
     }
 
 
-    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> getKafkaSource(
-            String topic,
-            String broker,
-            String reset) {
-        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> kafkasource = KafkaManager.getKafkaSource(
-                topic,
-                broker,
-                new TopicOffsetMsgDeserialize());
-        kafkasource.setCommitOffsetsOnCheckpoints(true);
-        if (reset == "earliest") {
-            kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
-        } else if (reset == "latest") {
-            kafkasource.setStartFromLatest();
-        }
-        return kafkasource;
-    }
 
-    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsgEventtime> getKafkaSourceWithEventtime(
-            String topic,
-            String broker,
-            String reset) {
-        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsgEventtime> kafkasource = KafkaManager.getKafkaSource(
-                topic,
-                broker,
-                new TopicOffsetEventTimeMsgDeserialize());
-        kafkasource.setCommitOffsetsOnCheckpoints(true);
-        if (reset == "earliest") {
-            kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
-        } else if (reset == "latest") {
-            kafkasource.setStartFromLatest();
-        }
-        return kafkasource;
-    }
+
+
 
     public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithTS(
             String topic,
@@ -111,16 +88,110 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
         return tableEnv.fromDataStream(source, fields);
     }
 
+
+    /**
+     *
+     * @param topic
+     * @param broker
+     * @param reset
+     * @return
+     */
     public static DataStreamSource getKafkaDataStream(String topic,
                                                       String broker,
                                                       String reset) {
         return streamEnv.addSource(getKafkaSource(topic, broker, reset));
     }
+    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> getKafkaSource(
+            String topic,
+            String broker,
+            String reset) {
+        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> kafkasource = KafkaManager.getKafkaSource(
+                topic,
+                broker,
+                new TopicOffsetMsgDeserialize());
+        kafkasource.setCommitOffsetsOnCheckpoints(true);
+        if (reset == "earliest") {
+            kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
+        } else if (reset == "latest") {
+            kafkasource.setStartFromLatest();
+        }
+        return kafkasource;
+    }
 
-
+    /**
+     *
+     * @param topic
+     * @param broker
+     * @param reset
+     * @return
+     */
     public static DataStreamSource getKafkaDataStreamWithEventTime(String topic,
                                                       String broker,
                                                       String reset) {
         return streamEnv.addSource(getKafkaSourceWithEventtime(topic, broker, reset));
+    }
+
+    /**
+     *
+     * @param topic
+     * @param broker
+     * @param reset
+     * @return
+     */
+    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithEventtime(
+            String topic,
+            String broker,
+            String reset) {
+        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
+                topic,
+                broker,
+                new TopicOffsetTimeStampMsgDeserialize());
+        kafkasource.setCommitOffsetsOnCheckpoints(true);
+        if (reset == "earliest") {
+            kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
+        } else if (reset == "latest") {
+            kafkasource.setStartFromLatest();
+        }
+        return kafkasource;
+    }
+
+
+
+
+    /**
+     *
+     * @param topic
+     * @param broker
+     * @param reset
+     * @return
+     */
+    public static DataStreamSource getKafkaDataStreamWithJsonEventTime(String topic,
+                                                                   String broker,
+                                                                   String reset) {
+        return streamEnv.addSource(getKafkaSourceWithJsonEventtime(topic, broker, reset));
+    }
+
+    /**
+     *
+     * @param topic
+     * @param broker
+     * @param reset
+     * @return
+     */
+    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithJsonEventtime(
+            String topic,
+            String broker,
+            String reset) {
+        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
+                topic,
+                broker,
+                new TopicOffsetJsonEventtimeDeserialize());
+        kafkasource.setCommitOffsetsOnCheckpoints(true);
+        if (reset == "earliest") {
+            kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费
+        } else if (reset == "latest") {
+            kafkasource.setStartFromLatest();
+        }
+        return kafkasource;
     }
 }
