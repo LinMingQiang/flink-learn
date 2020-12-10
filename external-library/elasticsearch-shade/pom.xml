@@ -3,21 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>flink-learn</artifactId>
+        <artifactId>external-library</artifactId>
         <groupId>com.flink.learn</groupId>
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>es-shade</artifactId>
-
+    <artifactId>elasticsearch-shade</artifactId>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
         <elasticsearch.version>7.8.1</elasticsearch.version>
-<!--        <elasticsearch.version>6.5.4</elasticsearch.version>-->
+        <!--        <elasticsearch.version>6.5.4</elasticsearch.version>-->
         <!-- <elasticsearch.version>5.6.4</elasticsearch.version>-->
     </properties>
     <dependencies>

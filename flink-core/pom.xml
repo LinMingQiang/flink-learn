@@ -62,11 +62,7 @@
             <artifactId>flink-cep-scala_${scala.binary.version}</artifactId>
             <scope>${scope.value}</scope>
         </dependency>
-        <dependency>
-            <groupId>com.flink.learn</groupId>
-            <artifactId>flink-function</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>com.flink.learn</groupId>
             <artifactId>flink-util</artifactId>

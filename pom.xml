@@ -11,11 +11,8 @@
         <module>flink-sourcesink</module>
         <module>flink-cep</module>
         <module>flink-core</module>
-        <module>es-shade</module>
         <module>resources</module>
         <module>flink-sql</module>
-        <module>flink-batch</module>
-        <module>flink-function</module>
         <module>assembly</module>
         <module>external-library</module>
     </modules>

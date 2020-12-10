@@ -7,7 +7,6 @@ import com.flink.common.java.bean.FlinkJobsInfo;
 import com.flink.common.rest.httputil.OkHttp3Client;
 import com.flink.common.yarn.api.YarnClientHandler;
 import com.flink.common.yarn.api.YarnRestFulClient;
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
 import java.io.IOException;
