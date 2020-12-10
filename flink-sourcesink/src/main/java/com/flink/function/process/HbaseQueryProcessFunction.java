@@ -1,4 +1,4 @@
-package com.flink.java.function.process;
+package com.flink.function.process;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
 import com.flink.common.dbutil.FlinkHbaseFactory;

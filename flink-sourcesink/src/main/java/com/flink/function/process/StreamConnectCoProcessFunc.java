@@ -1,4 +1,4 @@
-package com.flink.java.function.process;
+package com.flink.function.process;
 
 import com.flink.common.kafka.KafkaManager;
 import org.apache.commons.lang3.time.DateFormatUtils;

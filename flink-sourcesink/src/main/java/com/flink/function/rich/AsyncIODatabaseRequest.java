@@ -1,16 +1,14 @@
-package com.flink.java.function.rich;
+package com.flink.function.rich;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
 import com.flink.common.dbutil.FlinkHbaseFactory;
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg;
-
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
 import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 
 import java.util.Collections;
 import java.util.concurrent.*;
