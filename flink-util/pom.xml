@@ -10,7 +10,7 @@
 
   <dependencies>
       <dependency>
-          <artifactId>es-shade</artifactId>
+          <artifactId>elasticsearch-shade</artifactId>
           <groupId>com.flink.learn</groupId>
           <version>${project.version}</version>
       </dependency>
