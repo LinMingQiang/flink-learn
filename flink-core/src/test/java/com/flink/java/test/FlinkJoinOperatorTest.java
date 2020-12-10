@@ -1,7 +1,7 @@
 package com.flink.java.test;
 
 import com.flink.common.kafka.KafkaManager.*;
-import com.flink.java.function.rich.AsyncIODatabaseRequest;
+import com.flink.function.rich.AsyncIODatabaseRequest;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.apache.flink.api.common.functions.FlatJoinFunction;
 import org.apache.flink.api.common.functions.JoinFunction;
@@ -27,88 +27,6 @@ import org.junit.Test;
 import java.util.concurrent.TimeUnit;
 
 public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
-    public static KeyedStream<KafkaTopicOffsetTimeMsg, String> d2 = null;
-    public static KeyedStream<KafkaTopicOffsetTimeMsg, String> d1 = null;
-    public static SingleOutputStreamOperator<KafkaTopicOffsetTimeMsg> cd2 = null;
-    public static SingleOutputStreamOperator<KafkaTopicOffsetTimeMsg> cd1 = null;
-
-    public static void initSource() {
-        d1 = baseEventtimeKafkaSource
-                .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor
-                                <KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                            @Override
-                            public long extractTimestamp(KafkaTopicOffsetTimeMsg element) {
-                                return element.ts();
-                            }
-                        }
-                ).keyBy(KafkaTopicOffsetTimeMsg::msg);
-        d2 = getKafkaDataStreamWithEventTime("test2", "localhost:9092", "latest")
-                .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor
-                                <KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                            @Override
-                            public long extractTimestamp(KafkaTopicOffsetTimeMsg element) {
-                                return element.ts();
-                            }
-                        }
-                )
-                .keyBy((KeySelector<KafkaTopicOffsetTimeMsg, String>) value -> value.msg());
-    }
-
-    /**
-     * json的数据源
-     */
-    public static void initJsonSource() {
-        d1 = baseEventtimeJsonSource
-                .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor
-                                <KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                            @Override
-                            public long extractTimestamp(KafkaTopicOffsetTimeMsg element) {
-                                return element.ts();
-                            }
-                        }
-                ).keyBy(KafkaTopicOffsetTimeMsg::msg);
-        d2 = getKafkaDataStreamWithJsonEventTime("test2", "localhost:9092", "latest")
-                .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor
-                                <KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                            @Override
-                            public long extractTimestamp(KafkaTopicOffsetTimeMsg element) {
-                                return element.ts();
-                            }
-                        }
-                )
-                .keyBy((KeySelector<KafkaTopicOffsetTimeMsg, String>) value -> value.msg());
-    }
-
-    /**
-     * json的数据源
-     */
-    public static void initJsonCleanSource() {
-        cd1 = baseEventtimeJsonSource
-                .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor
-                                <KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                            @Override
-                            public long extractTimestamp(KafkaTopicOffsetTimeMsg element) {
-                                return element.ts();
-                            }
-                        }
-                );
-         cd2 = getKafkaDataStreamWithJsonEventTime("test2", "localhost:9092", "latest")
-                .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor
-                                <KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                            @Override
-                            public long extractTimestamp(KafkaTopicOffsetTimeMsg element) {
-                                return element.ts();
-                            }
-                        }
-                )
-                ;
-    }
 
     @Test
     public void windowJoinTest() throws Exception {

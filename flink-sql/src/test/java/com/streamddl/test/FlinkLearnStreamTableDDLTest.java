@@ -1,4 +1,4 @@
-package com.streamtable.test;
+package com.streamddl.test;
 
 import com.flink.common.java.pojo.TestPoJo;
 import com.flink.learn.sql.common.DDLSourceSQLManager;

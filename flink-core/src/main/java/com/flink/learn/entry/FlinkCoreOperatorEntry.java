@@ -7,7 +7,7 @@ import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.flink.common.java.core.FlinkEvnBuilder;
 import com.flink.common.java.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
-import com.flink.java.function.process.StreamConnectCoProcessFunc;
+import com.flink.function.process.StreamConnectCoProcessFunc;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;

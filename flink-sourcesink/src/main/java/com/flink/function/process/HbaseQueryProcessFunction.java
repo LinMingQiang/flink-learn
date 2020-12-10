@@ -2,7 +2,7 @@ package com.flink.function.process;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
 import com.flink.common.dbutil.FlinkHbaseFactory;
-import com.flink.java.function.common.util.AbstractHbaseQueryFunction;
+import com.flink.function.common.AbstractHbaseQueryFunction;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;

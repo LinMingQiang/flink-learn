@@ -1,7 +1,6 @@
 package com.flink.common.java.sinkfunc;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.flink.common.dbutil.ElasticsearchHandler;
 import com.flink.common.dbutil.ElasticsearchHandler7;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
