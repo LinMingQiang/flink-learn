@@ -18,7 +18,7 @@ class TopicOffsetJsonEventtimeDeserialize
         KafkaTopicOffsetTimeMsg(new String(record.topic()),
           record.offset(),
           1600000000000L + msgJson.getLong("ts")*1000,
-          DateFormatUtils.format(record.timestamp(), "yyyy-mm-dd HH:mm:ss"),
+          DateFormatUtils.format(1600000000000L + msgJson.getLong("ts")*1000, "yyyy-mm-dd HH:mm:ss"),
           msgJson.getString("msg"))
       } else {
         null

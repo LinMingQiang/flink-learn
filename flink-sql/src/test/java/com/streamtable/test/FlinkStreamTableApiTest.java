@@ -9,6 +9,8 @@ import com.flink.common.manager.SchemaManager;
 import com.flink.common.manager.TableSourceConnectorManager;
 import com.flink.function.common.AbstractHbaseQueryFunction;
 import com.flink.function.process.HbaseQueryProcessFunction;
+import com.flink.learn.sql.func.StrSplitTableFunction;
+import com.flink.learn.sql.func.StrSplitToMultipleRowTableFunction;
 import com.flink.learn.sql.func.TimestampYearHour;
 import com.flink.learn.sql.func.TimestampYearHourTableFunc;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
@@ -21,10 +23,16 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.Over;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.Tumble;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
+import org.apache.flink.table.functions.TableFunction;
+import org.apache.flink.table.functions.TemporalTableFunction;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
@@ -32,11 +40,13 @@ import org.apache.hadoop.hbase.client.Result;
 import org.junit.Test;
 import com.ddlsql.DDLSourceSQLManager;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.apache.flink.table.api.Expressions.$;
+import static org.apache.flink.table.api.Expressions.*;
 
-public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
+public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 
 
     /**
@@ -74,14 +84,13 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
         initJsonCleanSource();
         Table a = getStreamTable(cd1, "topic,offset,ts,date,msg");
         tableEnv.createTemporaryView("test", a);
-
         tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSink_retract"));
-        // 方式1
-        tableEnv.executeSql("insert into printlnSink_retract select topic,msg,count(*) as ll from test group by topic,msg");
 
+        // 方式1
+        //  tableEnv.executeSql("insert into printlnSink_retract select topic,msg,count(*) as ll from test group by topic,msg");
         // 方式2
-//      Table b = tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg");
-//      b.executeInsert("printlnSink_retract");
+        Table b = tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg");
+        b.executeInsert("printlnSink_retract");
 
         // 方式3
 //        tableEnv.toRetractStream(
@@ -91,8 +100,10 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
 
         streamEnv.execute("jobname");
     }
+
     /**
      * stream 转 table ， table 转stream ，stream再转table
+     *
      * @throws Exception
      */
     @Test
@@ -109,15 +120,18 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 .filter(x -> x.f0)
                 .map(x -> new Tuple3<>(x.f1.getField(0).toString(), x.f1.getField(1).toString(), Long.valueOf(x.f1.getField(2).toString())))
                 .returns(Types.TUPLE(Types.STRING, Types.STRING, Types.LONG));
-        // stream - table
-        tableEnv.createTemporaryView("tmptale", tableEnv.fromDataStream(stream, "topic,msg,ll"));
+
         // table - stream
-        tableEnv.toRetractStream(tableEnv.from("tmptale"), Row.class).print();
-        streamEnv.execute("testStreamToTable");
+        printlnStringTable(tableEnv.fromDataStream(stream, "topic,msg,ll"));
+        streamEnv.execute("");
+
     }
 
     /**
      * inner join的状态不会清楚，会一直保持下去
+     * 注意： 如果两个表都有rowtime 时间字段，在select出来的时候只能选一个，
+     * https://stackoverflow.com/questions/57181771/flink-rowtime-attributes-must-not-be-in-the-input-rows-of-a-regular-join
+     *
      * @throws Exception
      */
     @Test
@@ -125,37 +139,185 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
         // {"ts":1000,"msg":"hello"}  {"ts":500,"msg":"hello"}
         initJsonCleanSource();
         Table left = getStreamTable(cd1, "topic,offset,ts,date,msg");
-        Table right = getStreamTable(cd2, $("topic").as("topic1") ,$("msg").as("msg2"));
+        Table right = getStreamTable(cd2,
+                $("topic").as("topic1"),
+                $("msg").as("msg2"),
+                $("ts").as("ts2"));
 
         Table result = left.join(right)
                 .where($("msg").isEqual($("msg2")))
                 .select($("*"));
 
-        tableEnv.toRetractStream(
-                result,
-                Row.class)
-                .print();
-        streamEnv.execute("jobname");
+        printlnStringTable(result);
+        streamEnv.execute("");
+
     }
 
+    /**
+     * 对应ddl里面的  LATERAL TABLE
+     *
+     * @throws Exception
+     */
     @Test
-    public void testSelect() throws Exception {
-        // {"ts":1000,"msg":"hello2"}  {"ts":500,"msg":"hello"}
+    public void testJoinUDTF() throws Exception {
+        // {"ts":1000,"msg":"hello,world"}  {"ts":500,"msg":"hello"}
         initJsonCleanSource();
         Table orders = getStreamTable(cd1, "topic,offset,ts,date,msg");
-        Table revenue = orders
+        tableEnv.createTemporarySystemFunction("ts_to_DMH", new TimestampYearHourTableFunc());
+        tableEnv.createTemporarySystemFunction("split", new StrSplitTableFunction(","));
+        tableEnv.createTemporarySystemFunction("split_multiple_row", new StrSplitToMultipleRowTableFunction(","));
+
+        Table result = orders
+                .joinLateral(call("ts_to_DMH", $("ts"))) // 因为返回的是Row，所以不需要as
+                .joinLateral(call("split", $("msg")).as("key", "value")) // 一行转多列,不as的话是 f0,f1
+                .joinLateral(call("split_multiple_row", $("msg")).as("v")) // 一行转多行
+                .select($("*"));
+
+        // 以下效果等同 orders.joinLateral(call("split_multiple_row", $("msg")).as("v")) // 一行转多行
+        // orders.flatMap(call("split_multiple_row", $("msg")).as("v"));
+        result.printSchema();
+        printlnStringTable(result);
+        streamEnv.execute("");
+
+    }
+
+
+    /**
+     * 不能设置 setIdleStateRetentionTime 清除，否则报
+     * java.lang.NullPointerException
+     * join.temporal.BaseTwoInputStreamOperatorWithStateRetention.registerProcessingCleanupTimer(BaseTwoInputStreamOperatorWithStateRetention.java:109)
+     * rowtime需要设置wtm。同时在数据上，最终的wtm是一起决定的
+     * @throws Exception
+     */
+    @Test
+    public void testJoinTemporalTable() throws Exception {
+        // test2 : {"ts":10,"msg":"1"} {"ts":15,"msg":"1"} {"ts":20,"msg":"1"} {"ts":31,"msg":"1"}
+        // test1: {"ts":11,"msg":"1"} {"ts":16,"msg":"1"} {"ts":21,"msg":"1"} {"ts":31,"msg":"1"}
+        // 触发 21 以前的 再输入 21之前的已经过期了，不生效
+        // 输入 22 没用，wtm在21，要等32 数据(test1和test2都)来了才会触发
+        // 可以得到 11 拿的10的 16拿的15的 21拿的20的
+        initJsonCleanSource();
+        Table orders = getStreamTable(cd1,
+                $("topic"),
+                $("offset"),
+                $("date"),
+                $("msg").as("o_currency"),
+                $("ts").rowtime().as("o_rowtime"));
+
+        Table ratesHistory = getStreamTable(cd2,
+                $("topic").as("topic2"),
+                $("offset").as("offset2"),
+                $("date").as("date2"),
+                $("msg").as("r_currency"),
+                $("ts").rowtime().as("r_rowtime"));// 提供一个汇率历史记录表静态数据集
+
+        printlnStringTable(orders);
+        printlnStringTable(ratesHistory);
+
+        TemporalTableFunction rates = ratesHistory.createTemporalTableFunction(
+                $("r_rowtime"),
+                $("r_currency"));
+        tableEnv.createTemporarySystemFunction("rates", rates);
+
+
+        Table result = orders
+                .joinLateral(
+                        call("rates", $("o_rowtime")),
+                        $("o_currency").isEqual($("r_currency")))
+                .select($("o_currency"),$("o_rowtime"),
+                        lit("<< - >>").as("hello "),
+                        $("r_rowtime"),
+                        $("r_currency"), $("offset2"));
+        printlnStringTable(result);
+        streamEnv.execute("");
+
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    @Test
+    public void testSelect() throws Exception {
+        // {"ts":10,"msg":"hello"}  {"ts":31,"msg":"hello"}
+        initJsonCleanSource();
+        Table orders = getStreamTable(cd1, $("topic"),
+                $("offset"),
+                $("date"),
+                $("msg"),
+                $("ts").rowtime());
+
+        Table result = orders
                 .filter($("msg").isNotEqual("hello"))
                 .groupBy($("msg"), $("topic"))
                 .select($("topic"), $("msg"), $("offset").sum().as("ll"));
-        tableEnv.toRetractStream(
-                revenue,
-                Row.class)
-                .print();
-        streamEnv.execute("testSelect");
+
+        printlnStringTable(result);
+
+        streamEnv.execute("");
+
     }
 
 
+    @Test
+    public void testWindow() throws Exception {
+        // {"ts":10,"msg":"hello"}  {"ts":31,"msg":"hello"}
+        initJsonCleanSource();
+        Table orders = getStreamTable(cd1, $("topic"),
+                $("offset"),
+                $("date"),
+                $("msg"),
+                $("ts").rowtime());
+        // lit(10) 表示一个常数
+        Table result = orders
+                .filter(
+                        and(
+                                $("topic").isNotNull(),
+                                $("msg").isNotNull(),
+                                $("ts").isNotNull()
+                        )
+                )
+                .select($("msg").lowerCase().as("msg"), $("topic"), $("ts"))
+                .window(Tumble.over(lit(10).seconds()).on($("ts")).as("hourlyWindow"))
+                .groupBy($("hourlyWindow"), $("topic"), $("msg"))
+                .select($("topic"),
+                        $("ts"),
+                        $("hourlyWindow").end().as("secWindow"),
+                        $("msg")
+                                .count().as("cnt"));
+        printlnStringTable(result);
+        streamEnv.execute("");
 
+    }
+
+
+    @Test
+    public void testOverWindow() throws Exception {
+        // {"ts":13,"msg":"hello"}  {"ts":35,"msg":"hello"}
+        initJsonCleanSource();
+        Table orders = getStreamTable(cd1, $("topic"),
+                $("offset"),
+                $("date"),
+                $("msg"),
+                $("ts").rowtime());
+// 窗口也是 wtm触发
+        Table res = orders
+                .window(Over
+                        .partitionBy($("msg"))
+                        .orderBy($("ts")) // 必须是时间，rowtime或者proctime
+                        // UNBOUNDED_ROW 每次窗口触发就统计前面所有的。
+                        // lit(1).minutes() 往前计算1分钟的数据
+                        .preceding(rowInterval(3L)) // 往前3个元素。 也就是每3个元素一个窗口计算，
+                        .following(CURRENT_ROW)
+                        .as("w")
+                )
+                .select($("msg"),
+                        $("offset").sum().over($("w")).as("over_offset_sum"),
+                        $("offset").min().over($("w")).as("over_offset_min")); // aggregate over the over window w
+        printlnStringTable(res);
+        streamEnv.execute("");
+
+    }
 
 
     @Test
@@ -391,5 +553,11 @@ public class FlinkLearnStreamExcutionTest extends FlinkJavaStreamTableTestBase {
                 Row.class)
                 .print();
         streamEnv.execute("");
+    }
+
+    public static void printlnStringTable(Table b) throws Exception {
+        tableEnv.toRetractStream(b,
+                Row.class)
+                .print();
     }
 }
