@@ -95,8 +95,8 @@ public class FlinkEvnBuilder {
                 EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamTableEnvironment streamTableEnv = StreamTableEnvironment.create(streamEnv, sett);
         // 状态 时间少于 stateMinT 不会被清除， 状态时间大于stateMaxT，将会被清除。 状态时间在中间的不会被清除。
-        streamTableEnv.getConfig()
-                .setIdleStateRetentionTime(stateMinT, stateMaxT);
+//        streamTableEnv.getConfig()
+//                .setIdleStateRetentionTime(stateMinT, stateMaxT);
         return streamTableEnv;
     }
 

@@ -230,8 +230,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
                         ","));
 
         tableEnv.createTemporarySystemFunction("productInfoFunc",
-                tableEnv.from("test2")
-                .createTemporalTableFunction("proctime", "id"));
+                tableEnv.from("test2").createTemporalTableFunction("proctime", "id"));
 
 
         tableEnv.toAppendStream(

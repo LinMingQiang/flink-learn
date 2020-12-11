@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.functions.co.CoMapFunction;
 import org.apache.flink.types.Row;
 import org.junit.Test;
 
-public class FlinkLearnStreamTableDDLTest extends FlinkJavaStreamTableTestBase {
+public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testDDLSample() throws Exception {
         tableEnv.executeSql(
