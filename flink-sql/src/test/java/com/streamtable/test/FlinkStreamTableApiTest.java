@@ -191,10 +191,12 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testJoinTemporalTable() throws Exception {
-        // test2 : {"ts":10,"msg":"1"} {"ts":15,"msg":"1"} {"ts":20,"msg":"1"} {"ts":31,"msg":"1"}
-        // test1: {"ts":11,"msg":"1"} {"ts":16,"msg":"1"} {"ts":21,"msg":"1"} {"ts":31,"msg":"1"}
-        // 触发 21 以前的 再输入 21之前的已经过期了，不生效
-        // 输入 22 没用，wtm在21，要等32 数据(test1和test2都)来了才会触发
+        // test2 : {"ts":10,"msg":"1"} {"ts":15,"msg":"1"} {"ts":20,"msg":"1"} {"ts":29,"msg":"1"} ： wtm = 19
+        // test1: {"ts":11,"msg":"1"} {"ts":16,"msg":"1"} {"ts":24,"msg":"1"} wtm = 14
+        // 输入24的时候触发 11 。 再输入 11以前的
+        // 输入 {"ts":25,"msg":"1"} 更新了wtm。  输入的11以前的数据也触发了。。。
+        // 最后输入 {"ts":34,"msg":"1"} 只触发了 16的。因为两个流的 wtm还是19，并不是24.
+        // 输入 test2 : {"ts":34,"msg":"1"} ,触发24  此时的wtm = 24
         // 可以得到 11 拿的10的 16拿的15的 21拿的20的
         initJsonCleanSource();
         Table orders = getStreamTable(cd1,
@@ -224,7 +226,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
                 .joinLateral(
                         call("rates", $("o_rowtime")),
                         $("o_currency").isEqual($("r_currency")))
-                .select($("o_currency"),$("o_rowtime"),
+                .select($("o_currency"),$("offset") , $("o_rowtime"),
                         lit("<< - >>").as("hello "),
                         $("r_rowtime"),
                         $("r_currency"), $("offset2"));

@@ -17,8 +17,8 @@ class TopicOffsetJsonEventtimeDeserialize
       if(msgJson.containsKey("ts")) {
         KafkaTopicOffsetTimeMsg(new String(record.topic()),
           record.offset(),
-          1600000000000L + msgJson.getLong("ts")*1000,
-          DateFormatUtils.format(1600000000000L + msgJson.getLong("ts")*1000, "yyyy-mm-dd HH:mm:ss"),
+          1600000020000L + msgJson.getLong("ts")*1000,
+          DateFormatUtils.format(1600000020000L + msgJson.getLong("ts")*1000, "yyyy-mm-dd HH:mm:ss"),
           msgJson.getString("msg"))
       } else {
         null
