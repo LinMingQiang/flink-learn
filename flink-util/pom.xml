@@ -92,12 +92,11 @@
           <artifactId>flink-cep-scala_${scala.binary.version}</artifactId>
           <scope>provided</scope>
       </dependency>
-      <dependency>
-          <groupId>org.apache.kafka</groupId>
-          <artifactId>kafka_${scala.binary.version}</artifactId>
-          <version>0.8.2.2</version>
-          <scope>provided</scope>
-      </dependency>
+<!--      <dependency>-->
+<!--          <groupId>org.apache.kafka</groupId>-->
+<!--          <artifactId>kafka_${scala.binary.version}</artifactId>-->
+<!--          <scope>provided</scope>-->
+<!--      </dependency>-->
 
   </dependencies>
 

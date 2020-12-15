@@ -36,7 +36,6 @@ public class FlinkEvnBuilder {
 
         //超时
         //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         env.getConfig().setAutoWatermarkInterval(1L); // 设置 触发水位计算 间隔
 
         // 同一时间只允许进行一个检查点

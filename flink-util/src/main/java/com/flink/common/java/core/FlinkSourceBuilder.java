@@ -27,9 +27,17 @@ import java.io.IOException;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 
-public class FlinkSourceBuilder {
-    public static StreamExecutionEnvironment streamEnv = null;
-    public static StreamTableEnvironment tableEnv = null;
+public class FlinkSourceBuilder extends FlinkStreamEnvAndSource{
+//    public static StreamExecutionEnvironment streamEnv = null;
+//    public static StreamTableEnvironment tableEnv = null;
+//    public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d2 = null;
+//    public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d1 = null;
+//    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd2 = null;
+//    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd1 = null;
+//    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> baseKafkaSource;
+//    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeKafkaSource;
+//    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeJsonSource;
+//
 
     public static void init() throws IOException {
         FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
@@ -185,11 +193,6 @@ public class FlinkSourceBuilder {
         return kafkasource;
     }
 
-    public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d2 = null;
-    public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d1 = null;
-    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd2 = null;
-    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd1 = null;
-
     /**
      * json的数据源
      */
@@ -267,9 +270,6 @@ public class FlinkSourceBuilder {
                 .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg());
     }
 
-    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> baseKafkaSource;
-    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeKafkaSource;
-    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeJsonSource;
     public static void printlnStringTable(Table b) {
         tableEnv.toRetractStream(b,
                 Row.class)
