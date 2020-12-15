@@ -50,6 +50,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy(x -> x.f0)
                 .sum(1)
+                .setParallelism(1)
                 .print();
 
         streamEnv.execute("lmq-flink-demo"); //程序名

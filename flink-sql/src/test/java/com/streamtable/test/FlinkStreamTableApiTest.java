@@ -378,7 +378,6 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
                 getKafkaDataStream("test", "localhost:9092", "latest"),
                 "topic,offset,msg");
         tableEnv.createTemporaryView("test", a);
-
 //        // 可以转stream之后再转换。pojo可以直接对应上Row
 //        SingleOutputStreamOperator<Tuple2<String, Row>> ds = tableEnv.toAppendStream(a, KafkaTopicOffsetMsgPoJo.class)
 //                .map(new MapFunction<KafkaTopicOffsetMsgPoJo, Tuple2<String, Row>>() {
