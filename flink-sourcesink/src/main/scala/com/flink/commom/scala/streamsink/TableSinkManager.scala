@@ -37,6 +37,7 @@ object TableSinkManager {
       fileNum, // optional: write to a single file
       writeM
     )
+
     tEnv.registerTableSink(tblName,
                            // specify table schema
                            col,

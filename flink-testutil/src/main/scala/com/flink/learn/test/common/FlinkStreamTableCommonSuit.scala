@@ -8,7 +8,7 @@ import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer}
 import org.apache.flink.table.api.bridge.scala.{BatchTableEnvironment, StreamTableEnvironment}
 import org.apache.flink.table.api.{Table, TableEnvironment}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -62,7 +62,7 @@ class FlinkStreamTableCommonSuit extends FunSuite with BeforeAndAfterAll {
   def kafkaSource(
       topic: String,
       broker: String,
-      reset: String): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
+      reset: String): FlinkKafkaConsumer[KafkaTopicOffsetMsg] = {
     val kafkasource = KafkaManager.getKafkaSource(
       topic,
       broker,

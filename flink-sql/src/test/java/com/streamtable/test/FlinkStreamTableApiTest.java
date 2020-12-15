@@ -379,7 +379,6 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
                 "topic,offset,msg");
         tableEnv.createTemporaryView("test", a);
 
-
 //        // 可以转stream之后再转换。pojo可以直接对应上Row
 //        SingleOutputStreamOperator<Tuple2<String, Row>> ds = tableEnv.toAppendStream(a, KafkaTopicOffsetMsgPoJo.class)
 //                .map(new MapFunction<KafkaTopicOffsetMsgPoJo, Tuple2<String, Row>>() {
@@ -390,10 +389,10 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 //                });
         // tableEnv.createTemporaryView("test", ds);
         // 方法1 。已经不推荐使用了，推荐的是ddl的方式
-        tableEnv.registerTableSink("hbasesink",
-                new HbaseRetractStreamTableSink(new String[]{"topic", "c"},
-                        new DataType[]{DataTypes.STRING(), DataTypes.BIGINT()
-                        }));
+//        tableEnv.createTemporarySystemFunction("hbasesink",
+//                new HbaseRetractStreamTableSink(new String[]{"topic", "c"},
+//                        new DataType[]{DataTypes.STRING(), DataTypes.BIGINT()
+//                        }));
         // 方法2
 //        tableEnv.sqlUpdate(DDLSourceSQLManager.createCustomHbaseSinkTbl("hbasesink"));
 

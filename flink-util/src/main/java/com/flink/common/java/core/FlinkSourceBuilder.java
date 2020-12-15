@@ -14,7 +14,7 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -46,11 +46,11 @@ public class FlinkSourceBuilder {
         baseEventtimeJsonSource = getKafkaDataStreamWithJsonEventTime("test", "localhost:9092", "latest");
 
     }
-    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithTS(
+    public static FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithTS(
             String topic,
             String broker,
             String reset) {
-        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
+        FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
                 topic,
                 broker,
                 new TopicOffsetTimeStampMsgDeserialize());
@@ -91,11 +91,11 @@ public class FlinkSourceBuilder {
                                                       String reset) {
         return streamEnv.addSource(getKafkaSource(topic, broker, reset));
     }
-    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> getKafkaSource(
+    public static FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetMsg> getKafkaSource(
             String topic,
             String broker,
             String reset) {
-        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetMsg> kafkasource = KafkaManager.getKafkaSource(
+        FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetMsg> kafkasource = KafkaManager.getKafkaSource(
                 topic,
                 broker,
                 new TopicOffsetMsgDeserialize());
@@ -128,11 +128,11 @@ public class FlinkSourceBuilder {
      * @param reset
      * @return
      */
-    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithEventtime(
+    public static FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithEventtime(
             String topic,
             String broker,
             String reset) {
-        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
+        FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
                 topic,
                 broker,
                 new TopicOffsetTimeStampMsgDeserialize());
@@ -168,11 +168,11 @@ public class FlinkSourceBuilder {
      * @param reset
      * @return
      */
-    public static FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithJsonEventtime(
+    public static FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetTimeMsg> getKafkaSourceWithJsonEventtime(
             String topic,
             String broker,
             String reset) {
-        FlinkKafkaConsumer010<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
+        FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetTimeMsg> kafkasource = KafkaManager.getKafkaSource(
                 topic,
                 broker,
                 new TopicOffsetJsonEventtimeDeserialize());

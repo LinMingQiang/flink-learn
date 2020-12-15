@@ -3,7 +3,7 @@ package com.flink.common.kafka
 import java.util.Properties
 
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize
-import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010, KafkaDeserializationSchema}
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDeserializationSchema}
 
 import scala.collection.JavaConversions._
 
@@ -35,8 +35,8 @@ object KafkaManager {
    */
   def getKafkaSource[T](topic: String,
                         broker: String,
-                        deserialize: KafkaDeserializationSchema[T]): FlinkKafkaConsumer010[T] = {
-    new FlinkKafkaConsumer010[T](topic.split(",").toList,
+                        deserialize: KafkaDeserializationSchema[T]): FlinkKafkaConsumer[T] = {
+    new FlinkKafkaConsumer[T](topic.split(",").toList,
       deserialize,
       getKafkaParam(broker))
   }
@@ -50,7 +50,7 @@ object KafkaManager {
    */
   def kafkaSource(
                    topic: String,
-                   broker: String): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
+                   broker: String): FlinkKafkaConsumer[KafkaTopicOffsetMsg] = {
     val kafkasource = KafkaManager.getKafkaSource(
       topic,
       broker,
