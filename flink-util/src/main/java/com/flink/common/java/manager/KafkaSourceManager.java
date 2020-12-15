@@ -6,19 +6,19 @@ import com.flink.common.kafka.KafkaManager;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 public class KafkaSourceManager {
 
-    private static <T> FlinkKafkaConsumer010<T> getKafkaSource(
+    private static <T> FlinkKafkaConsumer<T> getKafkaSource(
             String topic,
             String broker,
             String reset,
             KafkaDeserializationSchema<T> kds) {
-        FlinkKafkaConsumer010<T> kafkasource = KafkaManager.getKafkaSource(
+        FlinkKafkaConsumer<T> kafkasource = KafkaManager.getKafkaSource(
                 topic,
                 broker,
                 kds);

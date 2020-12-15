@@ -6,7 +6,7 @@ import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class FlinkStreamCommonSuit extends FunSuite with BeforeAndAfterAll {
@@ -35,7 +35,7 @@ class FlinkStreamCommonSuit extends FunSuite with BeforeAndAfterAll {
   def kafkaSource(
       topic: String,
       broker: String,
-      reset: String = "latest"): FlinkKafkaConsumer010[KafkaTopicOffsetMsg] = {
+      reset: String = "latest"): FlinkKafkaConsumer[KafkaTopicOffsetMsg] = {
     val kafkasource = KafkaManager.getKafkaSource(
       topic,
       broker,

@@ -37,7 +37,6 @@ object FlinkEvnBuilder {
         ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
       //超时
       //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
-      env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
       env.getConfig.setAutoWatermarkInterval(5000L) // 设置 触发水位计算 间隔
     }
 
