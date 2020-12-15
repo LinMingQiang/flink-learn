@@ -19,6 +19,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.table.catalog.ConnectorCatalogTable;
 import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.test.util.AbstractTestBase;
 import org.apache.flink.types.Row;
@@ -134,7 +135,6 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
         tableEnv = FlinkEvnBuilder.buildStreamTableEnv(streamEnv,
                 Time.minutes(1),
                 Time.minutes(6));
-
         tableE = FlinkEvnBuilder.buildTableEnv();
         baseKafkaSource= getKafkaDataStream("test", "localhost:9092", "latest");
         baseEventtimeKafkaSource = getKafkaDataStreamWithEventTime("test", "localhost:9092", "latest");
