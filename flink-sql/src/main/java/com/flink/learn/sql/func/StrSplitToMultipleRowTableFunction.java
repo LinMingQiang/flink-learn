@@ -13,8 +13,8 @@ public class StrSplitToMultipleRowTableFunction extends TableFunction<Row> {
         this.splitRegex = splitRegex;
     }
     String splitRegex = ",";
-    public void eval(String str) {
-        String[] r = str.split(splitRegex);
+    public void eval(String... keys) {
+        String[] r = keys[0].split(splitRegex);
         for (String s : r) {
             collect(Row.of(s));
         }

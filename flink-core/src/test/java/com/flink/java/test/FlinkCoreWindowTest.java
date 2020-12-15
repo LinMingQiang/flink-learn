@@ -21,6 +21,7 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindo
 import org.apache.flink.streaming.api.windowing.assigners.WindowAssigner;
 import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.triggers.ContinuousProcessingTimeTrigger;
 import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -54,6 +55,8 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy(0)
                 .timeWindow(Time.seconds(2)) // 统计5s一个窗口
+                // 固定时间触发, 每10s触发一次(系统时间) .如果没有设置，则是根据eventtime > window end time 来决定触发
+                .trigger(ContinuousProcessingTimeTrigger.of(Time.seconds(5)))
                 // .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
                 // .evictor(TimeEvictor.of(Time.seconds(2))) // 只保留 窗口内最近2s的数据做计算
                 .process(new ProcessWindowFunction<Tuple2<String, Long>,

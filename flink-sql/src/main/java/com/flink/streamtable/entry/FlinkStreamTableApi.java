@@ -49,4 +49,8 @@ public class FlinkStreamTableApi extends FlinkSourceBuilder {
                 .select($("o_rowtime"));
         printlnStringTable(result);
     }
+
+
+
+
 }

@@ -24,6 +24,7 @@ public class HbaseLookupFunction extends TableFunction<Row> {
      * @param keys join的key例如 a.name = hbase.name and a.age = hbase.age，那进来的局势 a.name,a.age数值
      */
     public void eval(Object... keys) {
+
             Row keyRow = new Row(3);
             keyRow.setField(0, "id1");
             keyRow.setField(1, 1L);

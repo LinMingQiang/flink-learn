@@ -21,13 +21,14 @@ import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.test.util.AbstractTestBase;
+import org.apache.flink.types.Row;
 import org.junit.After;
 import org.junit.Before;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Serializable {
+public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Serializable{
 
 
     public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d2 = null;
@@ -288,5 +289,11 @@ public class FlinkJavaStreamTableTestBase extends AbstractTestBase implements Se
             kafkasource.setStartFromLatest();
         }
         return kafkasource;
+    }
+
+    public static void printlnStringTable(Table b) {
+        tableEnv.toRetractStream(b,
+                Row.class)
+                .print();
     }
 }

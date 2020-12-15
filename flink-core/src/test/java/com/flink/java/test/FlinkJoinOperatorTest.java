@@ -100,6 +100,19 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
 
 
     /**
+     * 在sql里面,
+     * 1： LookupableTableSource
+     * 2： 注册udf，然后 LATERAL TABLE (hbaselookup(id, name))
+     * 3:  lookup 就是普通的 TableFunction。只是分同步还是异步
+     */
+    @Test
+    public void lookupFunTest(){
+        // {"ts":200,"msg":"268"}
+
+    }
+
+
+    /**
      * 异步io测试
      * https://liurio.github.io/2020/03/28/Flink%E6%B5%81%E4%B8%8E%E7%BB%B4%E8%A1%A8%E7%9A%84%E5%85%B3%E8%81%94/
      */
