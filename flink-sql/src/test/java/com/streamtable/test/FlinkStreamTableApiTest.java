@@ -4,6 +4,7 @@ import com.flink.commom.scala.streamsink.TableSinkManager;
 import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
 import com.flink.common.java.pojo.TestRowPoJo;
 import com.flink.common.java.pojo.WordCountPoJo;
+import com.flink.common.java.sourcefunc.HbaseLookupFunction;
 import com.flink.common.java.tablesink.HbaseRetractStreamTableSink;
 import com.flink.common.manager.SchemaManager;
 import com.flink.common.manager.TableSourceConnectorManager;
@@ -31,6 +32,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.Tumble;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
+import org.apache.flink.table.descriptors.Schema;
 import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.table.functions.TemporalTableFunction;
 import org.apache.flink.table.types.DataType;
@@ -166,7 +168,6 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         tableEnv.createTemporarySystemFunction("ts_to_DMH", new TimestampYearHourTableFunc());
         tableEnv.createTemporarySystemFunction("split", new StrSplitTableFunction(","));
         tableEnv.createTemporarySystemFunction("split_multiple_row", new StrSplitToMultipleRowTableFunction(","));
-
         Table result = orders
                 .joinLateral(call("ts_to_DMH", $("ts"))) // 因为返回的是Row，所以不需要as
                 .joinLateral(call("split", $("msg")).as("key", "value")) // 一行转多列,不as的话是 f0,f1
@@ -187,6 +188,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
      * java.lang.NullPointerException
      * join.temporal.BaseTwoInputStreamOperatorWithStateRetention.registerProcessingCleanupTimer(BaseTwoInputStreamOperatorWithStateRetention.java:109)
      * rowtime需要设置wtm。同时在数据上，最终的wtm是一起决定的
+     *
      * @throws Exception
      */
     @Test
@@ -226,7 +228,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
                 .joinLateral(
                         call("rates", $("o_rowtime")),
                         $("o_currency").isEqual($("r_currency")))
-                .select($("o_currency"),$("offset") , $("o_rowtime"),
+                .select($("o_currency"), $("offset"), $("o_rowtime"),
                         lit("<< - >>").as("hello "),
                         $("r_rowtime"),
                         $("r_currency"), $("offset2"));
@@ -463,61 +465,6 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         tableEnv.execute("");
     }
 
-
-    /**
-     * 时间的几种定义
-     * 1: pt.proctime ： 默认就有 proctime属性，pt为它的命名
-     * 2: user_action_time AS PROCTIME()
-     */
-    @Test
-    public void testTimeAttributes() throws Exception {
-        // {"id":"id2","name":"name","age":1}
-        // 方法1 ： Processtime
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg,pt.proctime")
-                .renameColumns("offset as ll"); // offset是关键字
-        tableEnv.createTemporaryView("test", a);
-        tableEnv.toAppendStream(a, Row.class).print();
-//
-//
-//        // 方法2 ： Processtime
-//        tableEnv.sqlUpdate(DDLSourceSQLManager.createStreamFromKafkaProcessTime(
-//                "localhost:9092",
-//                "localhost:2181",
-//                "test", "test2", "test2"));
-//        tableEnv.toAppendStream(tableEnv.from("test2"), Row.class).print();
-
-
-        // {"id":"id2","name":"name","age":1,"etime":1596423467685}
-// eventtime
-//        Table a = getStreamTable(
-//                getKafkaDataStreamWithEventTime("test", "localhost:9092", "latest")
-//                        .assignTimestampsAndWatermarks(
-//                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetMsgEventtime>(Time.seconds(10)) {
-//                                    @Override
-//                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetMsgEventtime element) {
-//                                        return element.etime();
-//                                    }
-//                                }),
-//                "topic,offset,msg,etime.rowtime");// offset是关键字
-//        tableEnv.createTemporaryView("test", a);
-//        tableEnv.toAppendStream(a, Row.class).print();
-
-        // eventtime
-        tableEnv.sqlUpdate(DDLSourceSQLManager.createStreamFromKafkaEventTime(
-                "localhost:9092",
-                "localhost:2181",
-                "test", "test2", "test2"));
-
-        tableEnv.toAppendStream(tableEnv.from("test2"), Row.class).print();
-
-
-        tableEnv.execute("");
-
-    }
-
-
     @Test
     public void testRowPoJo() throws Exception {
         Table a = getStreamTable(
@@ -539,27 +486,21 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     }
 
 
-    @Test
-    public void testTableFunction() throws Exception {
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg")
-                .renameColumns("offset as offsets");
-        tableEnv.createTemporaryView("test", a);
-        tableEnv.createTemporarySystemFunction("TimestampYearHourTableFunc", TimestampYearHourTableFunc.class);
-        Table b = tableEnv.sqlQuery("select tttable.*,tmpTable.*,tmpTable2.* from test as tttable," +
-                " LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable(d, m, h)," +
-                "LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable2(d1, m1, h1)");
-        b.printSchema();
-        tableEnv.toRetractStream(b,
-                Row.class)
-                .print();
-        streamEnv.execute("");
-    }
-
-    public static void printlnStringTable(Table b) throws Exception {
-        tableEnv.toRetractStream(b,
-                Row.class)
-                .print();
-    }
+//    @Test
+//    public void testTableFunction() throws Exception {
+//        Table a = getStreamTable(
+//                getKafkaDataStream("test", "localhost:9092", "latest"),
+//                "topic,offset,msg")
+//                .renameColumns("offset as offsets");
+//        tableEnv.createTemporaryView("test", a);
+//        tableEnv.createTemporarySystemFunction("TimestampYearHourTableFunc", TimestampYearHourTableFunc.class);
+//        Table b = tableEnv.sqlQuery("select tttable.*,tmpTable.*,tmpTable2.* from test as tttable," +
+//                " LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable(d, m, h)," +
+//                "LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable2(d1, m1, h1)");
+//        b.printSchema();
+//        tableEnv.toRetractStream(b,
+//                Row.class)
+//                .print();
+//        streamEnv.execute("");
+//    }
 }
