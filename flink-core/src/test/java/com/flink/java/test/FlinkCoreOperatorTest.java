@@ -42,6 +42,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
         baseKafkaSource
                 .flatMap((FlatMapFunction<KafkaTopicOffsetMsg, String>) (value, out) -> {
                     for (String s : value.msg().split(",", -1)) {
+                        System.out.println(s);
                         out.collect(s);
                     }
                 })
@@ -49,8 +50,8 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                 .map(x -> new Tuple2(x, 1L))
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy(x -> x.f0)
-                .sum(1)
-                .setParallelism(1)
+                 .sum(1)
+                 .setParallelism(1)
                 .print();
 
         streamEnv.execute("lmq-flink-demo"); //程序名

@@ -109,38 +109,38 @@ class FlinkLearnStreamDDLSQLEntry extends FlinkStreamTableCommonSuit {
   /**
     *
     */
-  test("insertIntoCsvTbl") {
-    TableSinkManager.registerCsvTableSink(
-      tableEnv,
-      "csvSinkTbl",
-      Array[String]("bid_req_num", "md_key"),
-      Array[TypeInformation[_]](Types.LONG, Types.STRING),
-      "/Users/eminem/workspace/flink/flink-learn/checkpoint/data", // output path
-      "|", // optional: delimit files by '|'
-      1, // optional: write to a single file
-      WriteMode.OVERWRITE
-    )
-    tableEnv.sqlUpdate(
-      s"""insert into csvSinkTbl select * from ssp_sdk_report""")
-    // tEnv.sqlQuery(s"""select id,count(*) num from test group by id""").insertInto("csvSinkTbl")
-    tableEnv.execute("FlinkLearnStreamDDLSQLEntry")
-  }
+//  test("insertIntoCsvTbl") {
+//    TableSinkManager.registerCsvTableSink(
+//      tableEnv,
+//      "csvSinkTbl",
+//      Array[String]("bid_req_num", "md_key"),
+//      Array[TypeInformation[_]](Types.LONG, Types.STRING),
+//      "/Users/eminem/workspace/flink/flink-learn/checkpoint/data", // output path
+//      "|", // optional: delimit files by '|'
+//      1, // optional: write to a single file
+//      WriteMode.OVERWRITE
+//    )
+//    tableEnv.sqlUpdate(
+//      s"""insert into csvSinkTbl select * from ssp_sdk_report""")
+//    // tEnv.sqlQuery(s"""select id,count(*) num from test group by id""").insertInto("csvSinkTbl")
+//    tableEnv.execute("FlinkLearnStreamDDLSQLEntry")
+//  }
 
 
-  test("udf"){
-    val a = tableEnv.fromDataStream(
-      getKafkaDataStream("test", "localhost:9092", "latest"),
-      'topic,
-      'offset,
-      'msg)
-    tableEnv.createTemporaryView("test", a)
-    tableEnv.createTemporarySystemFunction("timestampYearHour", classOf[TimestampYearHour])
-    val b = tableEnv.sqlQuery("select msg,timestampYearHour(100000000) as day_month_hour from test")
-
-    b.toRetractStream[Row].print
-
-    tableEnv.execute("")
-
-
-  }
+//  test("udf"){
+//    val a = tableEnv.fromDataStream(
+//      getKafkaDataStream("test", "localhost:9092", "latest"),
+//      'topic,
+//      'offset,
+//      'msg)
+//    tableEnv.createTemporaryView("test", a)
+//    tableEnv.createTemporarySystemFunction("timestampYearHour", classOf[TimestampYearHour])
+//    val b = tableEnv.sqlQuery("select msg,timestampYearHour(100000000) as day_month_hour from test")
+//
+//    b.toRetractStream[Row].print
+//
+//    tableEnv.execute("")
+//
+//
+//  }
 }

@@ -5,7 +5,6 @@ import com.flink.learn.reader.{WordCounKeyreader, WordCounPojoKeyreader, WordCou
 import com.flink.learn.trans.{AccountKeyedStateBootstrapFunction, AccountPojoKeyedStateBootstrapFunction, AccountTuple2KeyedStateBootstrapFunction}
 import org.apache.flink.api.java.functions.KeySelector
 import org.apache.flink.api.java.ExecutionEnvironment
-import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
 import org.apache.flink.state.api.{BootstrapTransformation, ExistingSavepoint, OperatorTransformation, Savepoint}
 import org.apache.flink.api.java.tuple.Tuple2
 /**
@@ -20,8 +19,8 @@ object FlinkKeyStateProccessTest {
   val newPath = ckpPath + "/scalatanssavepoint"
   val bEnv = ExecutionEnvironment.getExecutionEnvironment
   def main(args: Array[String]): Unit = {
-    val existSp =
-      Savepoint.load(bEnv, newPath, new RocksDBStateBackend(ckpPath))
+//    val existSp =
+//      Savepoint.load(bEnv, newPath, new RocksDBStateBackend(ckpPath))
     // readKeyState(existSp, uid).print
     // transKeystateAndWritebak(existSp)
 

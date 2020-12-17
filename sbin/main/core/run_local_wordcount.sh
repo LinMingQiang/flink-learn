@@ -5,5 +5,5 @@
 #-s file:///Users/eminem/workspace/flink/flink-learn/savepoint/savepoint-c4fb21-d0e5d7045b40 \
 
 echo "start ........"
-flink run -c com.flink.learn.entry.FlinkCoreOperatorEntry /Users/eminem/workspace/flink/flink-learn/flink-core/target/flink-core-1.0.0.jar "runStreamConnect"
+flink run -Dexecution.runtime-mode=STREAMING -c com.flink.learn.entry.FlinkCoreOperatorEntry /Users/eminem/workspace/flink/flink-learn/flink-core/target/flink-core-1.0.0.jar "runWordCount"
 #flink run -c com.flink.learn.entry.FlinkCoreOperatorEntry /Users/eminem/workspace/flink/flink-learn/flink-core/target/flink-core-1.0.0.jar
