@@ -1,5 +1,6 @@
 package com.flink.common.java.core;
 
+import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -17,7 +18,6 @@ import java.io.IOException;
 public class FlinkEvnBuilder {
 
     /**
-     *
      * @param parameters
      * @param checkpointPath
      * @param checkPointInterval
@@ -30,10 +30,9 @@ public class FlinkEvnBuilder {
             Long checkPointInterval) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.getConfig().setGlobalJobParameters(parameters); // 广播配置
-       // env.getConfig().setAutoWatermarkInterval(10000L); // 每10s触发一次 wtm
+        // env.getConfig().setAutoWatermarkInterval(10000L); // 每10s触发一次 wtm
         env.enableCheckpointing(checkPointInterval); //更新offsets。每60s提交一次
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(checkPointInterval); //; 两个chk最小间隔
-
         //超时
         //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
         env.getConfig().setAutoWatermarkInterval(1L); // 设置 触发水位计算 间隔
@@ -51,19 +50,15 @@ public class FlinkEvnBuilder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // rocksDBStateBackend.setDbStoragePath("") // rocksdb本地路径，默认在tm临时路径下
-        // println(rocksDBStateBackend.isIncrementalCheckpointsEnabled)
-        // println(rocksDBStateBackend.isTtlCompactionFilterEnabled)
         // state.backend.rocksdb.ttl.compaction.filter.enabled
-        // 说是存储在hdfs，看代码好像不支持 hdfs
-        // rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage")
+        // 说是存储在hdfs，看代码好像不支持 hdfs // rocksdb本地路径，默认在tm临时路径下
+        rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage");
         env.setStateBackend(rocksDBStateBackend);
         return env;
     }
 
 
     /**
-     *
      * @param parameters
      * @param checkpointPath
      * @param checkPointInterval
@@ -87,7 +82,7 @@ public class FlinkEvnBuilder {
     }
 
 
-    public static StreamTableEnvironment buildStreamTableEnv(StreamExecutionEnvironment streamEnv ,
+    public static StreamTableEnvironment buildStreamTableEnv(StreamExecutionEnvironment streamEnv,
                                                              Time stateMinT,
                                                              Time stateMaxT) throws IOException {
         EnvironmentSettings sett =
@@ -99,18 +94,17 @@ public class FlinkEvnBuilder {
     }
 
     /**
-     *
      * @return
      */
     public static ExecutionEnvironment buildEnv() {
         return ExecutionEnvironment.getExecutionEnvironment();
     }
 
-    public static BatchTableEnvironment buildBatchEnv(ExecutionEnvironment e){
+    public static BatchTableEnvironment buildBatchEnv(ExecutionEnvironment e) {
         return BatchTableEnvironment.create(e);
     }
 
-    public static TableEnvironment buildTableEnv(){
+    public static TableEnvironment buildTableEnv() {
         EnvironmentSettings sett =
                 EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         return TableEnvironment.create(sett);

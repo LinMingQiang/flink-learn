@@ -16,77 +16,77 @@ import org.apache.flink.types.Row
 
 class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
 
-  test("executeSql") {
-    val a = tableEnv.fromDataStream(
-      getKafkaDataStream("test", "localhost:9092", "latest"),
-      'topic,
-      'offset,
-      'msg)
-    tableEnv.createTemporaryView("test", a)
-    tableEnv.executeSql(
-      DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl(
-        "printlnSink_retract"))
-    tableEnv
-      .sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg")
-      .insertInto("printlnSink_retract")
-    // 这里需要用tableEnv.execute("jobname"); 而不是 streamEnv.execute("jobname")
-    tableEnv.execute("jobname")
-  }
-
-
-  /**
-   * scala报 No operators defined in streaming topology. Cannot generate StreamGraph.
-   * 未解决
-   */
-  test("stream") {
-    val tableA = tableEnv.fromDataStream(
-      getKafkaDataStream("test", "localhost:9092", "latest"),
-      'topic,
-      'offset,
-      'msg)
-    tableEnv.createTemporaryView("test", tableA)
-    tableEnv
-      .toRetractStream[Row](
-        tableEnv.sqlQuery(
-          "select topic,msg,count(*) as ll from test group by topic,msg"))
-      .addSink(x => println(x))
-
-    streamEnv.execute("")
-  }
+//  test("executeSql") {
+//    val a = tableEnv.fromDataStream(
+//      getKafkaDataStream("test", "localhost:9092", "latest"),
+//      'topic,
+//      'offset,
+//      'msg)
+//    tableEnv.createTemporaryView("test", a)
+//    tableEnv.executeSql(
+//      DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl(
+//        "printlnSink_retract"))
+//    tableEnv
+//      .sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg")
+//      .insertInto("printlnSink_retract")
+//    // 这里需要用tableEnv.execute("jobname"); 而不是 streamEnv.execute("jobname")
+//    tableEnv.execute("jobname")
+//  }
+//
+//
+//  /**
+//   * scala报 No operators defined in streaming topology. Cannot generate StreamGraph.
+//   * 未解决
+//   */
+//  test("stream") {
+//    val tableA = tableEnv.fromDataStream(
+//      getKafkaDataStream("test", "localhost:9092", "latest"),
+//      'topic,
+//      'offset,
+//      'msg)
+//    tableEnv.createTemporaryView("test", tableA)
+//    tableEnv
+//      .toRetractStream[Row](
+//        tableEnv.sqlQuery(
+//          "select topic,msg,count(*) as ll from test group by topic,msg"))
+//      .addSink(x => println(x))
+//
+//    streamEnv.execute("")
+//  }
 
 
   /**
    *
    */
-  test("stream join") {
-    val tableA = tableEnv.fromDataStream(
-      getKafkaDataStream("test", "localhost:9092", "latest"),
-      'topic,
-      'offset,
-      'msg)
-    val tableB = tableEnv.fromDataStream(
-      getKafkaDataStream("test", "localhost:9092", "latest"),
-      'topic,
-      'offset,
-      'msg)
-    tableEnv.createTemporaryView("tableA", tableA)
-    tableEnv.createTemporaryView("tableB", tableB)
-    tableEnv.executeSql(
-      DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl(
-        "printlnSink_retract"))
-    //    tableEnv.getConfig
-//      .setIdleStateRetentionTime(Time.hours(1), Time.hours(2))
-    // sql 结果转为 streamDataset
-    val joinT = tableEnv
-      .sqlQuery(
-        "select a.topic,a.msg from tableA a join tableB b on a.msg=b.msg")
-    tableEnv.createTemporaryView("jointable", joinT)
-    tableEnv
-      .sqlQuery(
-        "select topic,msg,count(*) as ll from jointable group by topic,msg")
-      .insertInto("printlnSink_retract")
-    tableEnv.execute("")
-  }
+//  test("stream join") {
+//    val tableA = tableEnv.fromDataStream(
+//      getKafkaDataStream("test", "localhost:9092", "latest"),
+//      'topic,
+//      'offset,
+//      'msg)
+//    val tableB = tableEnv.fromDataStream(
+//      getKafkaDataStream("test", "localhost:9092", "latest"),
+//      'topic,
+//      'offset,
+//      'msg)
+//    tableEnv.createTemporaryView("tableA", tableA)
+//    tableEnv.createTemporaryView("tableB", tableB)
+//    tableEnv.executeSql(
+//      DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl(
+//        "printlnSink_retract"))
+//    //    tableEnv.getConfig
+////      .setIdleStateRetentionTime(Time.hours(1), Time.hours(2))
+//    // sql 结果转为 streamDataset
+//    val joinT = tableEnv
+//      .sqlQuery(
+//        "select a.topic,a.msg from tableA a join tableB b on a.msg=b.msg")
+//    tableEnv.createTemporaryView("jointable", joinT)
+//    tableEnv
+//      .sqlQuery(
+//        "select topic,msg,count(*) as ll from jointable group by topic,msg")
+//      .insertInto("printlnSink_retract")
+//    tableEnv.execute("")
+//  }
   // {"id":"1","name":"211","age":5}
   /**
     *
