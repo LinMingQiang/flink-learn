@@ -10,7 +10,6 @@ package object bean {
                        var pv: StatisticalIndic) {
     @BeanProperty
     val key = s"${startdate},${plan},${hour}"
-
     override def toString() = {
       (key, pv).toString()
     }
