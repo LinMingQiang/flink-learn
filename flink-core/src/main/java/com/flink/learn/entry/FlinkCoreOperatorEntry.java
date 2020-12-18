@@ -36,16 +36,14 @@ public class FlinkCoreOperatorEntry {
 //                Time.minutes(6));
         if(args.length > 0) {
             switch (args[0]) {
-                case "runWordCount":
-                    runWordCount();
-                case "runStreamConnect":
-                    runStreamConnect();
+                case "runWordCount": runWordCount(); break;
+                case "runStreamConnect":  runStreamConnect(); break;
+                default:
+                    System.out.println("未匹配 ：" + args[0]);break;
             }
         } else {
             runWordCount();
-
         }
-
         streamEnv.execute("FlinkCoreOperatorEntry"); //程序名
     }
 
