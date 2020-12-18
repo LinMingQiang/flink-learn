@@ -38,7 +38,6 @@ public class SampleTest {
         DataStream<String> baseKafkaSource = env.socketTextStream("localhost", 9877);
         baseKafkaSource.flatMap((FlatMapFunction<String, String>) (value, out) -> {
             for (String s : value.split(",", -1)) {
-                System.out.println(s);
                 out.collect(s);
             }
         })
