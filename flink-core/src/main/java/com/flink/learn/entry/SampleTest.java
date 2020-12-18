@@ -1,4 +1,4 @@
-package com.flink.java.test;
+package com.flink.learn.entry;
 
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize;
 import com.flink.common.kafka.KafkaManager;
@@ -12,6 +12,7 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -24,21 +25,19 @@ public class SampleTest {
     public static String checkpointPath = "file:///Users/eminem/workspace/flink/flink-learn/checkpoint/WordCountEntry";
 
     public static void main(String[] args) throws Exception {
-
-        env = StreamExecutionEnvironment.getExecutionEnvironment();
+        String checkpointPath = "file:///tmp/WordCount";
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.enableCheckpointing(5000);
         env.setParallelism(1);
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3, 2000));
 
         CheckpointConfig config = env.getCheckpointConfig();
-        config.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION); //取消作业时保留检查点
-//    env.setStateBackend(new FsStateBackend("hdfs://Desktop:9000/tmp/flinkck"))
+        config.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         env.setStateBackend(new RocksDBStateBackend(checkpointPath, true));
 
 
-        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> baseKafkaSource = getKafkaDataStream("test", "localhost:9092", "latest");
-        baseKafkaSource.flatMap((FlatMapFunction<KafkaManager.KafkaTopicOffsetMsg, String>) (value, out) -> {
-            for (String s : value.msg().split(",", -1)) {
+        DataStream<String> baseKafkaSource = env.socketTextStream("localhost", 9877);
+        baseKafkaSource.flatMap((FlatMapFunction<String, String>) (value, out) -> {
+            for (String s : value.split(",", -1)) {
                 System.out.println(s);
                 out.collect(s);
             }
