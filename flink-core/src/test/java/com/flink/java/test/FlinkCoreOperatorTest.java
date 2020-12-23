@@ -81,13 +81,13 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
         sourceStream.keyBy(x -> x.word)
                 .sum("num")
                 .print();
-
         // 错误数据输出
         sourceStream
                 .getSideOutput(rejectedWordsTag)
                 .keyBy(x -> x.word)
                 .sum("num")
                 .print();
+        System.out.println(streamEnv.getExecutionPlan());
         streamEnv.execute("testOutputTag");
     }
 

@@ -6,12 +6,9 @@ import com.flink.common.core.FlinkLearnPropertiesUtil
 import com.flink.common.dbutil.ElasticsearchHandler
 import com.flink.learn.bean.CaseClassUtil.ReportInfo
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
-import org.apache.flink.api.common.typeinfo.{TypeHint, TypeInformation}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
-import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
-import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
+import org.apache.flink.streaming.api.functions.sink._
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.transport.TransportClient
 
@@ -19,8 +16,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 class ElasticReportSink(size: Int, interval: Long)
-    extends RichSinkFunction[ReportInfo]
-    with CheckpointedFunction {
+    extends RichSinkFunction[ReportInfo] {
   var client: TransportClient = null
   private var checkpointedState: ListState[ReportInfo] = _ // checkpoint state
   private val bufferedElements = mutable.HashMap[String, ReportInfo]() // buffer List
@@ -40,12 +36,13 @@ class ElasticReportSink(size: Int, interval: Long)
     client = ElasticsearchHandler.getEsClient(FlinkLearnPropertiesUtil.ES_HOSTS,
       FlinkLearnPropertiesUtil.ES_CLUSTERNAME)
   }
+
   // (day, hour, buyerId, appid, adslot_id, policyId)
-  /**
+ /**
     *
     * @param value
     */
-  override def invoke(value: ReportInfo): Unit = {
+  override def invoke(value: ReportInfo , context: SinkFunction.Context): Unit = {
     try {
       bufferedElements.put(value.keybyKey, value) // 每次都保存最新的
       if (new Date().getTime > nextTime || bufferedElements.size > size) { // 每个一分钟提交一次
@@ -69,38 +66,38 @@ class ElasticReportSink(size: Int, interval: Long)
       case e: Throwable => e.printStackTrace()
     }
   }
-
-  /**
-    * 快照
-    */
-  override def snapshotState(
-      functionSnapshotContext: FunctionSnapshotContext): Unit = {
-    checkpointedState.clear()
-    println("start snapshotState", bufferedElements.size)
-    for (element <- bufferedElements) {
-      checkpointedState.add(element._2)
-    }
-    println("end snapshotState")
-  }
-
-  /**
-    * 初始化恢复
-    * @param functionInitializationContext
-    */
-  override def initializeState(
-      functionInitializationContext: FunctionInitializationContext): Unit = {
-    val descriptor = new ListStateDescriptor[ReportInfo](
-      "buffered-elements",
-      TypeInformation.of(new TypeHint[ReportInfo]() {})
-    )
-    checkpointedState = functionInitializationContext.getOperatorStateStore
-      .getListState(descriptor)
-    if (functionInitializationContext.isRestored) {
-      println("--- initializeState ---")
-      for (element <- checkpointedState.get()) {
-        bufferedElements += (element.keybyKey -> element)
-        println("operator state : ", element)
-      }
-    }
-  }
+//
+//  /**
+//    * 快照
+//    */
+//  override def snapshotState(
+//      functionSnapshotContext: FunctionSnapshotContext): Unit = {
+//    checkpointedState.clear()
+//    println("start snapshotState", bufferedElements.size)
+//    for (element <- bufferedElements) {
+//      checkpointedState.add(element._2)
+//    }
+//    println("end snapshotState")
+//  }
+//
+//  /**
+//    * 初始化恢复
+//    * @param functionInitializationContext
+//    */
+//  override def initializeState(
+//      functionInitializationContext: FunctionInitializationContext): Unit = {
+//    val descriptor = new ListStateDescriptor[ReportInfo](
+//      "buffered-elements",
+//      TypeInformation.of(new TypeHint[ReportInfo]() {})
+//    )
+//    checkpointedState = functionInitializationContext.getOperatorStateStore
+//      .getListState(descriptor)
+//    if (functionInitializationContext.isRestored) {
+//      println("--- initializeState ---")
+//      for (element <- checkpointedState.get()) {
+//        bufferedElements += (element.keybyKey -> element)
+//        println("operator state : ", element)
+//      }
+//    }
+//  }
 }
