@@ -5,6 +5,7 @@ import com.flink.common.java.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetTimeMsg;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
+import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.state.MapState;
@@ -18,9 +19,12 @@ import org.apache.flink.api.java.tuple.Tuple1;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
+import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.evictors.Evictor;
 import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor;
@@ -49,51 +53,73 @@ public class FlinkStreamBusinessTest extends FlinkJavaStreamTableTestBase {
 
     /**
      * DAU ： 一天的窗口，每5s输出一次。
+     * 不能用滑动窗口， 用翻滚窗口+trigger （翻滚窗口肯定是一天的 0-24，不会有滑动的问题）
      */
     @Test
     public void testWindowDAU() throws Exception {
-        // {"ts":5,"msg":"hello"} {"ts":10,"msg":"hello"} {"ts":15,"msg":"hello"} {"ts":20,"msg":"hello2"}
-        // {"ts":25,"msg":"hello3"} {"ts":30,"msg":"hello4"} {"ts":35,"msg":"hello"} {"ts":40,"msg":"hello"}
+        // {"ts":5,"msg":"hello"} {"ts":10,"msg":"hello2"} {"ts":15,"msg":"hello"} {"ts":20,"msg":"hello"}
+        // {"ts":25,"msg":"hello3"} {"ts":99,"msg":"hello4"} {"ts":101,"msg":"hello"} {"ts":140,"msg":"hello"}
         initJsonCleanSource();
         cd1
-                .filter((FilterFunction<KafkaTopicOffsetTimeMsg>) value -> value.ts() >= 1600000000000L) // 过滤昨天的数据
                 .keyBy((KeySelector<KafkaTopicOffsetTimeMsg, String>) value -> value.topic()) // 按key分配
-                .window(TumblingProcessingTimeWindows.of(Time.seconds(100L))) // 统计5s一个窗口
-                .trigger(ContinuousProcessingTimeTrigger.of(Time.seconds(5))) // 固定时间触发, 每10s触发一次(系统时间)
-                .evictor(TimeEvictor.of(Time.seconds(0), true)) // 每次计算完都清除 窗口数据。
+                .window(TumblingEventTimeWindows.of(Time.seconds(100L))) // 统计100s一个窗口
+                // 因为用的是系统时间，所以一个窗口会被多次触发，除非wtm超过了这个窗口的endtime，否则窗口一直保留.用processtime可以多次触发
+                .trigger(ContinuousProcessingTimeTrigger.of(Time.seconds(3))) // 固定时间触发, 每5s触发一次(系统时间)
+                .evictor(TimeEvictor.of(Time.seconds(0), true))
+                // 如果不加这个， Iterable<KafkaTopicOffsetTimeMsg> elements 的数据就一直累积。
+                // 每次计算完都清除 窗口数据。(只是清理原始数据process的数据会保留，也就是说，每次计算的时候，都是计算都是拿着5s中的数据进入process计算)
                 .process(new ProcessWindowFunction<KafkaTopicOffsetTimeMsg,
                         Tuple2<TimeWindow, Tuple3<String, Long, Long>>,
                         String,
                         TimeWindow>() {
-                    MapState<String, String> UidState = null;
-                    ValueState<Long> pvCount = null;
-                    ValueState<Long> uvCount = null;
+                    ValueStateDescriptor<Long> pvDec = null;
+                    MapStateDescriptor<String, String> uidDec = null;
+                    ValueStateDescriptor<Long> uvDec = null;
 
                     @Override
                     public void open(Configuration parameters) {
-                        UidState = getRuntimeContext().getMapState(new MapStateDescriptor<String, String>("uids", Types.STRING, Types.STRING));
-                        pvCount = getRuntimeContext().getState(new ValueStateDescriptor<Long>("pvCount", Types.LONG, 0L));
-                        uvCount = getRuntimeContext().getState(new ValueStateDescriptor<Long>("uvCount", Types.LONG, 0L));
+                        uidDec = new MapStateDescriptor("uidState", Types.STRING, Types.STRING);
+                        pvDec = new ValueStateDescriptor<Long>("pvCount", Types.LONG, 0L);
+                        uvDec = new ValueStateDescriptor<Long>("uvCount", Types.LONG, 0L);
                     }
-
-                    // 保存每个key下面的所有uid。
+                    // 不同的窗口也会进来，所以必须用 context.windowState() ,这个是窗口自己的state。如果在外面定义，那就是operate state，所有公用的
                     @Override
                     public void process(String groupKey,
                                         Context context,
                                         Iterable<KafkaTopicOffsetTimeMsg> elements,
                                         Collector<Tuple2<TimeWindow, Tuple3<String, Long, Long>>> out) throws Exception {
-                        Long pv = pvCount.value();
-                        Long uv = uvCount.value();
+                        ValueState<Long> pvState = context.windowState().getState(pvDec);
+                        ValueState<Long> uvState = context.windowState().getState(uvDec);
+                        MapState<String, String> uidsState = context.windowState().getMapState(uidDec);
+                        Long pv = pvState.value();
+                        Long uv = uvState.value();
                         for (KafkaTopicOffsetTimeMsg element : elements) {
-                            if (!UidState.contains(element.msg())) {
-                                UidState.put(element.msg(), null);
+                            if (!uidsState.contains(element.msg())) {
+                                uidsState.put(element.msg(), null);
                                 uv++;
                             }
                             pv++;
                         }
-                        pvCount.update(pv);
-                        uvCount.update(uv);
-                        out.collect(new Tuple2(context.window(), new Tuple3(groupKey, pv, uvCount.value())));
+                        pvState.update(pv);
+                        uvState.update(uv);
+                        out.collect(new Tuple2(context.window(), new Tuple3(groupKey, pv, uvState.value())));
+                    }
+
+                    /**
+                     * 当窗口被清理的时候调用对应窗口的clear
+                     * @param context
+                     * @throws Exception
+                     */
+                    @Override
+                    public void clear(Context context) throws Exception {
+                        System.out.println("clear : " + context.window());
+                        ValueState<Long> pvState = context.windowState().getState(pvDec);
+                        ValueState<Long> uvState = context.windowState().getState(uvDec);
+                        MapState<String, String> uidsState = context.windowState().getMapState(uidDec);
+                        pvState.clear();
+                        uvState.clear();
+                        uidsState.clear();
+                        super.clear(context);
                     }
                 })
                 .setParallelism(4)
