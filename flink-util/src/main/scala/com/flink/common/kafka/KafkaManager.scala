@@ -26,6 +26,7 @@ object KafkaManager {
   case class KafkaTopicOffsetMsg(topic: String, offset: Long, msg: String)
 //  case class KafkaTopicOffsetMsgEventtime(topic: String, offset: Long, msg: String, etime: Long)
   case class KafkaTopicOffsetTimeMsg(topic: String, offset: Long,  ts: Long, date: String, msg: String)
+  case class KafkaTopicOffsetTimeKeyMsg(topic: String, offset: Long,  ts: Long, date: String, key: String, msg: String)
 
   /**
    *

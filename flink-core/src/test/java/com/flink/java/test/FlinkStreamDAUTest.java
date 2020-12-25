@@ -49,7 +49,7 @@ import java.util.List;
 import static org.apache.flink.table.api.Expressions.*;
 import static org.apache.flink.table.api.Expressions.$;
 
-public class FlinkStreamBusinessTest extends FlinkJavaStreamTableTestBase {
+public class FlinkStreamDAUTest extends FlinkJavaStreamTableTestBase {
 
     /**
      * DAU ： 一天的窗口，每5s输出一次。

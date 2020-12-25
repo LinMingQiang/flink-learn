@@ -20,7 +20,8 @@ class TopicOffsetJsonEventtimeDeserialize
           record.offset(),
           t + msgJson.getLong("ts")*1000,
           DateFormatUtils.format(t + msgJson.getLong("ts")*1000, "yyyy-mm-dd HH:mm:ss"),
-          msgJson.getString("msg"))
+          msgJson.getString("msg")
+        )
       } else {
         null
       }

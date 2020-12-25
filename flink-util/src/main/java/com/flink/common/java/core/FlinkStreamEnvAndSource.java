@@ -16,6 +16,8 @@ public abstract class FlinkStreamEnvAndSource {
     public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d1 = null;
     public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd2 = null;
     public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd1 = null;
+    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd3 = null;
+
 
     public static DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> baseKafkaSource = null;
     public static DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeKafkaSource = null;
