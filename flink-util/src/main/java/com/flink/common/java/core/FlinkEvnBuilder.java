@@ -32,6 +32,8 @@ public class FlinkEvnBuilder {
         env.getConfig().setGlobalJobParameters(parameters); // 广播配置
         // env.getConfig().setAutoWatermarkInterval(10000L); // 每10s触发一次 wtm
         env.enableCheckpointing(checkPointInterval); //更新offsets。每60s提交一次
+        env.setMaxParallelism(2);
+        env.setParallelism(2);
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(checkPointInterval); //; 两个chk最小间隔
         //超时
         //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
@@ -53,7 +55,7 @@ public class FlinkEvnBuilder {
         // state.backend.rocksdb.ttl.compaction.filter.enabled
         // 说是存储在hdfs，看代码好像不支持 hdfs // rocksdb本地路径，默认在tm临时路径下
         rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage");
-        env.setStateBackend(rocksDBStateBackend);
+         env.setStateBackend(rocksDBStateBackend);
         return env;
     }
 

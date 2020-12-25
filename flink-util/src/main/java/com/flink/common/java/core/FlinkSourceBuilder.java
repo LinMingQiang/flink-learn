@@ -218,6 +218,18 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource{
                         }
                 )
         ;
+
+        cd3 = getKafkaDataStreamWithJsonEventTime("test3", "localhost:9092", "latest")
+                .assignTimestampsAndWatermarks(
+                        new BoundedOutOfOrdernessTimestampExtractor
+                                <KafkaManager.KafkaTopicOffsetTimeMsg>(org.apache.flink.streaming.api.windowing.time.Time.seconds(10)) {
+                            @Override
+                            public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
+                                return element.ts();
+                            }
+                        }
+                )
+        ;
     }
     public static void initSource() {
         d1 = baseEventtimeKafkaSource

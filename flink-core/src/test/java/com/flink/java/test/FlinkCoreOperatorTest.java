@@ -42,7 +42,6 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
         baseKafkaSource
                 .flatMap((FlatMapFunction<KafkaTopicOffsetMsg, String>) (value, out) -> {
                     for (String s : value.msg().split(",", -1)) {
-                        System.out.println(s);
                         out.collect(s);
                     }
                 })
