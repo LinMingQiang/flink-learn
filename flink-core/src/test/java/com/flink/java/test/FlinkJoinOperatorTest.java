@@ -59,7 +59,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
         // d1: {"ts":15,"msg":"1"}
         // d2 {"ts":25,"msg":"1"} {"ts":5,"msg":"1"} // 正常输出
         // d2 : {"ts":26,"msg":"1"} {"ts":4,"msg":"1"}  // join 不到
-        initJsonSource();
+        initJsonSource(true);
         d1.intervalJoin(d2)
                 .between(Time.seconds(-10), Time.seconds(10))
                 .process(new ProcessJoinFunction<KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg, String>() {
@@ -145,7 +145,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
         // {"ts":111,"msg":"1"} join {"ts":152,"msg":"1"}
         // {"ts":130,"msg":"4"} join {"ts":130,"msg":"3"}
 
-        initJsonSource();
+        initJsonSource(true);
         MapStateDescriptor<String, KafkaTopicOffsetTimeMsg> bcStateDescriptor =
                 new MapStateDescriptor("d2", Types.STRING, TypeInformation.of(KafkaTopicOffsetTimeMsg.class));
         // d2必须也要wtm，因为双流的wtm是两个流决定的

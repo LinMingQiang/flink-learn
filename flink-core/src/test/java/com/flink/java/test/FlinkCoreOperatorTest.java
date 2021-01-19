@@ -98,6 +98,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
      * 再输入b : b2 b3 ， b流的wtm = b3 。  最后的wtm = min (a3, b3) = (a3 - 10s)
      * 这个时候才触发 a的过期，a1,a2 ，如果已经超过10s了的话
      * 后面再输入其他的，就去 最小的那个。每次输入，各自流都会更新自己的wtm，然后再跟另一个比较取最小
+     *
      * @throws Exception
      */
     @Test
@@ -117,7 +118,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                                         return element.ts();
                                     }
                                 })
-                .setParallelism(1);
+                        .setParallelism(1);
 
         SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> b =
                 KafkaSourceManager.getKafkaDataStream(streamEnv,
@@ -130,8 +131,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                                     public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
                                         return element.ts();
                                     }
-                                }).setParallelism(1)
-                ;
+                                }).setParallelism(1);
 
         SingleOutputStreamOperator resultStream =
                 a
