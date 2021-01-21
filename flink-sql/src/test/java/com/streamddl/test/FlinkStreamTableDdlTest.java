@@ -1,141 +1,109 @@
 package com.streamddl.test;
 
+import com.ddlsql.DDLSourceSQLManager;
 import com.flink.common.java.pojo.TestPoJo;
-import com.flink.learn.sql.common.DDLSourceSQLManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.functions.co.CoMapFunction;
+import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableResult;
 import org.apache.flink.types.Row;
 import org.junit.Test;
 
 public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
-    @Test
-    public void testDDLSample() throws Exception {
-        tableEnv.executeSql(
-                DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
-                        "localhost:2181",
-                        "test",
-                        "test",
-                        ",",
-                        "test"));
-        tableEnv.toRetractStream(tableEnv
-                .sqlQuery("select id,count(*) num from test group by id"), Row.class)
-                .filter(x -> x.f0)
-                .map(x -> x.f1)
-                .print();
-        // insertIntoCsvTbl(tEnv)
-        streamEnv.execute("FlinkLearnStreamDDLSQLEntry");
-    }
-
-
-    @Test
-    public void testDDLWindow() {
-
-    }
 
     /**
-     * 双流连接
+     * 在main里面可以执行，不需要 execute
+     * 在test里面执行得用TableResult
+     *
      * @throws Exception
      */
     @Test
-    public void testStreamConneect() throws Exception {
-
+    public void testDDLSample() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:23","msg":"hello"}
         tableEnv.executeSql(
-                DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
-                        "localhost:2181",
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
                         "test",
-                        ",",
-                        "test"));
-        tableEnv.executeSql(
-                DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
-                        "localhost:2181",
-                        "test2",
-                        "test2",
-                        ",",
-                        "test2"));
+                        "test",
+                        "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+        TableResult re = tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg");
 
-        tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSinkTbl"));
+        // 想要输出得
+        re.print();
 
-        DataStream<Row> a1 =
-                tableEnv.toAppendStream(
-                        tableEnv.sqlQuery("select topic,msg from test") , Row.class);
-        DataStream<Row> a2 =
-                tableEnv.toAppendStream(
-                        tableEnv.sqlQuery("select topic,msg from test2") , Row.class);
-
-        DataStream a3 = a1.connect(a2).map(new CoMapFunction<Row, Row, TestPoJo>() {
-            @Override
-            public TestPoJo map1(Row x) throws Exception {
-                TestPoJo r = new TestPoJo(x.getField(0).toString(), x.getField(1).toString(), 1L);
-                        return r;
-            }
-            @Override
-            public TestPoJo map2(Row x) throws Exception {
-                TestPoJo r = new TestPoJo(x.getField(0).toString(), x.getField(1).toString(), 1L);
-                return r;
-            }
-        }).returns(Types.POJO(TestPoJo.class));
-
-        tableEnv.createTemporaryView("tmptale1", tableEnv.fromDataStream(a3));
-        tableEnv.sqlQuery("select topic,msg,sum(ll) ll from tmptale1 group by topic,msg")
-                .insertInto("printlnSinkTbl");
-
-        tableEnv.execute("");
     }
+
+
+    @Test
+    public void testDDLWindow() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:01","msg":"hello"} {"rowtime":"2021-01-20 00:00:02","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:00:13","msg":"hello"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+        // TUMBLE_ROWTIME 返回的字段做为 rowtime
+        String sql = "select TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
+                "TUMBLE_END(rowtime, INTERVAL '3' SECOND) as TUMBLE_END," +
+                "TUMBLE_ROWTIME(rowtime, INTERVAL '3' SECOND) as new_rowtime," +
+                "msg,count(1) cnt from test group by TUMBLE(rowtime, INTERVAL '3' SECOND), msg";
+        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
+
+        streamEnv.execute();
+    }
+
+
+    @Test
+    public void testIntervalJoin() throws Exception {
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test2",
+                        "test2",
+                        "test2",
+                        "json"));
+        // o-4 < s < o
+        // o < s < o+4
+        // o-1 < s < o+3
+        // TUMBLE_ROWTIME 返回的字段做为 rowtime
+        String sql = " SELECT o.* " +
+                "FROM test o, test2 s " +
+                "WHERE o.msg = s.msg AND" +
+                "      o.rowtime BETWEEN s.rowtime - INTERVAL '4' SECOND AND s.rowtime";
+        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
+
+        streamEnv.execute();
+    }
+
     /**
-     * 自定义的sinkfactory
-     * 百度SPI
-     *  要一次创建 META-INF 再创建services
-     * 1： 需要再resources/META-INF.services/下创建一个接口名-(org.apache.flink.table.factories.TableFactory)的SPI文件（不是txt）
-     * 2：在文件里面写上自己实现的类路径
-     * 3：实现PrintlnAppendStreamFactory。
+     * 自定义的format
+     *
+     * @throws Exception
      */
     @Test
-    public void testcustomSinkFactory() throws Exception {
-
-        // ddl source
+    public void testCustomJsonFormat() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:23","msg":"hello"}
         tableEnv.executeSql(
-                DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
-                        "localhost:2181",
+                DDLSourceSQLManager.createStreamFromKafka(
+                        "localhost:9092",
                         "test",
-                        "test2",
-                        ",",
-                        "test"));
-        tableEnv.createTemporaryView("test" , tableEnv.from("test2")
-                .renameColumns("id as topic")
-                .renameColumns("name as msg")
-                .renameColumns("age as ll"));
-// sourve
-//        Table a = getStreamTable(
-//                getKafkaDataStream("test", "localhost:9092", "latest"),
-//                "topic,offset,msg")
-//                .renameColumns("offset as ll"); // offset是关键字
-        //   tableEnv.createTemporaryView("test", a);
+                        "test",
+                        "test",
+                        "custom-json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+        TableResult re = tableEnv.executeSql("insert into printlnRetractSink select msg , 1 as cnt from test");
 
-
-        tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSinkTbl"));
-
-        DataStream b =
-                tableEnv.toRetractStream(
-                        tableEnv.sqlQuery("select topic,msg,count(1) as ll from test group by topic,msg")
-                        , Row.class)
-                        .filter(x -> x.f0)
-                        .map(x -> new TestPoJo(x.f1.getField(0).toString(), x.f1.getField(1).toString(), Long.valueOf(x.f1.getField(2).toString())))
-                        .returns(Types.POJO(TestPoJo.class));
-
-        tableEnv.createTemporaryView("tmptale", tableEnv.fromDataStream(b));
-
-        // 只能tableEnv.execute("");
-        tableEnv.sqlQuery("select topic,msg,ll from tmptale")
-                .insertInto("printlnSinkTbl");
-        // 只能streamEnv.execute("");
-        // tableEnv.toRetractStream(tableEnv.from("test"), Row.class).print();
-
-
-        tableEnv.execute("");
+        re.print();
     }
-
-
 }

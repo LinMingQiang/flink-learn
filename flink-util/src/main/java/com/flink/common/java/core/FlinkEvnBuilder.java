@@ -58,30 +58,19 @@ public class FlinkEvnBuilder {
          env.setStateBackend(rocksDBStateBackend);
         return env;
     }
-
-
-    /**
-     * @param parameters
-     * @param checkpointPath
-     * @param checkPointInterval
-     * @param stateMinT
-     * @param stateMaxT
-     * @return
-     * @throws IOException
-     */
-    public static StreamTableEnvironment buildStreamTableEnv(ParameterTool parameters,
-                                                             String checkpointPath,
-                                                             Long checkPointInterval,
-                                                             Time stateMinT,
-                                                             Time stateMaxT) throws IOException {
-        StreamExecutionEnvironment streamEnv = buildStreamingEnv(parameters, checkpointPath, checkPointInterval);
-        EnvironmentSettings sett =
-                EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
-        StreamTableEnvironment streamTableEnv = StreamTableEnvironment.create(streamEnv, sett);
-        streamTableEnv.getConfig()
-                .setIdleStateRetentionTime(stateMinT, stateMaxT);
-        return streamTableEnv;
-    }
+//    public static StreamTableEnvironment buildStreamTableEnv(ParameterTool parameters,
+//                                                             String checkpointPath,
+//                                                             Long checkPointInterval,
+//                                                             Time stateMinT,
+//                                                             Time stateMaxT) throws IOException {
+//        StreamExecutionEnvironment streamEnv = buildStreamingEnv(parameters, checkpointPath, checkPointInterval);
+//        EnvironmentSettings sett =
+//                EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
+//        StreamTableEnvironment streamTableEnv = StreamTableEnvironment.create(streamEnv, sett);
+//        streamTableEnv.getConfig()
+//                .setIdleStateRetentionTime(stateMinT, stateMaxT);
+//        return streamTableEnv;
+//    }
 
 
     public static StreamTableEnvironment buildStreamTableEnv(StreamExecutionEnvironment streamEnv,
@@ -91,24 +80,24 @@ public class FlinkEvnBuilder {
                 EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamTableEnvironment streamTableEnv = StreamTableEnvironment.create(streamEnv, sett);
         // 状态 时间少于 stateMinT 不会被清除， 状态时间大于stateMaxT，将会被清除。 状态时间在中间的不会被清除。
-//        streamTableEnv.getConfig().setIdleStateRetentionTime(stateMinT, stateMaxT);
+        streamTableEnv.getConfig().setIdleStateRetentionTime(stateMinT, stateMaxT);
         return streamTableEnv;
     }
 
     /**
      * @return
      */
-    public static ExecutionEnvironment buildEnv() {
-        return ExecutionEnvironment.getExecutionEnvironment();
-    }
-
-    public static BatchTableEnvironment buildBatchEnv(ExecutionEnvironment e) {
-        return BatchTableEnvironment.create(e);
-    }
-
-    public static TableEnvironment buildTableEnv() {
-        EnvironmentSettings sett =
-                EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
-        return TableEnvironment.create(sett);
-    }
+//    public static ExecutionEnvironment buildEnv() {
+//        return ExecutionEnvironment.getExecutionEnvironment();
+//    }
+//
+//    public static BatchTableEnvironment buildBatchEnv(ExecutionEnvironment e) {
+//        return BatchTableEnvironment.create(e);
+//    }
+//
+//    public static TableEnvironment buildTableEnv() {
+//        EnvironmentSettings sett =
+//                EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
+//        return TableEnvironment.create(sett);
+//    }
 }

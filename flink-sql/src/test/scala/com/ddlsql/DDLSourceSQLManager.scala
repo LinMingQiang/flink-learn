@@ -88,24 +88,25 @@ object DDLSourceSQLManager {
     * @param tableName
     * @return
     */
+
   def createStreamFromKafka(broker: String,
-                            zk: String,
                             topic: String,
                             tableName: String,
-                            groupID: String): String = {
+                            groupID: String,
+                            format : String = "json"): String = {
     s"""CREATE TABLE $tableName (
-       |    id VARCHAR,
-       |    name VARCHAR,
-       |    age INT
+       |    topic VARCHAR METADATA FROM 'topic',
+       |    `offset` bigint METADATA,
+       |    rowtime TIMESTAMP(3),
+       |    msg VARCHAR,
+       |    WATERMARK FOR rowtime AS rowtime - INTERVAL '10' SECOND
        |) WITH (
-          'connector' = 'kafka-0.10',
+       |    'connector' = 'kafka',
        |    'topic' = '$topic',
        |    'scan.startup.mode' = 'latest-offset',
        |    'properties.bootstrap.servers' = '$broker',
        |    'properties.group.id' = '$groupID',
-       |    'format' = 'json',
-       |    'json.fail-on-missing-field' = 'false',
-       |    'json.ignore-parse-errors' = 'true'
+       |    'format' = '$format'
        |)""".stripMargin
   }
 
@@ -135,14 +136,28 @@ object DDLSourceSQLManager {
 
   def createCustomSinkTbl(printlnSinkTbl: String): String = {
     s"""CREATE TABLE ${printlnSinkTbl} (
-       |topic VARCHAR,
-       |ll BIGINT,
-       |msg VARCHAR
+       |msg VARCHAR,
+       |cnt BIGINT
        |) WITH (
        |'connector.type' = 'printsink',
        |'println.prefix'='>> : '
        |)""".stripMargin
   }
+
+  /**
+   * 新版的是connector,旧版是 connector.type
+   * @param printlnSinkTbl
+   * @return
+   */
+  def createDynamicPrintlnRetractSinkTbl(printlnSinkTbl: String): String = {
+    s"""CREATE TABLE ${printlnSinkTbl} (
+       |msg VARCHAR,
+       |cnt BIGINT
+       |) WITH (
+       |'connector' = 'printRetract'
+       |)""".stripMargin
+  }
+
 
   def createCustomPrintlnRetractSinkTbl(printlnSinkTbl: String): String = {
     s"""CREATE TABLE ${printlnSinkTbl} (

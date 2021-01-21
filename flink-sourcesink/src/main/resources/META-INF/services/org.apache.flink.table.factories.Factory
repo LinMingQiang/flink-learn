@@ -1,0 +1,2 @@
+com.flink.common.source.java.dynamicfactory.PrintlnRetractDynamicTableSinkFactory
+com.flink.common.java.format.CustomJsonRowDataFormatFactory

@@ -26,6 +26,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Over;
 import org.apache.flink.table.api.Table;
@@ -72,6 +73,31 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 //        streamEnv.execute("aa");
 //    }
 
+    /**
+     * append的只支持非 group类的sql输出
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testTableApiWordCount() throws Exception {
+        // {"ts":100,"msg":"hello"}
+        initJsonCleanSource();
+        Table a = getStreamTable(cd1, "topic,offset,ts,date,msg");
+        tableEnv.createTemporaryView("test", a);
+        // 方式1
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+        tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg");
+
+//        tableEnv
+//                .toRetractStream(
+//                        tableEnv.sqlQuery("select msg,count(*) as cnt from test group by msg"),
+//                        Row.class)
+//                .filter(x -> x.f0)
+//                .map(x -> new Tuple2<>(x.f1.getField(0).toString(), Long.valueOf(x.f1.getField(1).toString())))
+//                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+//                .print();
+        streamEnv.execute();
+    }
 
     /**
      * stream 转 table 转 stream
@@ -173,8 +199,9 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
                 .joinLateral(call("split", $("msg")).as("key", "value")) // 一行转多列,不as的话是 f0,f1
                 .joinLateral(call("split_multiple_row", $("msg")).as("v")) // 一行转多行
                 .select($("*"));
-
-        // 以下效果等同 orders.joinLateral(call("split_multiple_row", $("msg")).as("v")) // 一行转多行
+        // TableAggregateFunction 用于多行转多行
+        // 以下两个效果等同
+        // orders.joinLateral(call("split_multiple_row", $("msg")).as("v")) // 一行转多行
         // orders.flatMap(call("split_multiple_row", $("msg")).as("v"));
         result.printSchema();
         printlnStringTable(result);
@@ -184,8 +211,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 
 
     /**
-     * 不能设置 setIdleStateRetentionTime 清除，否则报
-     * java.lang.NullPointerException
+     * ##好像没问题了？？：不能设置 setIdleStateRetentionTime 清除，否则报 java.lang.NullPointerException
      * join.temporal.BaseTwoInputStreamOperatorWithStateRetention.registerProcessingCleanupTimer(BaseTwoInputStreamOperatorWithStateRetention.java:109)
      * rowtime需要设置wtm。同时在数据上，最终的wtm是一起决定的
      *
@@ -215,8 +241,8 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
                 $("msg").as("r_currency"),
                 $("ts").rowtime().as("r_rowtime"));// 提供一个汇率历史记录表静态数据集
 
-        printlnStringTable(orders);
-        printlnStringTable(ratesHistory);
+//        printlnStringTable(orders);
+//        printlnStringTable(ratesHistory);
 
         TemporalTableFunction rates = ratesHistory.createTemporalTableFunction(
                 $("r_rowtime"),
@@ -261,69 +287,6 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         streamEnv.execute("");
 
     }
-
-
-    @Test
-    public void testWindow() throws Exception {
-        // {"ts":10,"msg":"hello"}  {"ts":31,"msg":"hello"}
-        initJsonCleanSource();
-        Table orders = getStreamTable(cd1, $("topic"),
-                $("offset"),
-                $("date"),
-                $("msg"),
-                $("ts").rowtime());
-        // lit(10) 表示一个常数
-        Table result = orders
-                .filter(
-                        and(
-                                $("topic").isNotNull(),
-                                $("msg").isNotNull(),
-                                $("ts").isNotNull()
-                        )
-                )
-                .select($("msg").lowerCase().as("msg"), $("topic"), $("ts"))
-                .window(Tumble.over(lit(10).seconds()).on($("ts")).as("hourlyWindow"))
-                .groupBy($("hourlyWindow"), $("topic"), $("msg"))
-                .select($("topic"),
-                        $("ts"),
-                        $("hourlyWindow").end().as("secWindow"),
-                        $("msg")
-                                .count().as("cnt"));
-        printlnStringTable(result);
-        streamEnv.execute("");
-
-    }
-
-
-    @Test
-    public void testOverWindow() throws Exception {
-        // {"ts":13,"msg":"hello"}  {"ts":35,"msg":"hello"}
-        initJsonCleanSource();
-        Table orders = getStreamTable(cd1, $("topic"),
-                $("offset"),
-                $("date"),
-                $("msg"),
-                $("ts").rowtime());
-// 窗口也是 wtm触发
-        Table res = orders
-                .window(Over
-                        .partitionBy($("msg"))
-                        .orderBy($("ts")) // 必须是时间，rowtime或者proctime
-                        // UNBOUNDED_ROW 每次窗口触发就统计前面所有的。
-                        // lit(1).minutes() 往前计算1分钟的数据
-                        .preceding(rowInterval(3L)) // 往前3个元素。 也就是每3个元素一个窗口计算，
-                        .following(CURRENT_ROW)
-                        .as("w")
-                )
-                .select($("msg"),
-                        $("offset").sum().over($("w")).as("over_offset_sum"),
-                        $("offset").min().over($("w")).as("over_offset_min")); // aggregate over the over window w
-        printlnStringTable(res);
-        streamEnv.execute("");
-
-    }
-
-
     @Test
     public void testStreamTableSink() throws Exception {
         Table a = getStreamTable(

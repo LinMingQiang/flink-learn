@@ -66,57 +66,7 @@ object DDLSourceSQLManager {
        |)""".stripMargin
 
   // -- earliest-offset /  group-offsets
-  /**
-    *
-    * @param topic
-    * @param tableName
-    * @return
-    */
-  def createStreamFromKafka(broker: String,
-                            zk: String,
-                            topic: String,
-                            tableName: String,
-                            groupID: String): String = {
-    s"""CREATE TABLE $tableName (
-       |    id VARCHAR,
-       |    name VARCHAR,
-       |    age INT
-       |) WITH (
-       |    'connector.type' = 'kafka',
-       |    'connector.version' = '0.10',
-       |    'connector.topic' = '$topic',
-       |    'connector.startup-mode' = 'latest-offset',
-       |    'connector.properties.zookeeper.connect' = '$zk',
-       |    'connector.properties.bootstrap.servers' = '$broker',
-       |    'connector.properties.group.id' = '$groupID',
-       |    'update-mode' = 'append',
-       |    'format.type' = 'json',
-       |    'format.derive-schema' = 'true'
-       |)""".stripMargin
-  }
 
-  def createStreamFromKafkaUseCustomFormat(broker: String,
-                            zk: String,
-                            topic: String,
-                            tableName: String,
-                            groupID: String): String = {
-    s"""CREATE TABLE $tableName (
-       |    id VARCHAR,
-       |    name VARCHAR,
-       |    age INT
-       |) WITH (
-       |    'connector.type' = 'kafka',
-       |    'connector.version' = '0.10',
-       |    'connector.topic' = '$topic',
-       |    'connector.startup-mode' = 'latest-offset',
-       |    'connector.properties.zookeeper.connect' = '$zk',
-       |    'connector.properties.bootstrap.servers' = '$broker',
-       |    'connector.properties.group.id' = '$groupID',
-       |    'update-mode' = 'append',
-       |    'format.type' = 'custom-json',
-       |    'format.derive-schema' = 'true'
-       |)""".stripMargin
-  }
 
   def createStreamFromKafkaProcessTime(broker: String,
                             zk: String,
@@ -124,21 +74,16 @@ object DDLSourceSQLManager {
                             tableName: String,
                             groupID: String): String = {
     s"""CREATE TABLE $tableName (
-       |    id VARCHAR,
-       |    name VARCHAR,
-       |    age INT,
+       |    ts VARCHAR,
+       |    msg VARCHAR,
        |    proctime as PROCTIME()
        |) WITH (
-       |    'connector.type' = 'kafka',
-       |    'connector.version' = '0.10',
-       |    'connector.topic' = '$topic',
-       |    'connector.startup-mode' = 'latest-offset',
-       |    'connector.properties.zookeeper.connect' = '$zk',
-       |    'connector.properties.bootstrap.servers' = '$broker',
-       |    'connector.properties.group.id' = '$groupID',
-       |    'update-mode' = 'append',
-       |    'format.type' = 'json',
-       |    'format.derive-schema' = 'true'
+       |    'connector' = 'kafka',
+       |    'topic' = '$topic',
+       |    'scan.startup.mode' = 'latest-offset',
+       |    'properties.bootstrap.servers' = '$broker',
+       |    'properties.group.id' = '$groupID',
+       |    'format' = 'custom-json'
        |)""".stripMargin
   }
   /**
@@ -167,26 +112,6 @@ object DDLSourceSQLManager {
 
   }
 
-def createCustomSinkTbl(printlnSinkTbl: String): String ={
-  s"""CREATE TABLE ${printlnSinkTbl} (
-     |topic VARCHAR,
-     |ll BIGINT,
-     |msg VARCHAR
-     |) WITH (
-     |'connector.type' = 'printsink',
-     |'println.prefix'='>> : '
-     |)""".stripMargin
-}
-  def createCustomPrintlnRetractSinkTbl(printlnSinkTbl: String): String ={
-    s"""CREATE TABLE ${printlnSinkTbl} (
-       |topic VARCHAR,
-       |msg VARCHAR,
-       |ll BIGINT
-       |) WITH (
-       |'connector.type' = 'printsink_retract',
-       |'println.prefix'='>> : '
-       |)""".stripMargin
-  }
 
   def createHbaseLookupSourceTbl(tbl: String): String ={
     s"""CREATE TABLE ${tbl} (
