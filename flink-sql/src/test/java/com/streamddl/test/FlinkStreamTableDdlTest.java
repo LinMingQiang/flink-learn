@@ -58,9 +58,35 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         streamEnv.execute();
     }
 
+    @Test
+    public void testOverWindow() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:01","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:00:05","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:00:12","msg":"hello"} // 只触发第一条
+        // {"rowtime":"2021-01-20 00:00:16","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:00:02","msg":"hello"} // 过期不参与计算
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        // TUMBLE_ROWTIME 返回的字段做为 rowtime
+        String sql = "select count(1) over w,sum(`offset`) over w " +
+                "FROM test " +
+                "window w AS (" +
+                "partition by msg " +
+                "order by rowtime " +
+                "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW" +
+                ")";
+        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
+
+        streamEnv.execute();
+    }
 
     @Test
     public void testIntervalJoin() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:13","msg":"hello"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",

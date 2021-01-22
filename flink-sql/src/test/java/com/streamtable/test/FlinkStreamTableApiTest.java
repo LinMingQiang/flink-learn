@@ -86,8 +86,8 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         tableEnv.createTemporaryView("test", a);
         // 方式1
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
-        tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg");
-
+        tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg")
+        .print();// 正常在main里面不需要print，test需要print才能执行
 //        tableEnv
 //                .toRetractStream(
 //                        tableEnv.sqlQuery("select msg,count(*) as cnt from test group by msg"),
@@ -96,7 +96,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 //                .map(x -> new Tuple2<>(x.f1.getField(0).toString(), Long.valueOf(x.f1.getField(1).toString())))
 //                .returns(Types.TUPLE(Types.STRING, Types.LONG))
 //                .print();
-        streamEnv.execute();
+       // streamEnv.execute(); // table转stream之后需要这个
     }
 
     /**
@@ -464,4 +464,41 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 //                .print();
 //        streamEnv.execute("");
 //    }
+
+
+
+    @Test
+    public void testOverWindow() throws Exception {
+        // {"ts":10,"msg":"hello"} {"ts":21,"msg":"hello"} {"ts":40,"msg":"hello"}
+        initJsonCleanSource();
+        // $("user"), $("product"), $("amount"), $("rowtime").rowtime()
+        Table a = getStreamTable(cd1, $("topic"), $("offset"), $("msg"), $("date"), $("ts").rowtime());
+        tableEnv.createTemporaryView("test", a);
+        String sql = "select sum(distinct `offset`) over w,max(`offset`) over w " +
+                "from test " +
+                "window w as ( " +
+                "PARTITION BY topic " +
+                "order by ts " +
+                "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) ";
+        Table b =  a
+                .window(Over
+                        .partitionBy($("topic"))
+                        .orderBy($("ts"))
+                        .preceding(UNBOUNDED_ROW)
+                        .as("w"))
+                .select(
+                        $("topic"),
+                        $("msg").count().over($("w")),
+                        $("msg").max().over($("w")),
+                        $("msg").min().over($("w"))
+                );
+        System.out.println(b.explain());;
+        tableEnv.toAppendStream(b, Row.class).print();
+//        tableEnv.toAppendStream(tableEnv.sqlQuery(sql), Row.class).print();
+
+
+        streamEnv.execute();
+
+
+    }
 }
