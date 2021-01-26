@@ -128,7 +128,8 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "test",
                         "custom-json"));
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
-        TableResult re = tableEnv.executeSql("insert into printlnRetractSink select msg , 1 as cnt from test");
+        // TableResult re = tableEnv.executeSql("insert into printlnRetractSink select msg , 1 as cnt from test");
+        TableResult re = tableEnv.executeSql("select msg , 1 as cnt from test");
 
         re.print();
     }
