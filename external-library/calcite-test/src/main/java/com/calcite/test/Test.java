@@ -13,7 +13,6 @@ import org.apache.calcite.tools.Frameworks;
 import org.apache.flink.sql.parser.dql.SqlShowCatalogs;
 
 public class Test {
-
     public static void main(String[] args) {
         // https://blog.csdn.net/ccllcaochong1/article/details/93367343
         // SqlParserImpl calcite内嵌的；CalciteTestSqlParserImpl为自己定义的
