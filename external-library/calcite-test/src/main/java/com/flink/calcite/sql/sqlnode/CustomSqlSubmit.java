@@ -1,4 +1,4 @@
-package org.apache.flink.sql.parser.ddl;
+package com.flink.calcite.sql.sqlnode;
 
 import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.parser.SqlParserPos;
