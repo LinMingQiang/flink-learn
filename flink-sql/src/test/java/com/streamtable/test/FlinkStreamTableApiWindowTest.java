@@ -19,9 +19,7 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.table.api.Over;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.Tumble;
+import org.apache.flink.table.api.*;
 import org.apache.flink.table.functions.TemporalTableFunction;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
@@ -52,15 +50,19 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
                                 $("ts").isNotNull()
                         )
                 )
-                .select($("msg").lowerCase().as("msg"), $("topic"), $("ts"))
-                .window(Tumble.over(lit(10).seconds()).on($("ts")).as("hourlyWindow"))
-                .groupBy($("hourlyWindow"), $("topic"), $("msg"))
+                .select($("msg").lowerCase().as("msg"), $("topic"), $("ts"));
+
+        GroupWindowedTable result2 =  result
+                .window(Tumble.over(lit(10).seconds()).on($("ts")).as("hourlyWindow"));
+        WindowGroupedTable result3 =  result2
+                .groupBy($("hourlyWindow"), $("topic"), $("msg"));
+        Table result4 =  result3
                 .select($("topic"),
-                        $("ts"),
                         $("hourlyWindow").end().as("secWindow"),
                         $("msg")
                                 .count().as("cnt"));
-        printlnStringTable(result);
+
+        printlnStringTable(result4);
         streamEnv.execute("");
 
     }

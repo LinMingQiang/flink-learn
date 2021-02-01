@@ -13,9 +13,10 @@ object FlinkLearnPropertiesUtil extends PropertiesTrait {
   lazy val CHECKPOINT_PATH = getProperties(
     "flink.checkpoint.path",
     "file:///Users/eminem/workspace/flink/flink-learn/checkpoint") +
-    s"/${proName}/${DateFormatUtils.format(new Date(), "yyyyMMddHHMM")}"
+    s"/${proName}/${DateFormatUtils
+      .format(new Date(), "yyyyMMddHHMM")}"
   lazy val CHECKPOINT_INTERVAL =
-    getProperties("flink.checkpoint.interval", "10000").toLong
+    getProperties("flink.checkpoint.interval", "0").toLong
   lazy val ES_HOSTS = getProperties("es.hosts")
   lazy val ES_CLUSTERNAME = getProperties("es.clustername")
   lazy val ES_XPACK_PASSW = getProperties("es.xpack.passw")
@@ -24,8 +25,8 @@ object FlinkLearnPropertiesUtil extends PropertiesTrait {
   lazy val MYSQL_PASSW = getProperties("mysql.passw")
 
   lazy val TEST_TOPIC = getProperties("kafka.topic.test")
-  lazy val FLINK_DEMO_CHECKPOINT_PATH = getProperties("flink.checkpoint.path") + s"/${proName}/${DateFormatUtils
-    .format(new Date(), "yyyyMMddHHMM")}"
+//  lazy val FLINK_DEMO_CHECKPOINT_PATH = getProperties("flink.checkpoint.path") + s"/${proName}/${DateFormatUtils
+//    .format(new Date(), "yyyyMMddHHMM")}"
 
   lazy val ZOOKEEPER = getProperties("hbase.zk")
 

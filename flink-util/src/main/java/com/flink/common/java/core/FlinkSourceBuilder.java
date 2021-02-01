@@ -44,7 +44,7 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
 
     public static void init() throws IOException {
         FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
-                "WordCountEntry");
+                "local-test");
         streamEnv = FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param(),
                 FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
                 FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());

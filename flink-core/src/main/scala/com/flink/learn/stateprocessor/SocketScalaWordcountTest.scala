@@ -9,7 +9,7 @@ import com.flink.common.core.{
   FlinkLearnPropertiesUtil
 }
 import com.flink.common.core.FlinkLearnPropertiesUtil.{
-  FLINK_DEMO_CHECKPOINT_PATH,
+  CHECKPOINT_PATH,
   param
 }
 import com.flink.learn.bean.{WordCountGroupByKey, WordCountPoJo}
@@ -27,7 +27,7 @@ object SocketScalaWordcountTest {
     FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
                                   "SocketScalaWordcountTest")
     val env = FlinkEvnBuilder.buildStreamingEnv(param,
-                                                FLINK_DEMO_CHECKPOINT_PATH,
+      CHECKPOINT_PATH,
                                                 10000)
     val source = env.socketTextStream("localhost", 9877)
     source

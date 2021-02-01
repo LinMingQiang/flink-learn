@@ -33,7 +33,7 @@ public class SocketJavaWordcountTest {
         env.getCheckpointConfig().enableExternalizedCheckpoints(
                 CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //env.setStateBackend(new FsStateBackend(checkpointPath))
-        RocksDBStateBackend rocksDBStateBackend = new RocksDBStateBackend(FlinkLearnPropertiesUtil.FLINK_DEMO_CHECKPOINT_PATH(), true);
+        RocksDBStateBackend rocksDBStateBackend = new RocksDBStateBackend(FlinkLearnPropertiesUtil.CHECKPOINT_PATH(), true);
         // rocksDBStateBackend.enableTtlCompactionFilter(); // 启用ttl后台增量清除功能
         env.setStateBackend(rocksDBStateBackend);
 

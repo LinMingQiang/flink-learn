@@ -1,7 +1,7 @@
 package com.flink.learn.test.common
 
 import com.flink.common.core.{EnvironmentalKey, FlinkEvnBuilder, FlinkLearnPropertiesUtil}
-import com.flink.common.core.FlinkLearnPropertiesUtil.{param, FLINK_DEMO_CHECKPOINT_PATH}
+import com.flink.common.core.FlinkLearnPropertiesUtil.{param, CHECKPOINT_PATH}
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
@@ -17,7 +17,7 @@ class FlinkStreamCommonSuit extends FunSuite with BeforeAndAfterAll {
     //    kafkasource.setStartFromSpecificOffsets(
     //      Map(new KafkaTopicPartition("maxwell_new", 0) -> 1L.asInstanceOf[java.lang.Long]));
     env = FlinkEvnBuilder.buildStreamingEnv(param,
-                                            FLINK_DEMO_CHECKPOINT_PATH,
+      CHECKPOINT_PATH,
       1000000) // 1 min
   }
 

@@ -15,8 +15,36 @@
 // limitations under the License.
 -->
 
+SqlCall CustomSqlSelectEmit():
+{
+SqlNode query;
+SqlNode wtmstring;
+TimeUnit time;
+}
+{
+    {EmitQueryContext context = new EmitQueryContext();}
+    EmitQuery(context)
+    <EMIT>
+        ( <WITH> wtmstring = StringLiteral()
+            (   time = Minute()
+                |
+                time = Second()
+             )
+         )
+                    {
+    return new CustomSqlSelectEmit(getPos(), context.query, wtmstring, time);
+}
+}
 
+void EmitQuery(EmitQueryContext context):
+{
+        SqlNode query;
+}
+{
+        context.query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)
+}
 
+<#--            -->
 SqlCall CustomSqlSubmit() :
 {
      SqlNode stringNode;

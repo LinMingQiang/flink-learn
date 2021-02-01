@@ -27,10 +27,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
-import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.Over;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.Tumble;
+import org.apache.flink.table.api.*;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
@@ -87,7 +84,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         // 方式1
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
         tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg")
-        .print();// 正常在main里面不需要print，test需要print才能执行
+                .print();// 正常在main里面不需要print，test需要print才能执行
 //        tableEnv
 //                .toRetractStream(
 //                        tableEnv.sqlQuery("select msg,count(*) as cnt from test group by msg"),
@@ -96,7 +93,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 //                .map(x -> new Tuple2<>(x.f1.getField(0).toString(), Long.valueOf(x.f1.getField(1).toString())))
 //                .returns(Types.TUPLE(Types.STRING, Types.LONG))
 //                .print();
-       // streamEnv.execute(); // table转stream之后需要这个
+        // streamEnv.execute(); // table转stream之后需要这个
     }
 
     /**
@@ -118,15 +115,15 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         //  tableEnv.executeSql("insert into printlnSink_retract select topic,msg,count(*) as ll from test group by topic,msg");
         // 方式2
         Table b = tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg");
-        b.executeInsert("printlnSink_retract");
-
+        TableResult re = b.executeInsert("printlnSink_retract");
+        re.print();
         // 方式3
 //        tableEnv.toRetractStream(
 //                tableEnv.sqlQuery("select topic,msg,count(*) as ll from test group by topic,msg"),
 //                Row.class)
 //                .print();
+//        streamEnv.execute("jobname");
 
-        streamEnv.execute("jobname");
     }
 
     /**
@@ -287,6 +284,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         streamEnv.execute("");
 
     }
+
     @Test
     public void testStreamTableSink() throws Exception {
         Table a = getStreamTable(
@@ -466,7 +464,6 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 //    }
 
 
-
     @Test
     public void testOverWindow() throws Exception {
         // {"ts":10,"msg":"hello"} {"ts":21,"msg":"hello"} {"ts":40,"msg":"hello"}
@@ -480,7 +477,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
                 "PARTITION BY topic " +
                 "order by ts " +
                 "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) ";
-        Table b =  a
+        Table b = a
                 .window(Over
                         .partitionBy($("topic"))
                         .orderBy($("ts"))
@@ -492,7 +489,8 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
                         $("msg").max().over($("w")),
                         $("msg").min().over($("w"))
                 );
-        System.out.println(b.explain());;
+        System.out.println(b.explain());
+        ;
         tableEnv.toAppendStream(b, Row.class).print();
 //        tableEnv.toAppendStream(tableEnv.sqlQuery(sql), Row.class).print();
 

@@ -1,6 +1,7 @@
 package com.calcite.test;
 
 import com.calcite.sql.parser.impl.CalciteTestSqlParserImpl;
+import com.flink.calcite.sql.sqlnode.CustomSqlSelectEmit;
 import org.apache.calcite.avatica.util.Casing;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.schema.SchemaPlus;
@@ -13,6 +14,15 @@ import org.apache.calcite.tools.Frameworks;
 import org.apache.flink.sql.parser.dql.SqlShowCatalogs;
 
 public class Test {
+    /**
+     * 自定义一个sql的逻辑
+     * 1：编写 CustomSqlSubmit 继承SqlNode
+     * 2：在Parser.tdd 中imports 添加类路径，和关键字
+     * 3：在Parser.tdd 中statementParserMethods添加 CustomSqlSubmit()
+     * 3：parserImpls.ftl 中添加 SQL语法
+     * 4： <SUBMIT> <JOB> <AS>
+     * @param args
+     */
     public static void main(String[] args) {
         // https://blog.csdn.net/ccllcaochong1/article/details/93367343
         // SqlParserImpl calcite内嵌的；CalciteTestSqlParserImpl为自己定义的
@@ -27,19 +37,29 @@ public class Test {
                         .setConformance(SqlConformanceEnum.ORACLE_12)
                         .build())
                 .build();
+        String create = "CREATE TABLE $tableName (\n" +
+                "         topic VARCHAR METADATA FROM 'topic',\n" +
+                "          `offset` bigint METADATA,\n" +
+                "          rowtime TIMESTAMP(3),\n" +
+                "          msg VARCHAR,\n" +
+                "          WATERMARK FOR rowtime AS rowtime - INTERVAL '10' SECOND\n" +
+                "       ) WITH (\n" +
+                "          'connector' = 'kafka',\n" +
+                "          'topic' = '$topic',\n" +
+                "          'scan.startup.mode' = 'latest-offset',\n" +
+                "          'properties.bootstrap.servers' = '$broker',\n" +
+                "          'properties.group.id' = '$groupID',\n" +
+                "          'format' = '$format'\n" +
+                "       )";
+        String sql = "" +
+                "(SELECT u.name,sum(o.amount) AS total FROM orders) " +
+                "EMIT WITH '10' SECOND";
 
-
-
-        String sql = "SELECT u.name,sum(o.amount) AS total\n" +
-                "         FROM orders o\n" +
-                "         INNER JOIN users u ON o.uid = u.id\n" +
-                "         WHERE u.age < 27\n" +
-                "         GROUP BY u.name";
-        SqlParser parser = SqlParser.create(sql, config.getParserConfig());
+        SqlParser parser = SqlParser.create(create, config.getParserConfig());
         try {
             SqlNode sqlNode = parser.parseStmt();
-
             System.out.println(sqlNode.toString());
+
         } catch (Exception e) {
             e.printStackTrace();
         }

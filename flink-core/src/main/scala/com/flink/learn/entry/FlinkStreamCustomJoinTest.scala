@@ -1,16 +1,7 @@
 package com.flink.learn.entry
 
-import com.flink.common.core.{
-  EnvironmentalKey,
-  FlinkEvnBuilder,
-  FlinkLearnPropertiesUtil
-}
-import com.flink.common.core.FlinkLearnPropertiesUtil.{
-  BROKER,
-  FLINK_DEMO_CHECKPOINT_PATH,
-  TEST_TOPIC,
-  param
-}
+import com.flink.common.core.{EnvironmentalKey, FlinkEvnBuilder, FlinkLearnPropertiesUtil}
+import com.flink.common.core.FlinkLearnPropertiesUtil.{param, CHECKPOINT_PATH}
 import org.apache.flink.streaming.api.scala._
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
@@ -33,11 +24,11 @@ object FlinkStreamCustomJoinTest {
 
     FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
                                   "LocalFlinkTest")
-    env = FlinkEvnBuilder.buildStreamingEnv(param, FLINK_DEMO_CHECKPOINT_PATH) // 1 min
+    env = FlinkEvnBuilder.buildStreamingEnv(param, CHECKPOINT_PATH) // 1 min
 
     // 只输出test2的数据，
     env
-      .addSource(KafkaManager.kafkaSource("test1,test2", BROKER))
+      .addSource(KafkaManager.kafkaSource("test1,test2", FlinkLearnPropertiesUtil.BROKER))
       .map { x =>
         val arr = x.msg.split(",", -1)
         val uid = arr(0)
