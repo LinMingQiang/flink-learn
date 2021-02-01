@@ -8,18 +8,17 @@ import com.flink.common.java.core.FlinkEvnBuilder;
 import com.flink.common.java.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
 import com.flink.function.process.StreamConnectCoProcessFunc;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.util.OutputTag;
 
 import java.io.IOException;
+import java.time.Duration;
 
 public class FlinkCoreOperatorEntry {
     public static StreamExecutionEnvironment streamEnv = null;
@@ -80,12 +79,8 @@ public class FlinkCoreOperatorEntry {
                         "localhost:9092",
                         "latest", new TopicOffsetTimeStampMsgDeserialize())
                         .assignTimestampsAndWatermarks(
-                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                                    @Override
-                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                                        return element.ts();
-                                    }
-                                })
+                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                        .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
                         .setParallelism(2);
 
         SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> b =
@@ -94,12 +89,8 @@ public class FlinkCoreOperatorEntry {
                         "localhost:9092",
                         "latest", new TopicOffsetTimeStampMsgDeserialize())
                         .assignTimestampsAndWatermarks(
-                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                                    @Override
-                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                                        return element.ts();
-                                    }
-                                })
+                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                        .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
                         .setParallelism(2);
 
         SingleOutputStreamOperator resultStream =

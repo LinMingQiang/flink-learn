@@ -1,8 +1,10 @@
 package com.flink.java.test;
 
+import com.flink.common.kafka.KafkaManager;
 import com.flink.common.kafka.KafkaManager.*;
 import com.flink.function.rich.AsyncIODatabaseRequest;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatJoinFunction;
 import org.apache.flink.api.common.functions.JoinFunction;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -17,13 +19,13 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.functions.co.*;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
@@ -151,14 +153,8 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
         // d2必须也要wtm，因为双流的wtm是两个流决定的
         BroadcastStream<KafkaTopicOffsetTimeMsg> bcedPatterns = getKafkaDataStreamWithJsonEventTime("test2", "localhost:9092", "latest")
                 .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor
-                                <KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                            @Override
-                            public long extractTimestamp(KafkaTopicOffsetTimeMsg element) {
-                                return element.ts();
-                            }
-                        }
-                ).broadcast(bcStateDescriptor);
+                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))).broadcast(bcStateDescriptor);
 
         d1
                 .connect(bcedPatterns)

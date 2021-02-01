@@ -49,10 +49,17 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "json"));
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
         // TUMBLE_ROWTIME 返回的字段做为 rowtime
-        String sql = "select TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
+        String sql = "select" +
+                " TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
                 "TUMBLE_END(rowtime, INTERVAL '3' SECOND) as TUMBLE_END," +
                 "TUMBLE_ROWTIME(rowtime, INTERVAL '3' SECOND) as new_rowtime," +
-                "msg,count(1) cnt from test group by TUMBLE(rowtime, INTERVAL '3' SECOND), msg";
+                "msg," +
+                "count(1) cnt" +
+                " from test" +
+                " where msg = 'hello' " +
+                " group by TUMBLE(rowtime, INTERVAL '3' SECOND), msg " +
+                "";
+        System.out.println(tableEnv.sqlQuery(sql).explain());;
         tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
 
         streamEnv.execute();

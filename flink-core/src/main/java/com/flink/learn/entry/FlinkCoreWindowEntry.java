@@ -6,16 +6,20 @@ import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.flink.common.java.core.FlinkEvnBuilder;
 import com.flink.common.java.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple1;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
+
+import java.time.Duration;
 
 public class FlinkCoreWindowEntry {
     public static StreamExecutionEnvironment streamEnv = null ;
@@ -47,18 +51,14 @@ public class FlinkCoreWindowEntry {
                 "localhost:9092",
                 "latest", new TopicOffsetTimeStampMsgDeserialize())
                 .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                            @Override
-                            public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                                return element.ts();
-                            }
-                        })
+                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
                 .returns(KafkaManager.KafkaTopicOffsetTimeMsg.class)
                 .map((MapFunction<KafkaManager.KafkaTopicOffsetTimeMsg, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .setParallelism(2)
-                .keyBy(0)
-                .timeWindow(Time.seconds(5)) // 统计5s一个窗口
+                .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0 )
+                .window(TumblingEventTimeWindows.of(Time.seconds(5))) // 统计5s一个窗口
                 .process(new ProcessWindowFunction<Tuple2<String, Long>,
                         String,
                         Tuple1<String>,

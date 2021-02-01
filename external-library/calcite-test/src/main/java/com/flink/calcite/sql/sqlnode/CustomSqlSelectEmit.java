@@ -13,9 +13,9 @@ import java.util.List;
 
 public class CustomSqlSelectEmit extends SqlCall {
     public static final SqlSpecialOperator OPERATOR;
-    TimeUnit time;
-    SqlNode query;
-    SqlNode wtmstring;
+    public static TimeUnit time;
+    public static SqlNode query;
+    public static SqlNode wtmstring;
     public CustomSqlSelectEmit(SqlParserPos pos, SqlNode query, SqlNode wtmstring, TimeUnit time) {
         super(pos);
         this.query = query;
@@ -24,6 +24,11 @@ public class CustomSqlSelectEmit extends SqlCall {
     }
     static {
         OPERATOR = new SqlSpecialOperator("SUBMIT JOB", SqlKind.OTHER_DDL);
+    }
+
+    @Override
+    public SqlKind getKind() {
+        return SqlKind.OTHER_DDL;
     }
 
     @Nonnull

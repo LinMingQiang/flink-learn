@@ -9,6 +9,7 @@ import com.flink.function.process.StreamConnectCoProcessFunc;
 import com.flink.function.rich.AsyncIODatabaseRequest;
 import com.flink.learn.richf.WordCountRichFunction;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -18,12 +19,12 @@ import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 
@@ -103,39 +104,14 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testConnectStream() throws Exception {
+        initJsonSource(true);
         // 10s过期
         OutputTag<String> rejectedWordsTag = new OutputTag<String>("rejected") {
         };
-        SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> a =
-                KafkaSourceManager.getKafkaDataStream(streamEnv,
-                        "test",
-                        "localhost:9092",
-                        "latest", new TopicOffsetTimeStampMsgDeserialize())
-                        .assignTimestampsAndWatermarks(
-                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                                    @Override
-                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                                        return element.ts();
-                                    }
-                                })
-                        .setParallelism(1);
-
-        SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> b =
-                KafkaSourceManager.getKafkaDataStream(streamEnv,
-                        "test2",
-                        "localhost:9092",
-                        "latest", new TopicOffsetTimeStampMsgDeserialize())
-                        .assignTimestampsAndWatermarks(
-                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                                    @Override
-                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                                        return element.ts();
-                                    }
-                                }).setParallelism(1);
 
         SingleOutputStreamOperator resultStream =
-                a
-                        .connect(b)
+                d1
+                        .connect(d2)
                         .keyBy(KafkaManager.KafkaTopicOffsetTimeMsg::msg, KafkaManager.KafkaTopicOffsetTimeMsg::msg)
                         .process(new StreamConnectCoProcessFunc(rejectedWordsTag))
                         .setParallelism(4);

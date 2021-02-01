@@ -3,11 +3,11 @@ package com.flink.learn.entry;
 import com.flink.common.core.EnvironmentalKey;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
 import com.flink.common.deserialize.TopicOffsetJsonEventtimeDeserialize;
-import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.flink.common.java.core.FlinkEvnBuilder;
 import com.flink.common.java.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
 import com.flink.learn.bean.ReportLogPojo;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -20,9 +20,10 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
+
+import java.time.Duration;
 
 public class FlinkStreamAttributEntry {
     public static StreamExecutionEnvironment streamEnv = null;
@@ -52,12 +53,8 @@ public class FlinkStreamAttributEntry {
                         "localhost:9092",
                         "latest", new TopicOffsetJsonEventtimeDeserialize())
                         .assignTimestampsAndWatermarks(
-                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                                    @Override
-                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                                        return element.ts();
-                                    }
-                                })
+                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                        .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
                         .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
                         .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
                             ValueState<Boolean> has = null;
@@ -82,12 +79,8 @@ public class FlinkStreamAttributEntry {
                         "localhost:9092",
                         "latest", new TopicOffsetJsonEventtimeDeserialize())
                         .assignTimestampsAndWatermarks(
-                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                                    @Override
-                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                                        return element.ts();
-                                    }
-                                })
+                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                        .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
                         .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
                         .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
                             ValueState<Boolean> has = null;
@@ -113,12 +106,8 @@ public class FlinkStreamAttributEntry {
                         "localhost:9092",
                         "latest", new TopicOffsetJsonEventtimeDeserialize())
                         .assignTimestampsAndWatermarks(
-                                new BoundedOutOfOrdernessTimestampExtractor<KafkaManager.KafkaTopicOffsetTimeMsg>(Time.seconds(10)) {
-                                    @Override
-                                    public long extractTimestamp(KafkaManager.KafkaTopicOffsetTimeMsg element) {
-                                        return element.ts();
-                                    }
-                                })
+                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                        .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
                         .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
                         .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
                             ValueState<Boolean> has = null;

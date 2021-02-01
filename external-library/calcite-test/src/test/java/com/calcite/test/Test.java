@@ -51,14 +51,16 @@ public class Test {
                 "          'properties.group.id' = '$groupID',\n" +
                 "          'format' = '$format'\n" +
                 "       )";
-        String sql = "" +
-                "(SELECT u.name,sum(o.amount) AS total FROM orders) " +
+        String sql = "(select TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
+                "TUMBLE_END(rowtime, INTERVAL '3' SECOND) as TUMBLE_END," +
+                "TUMBLE_ROWTIME(rowtime, INTERVAL '3' SECOND) as new_rowtime," +
+                "msg,count(1) cnt from test group by TUMBLE(rowtime, INTERVAL '3' SECOND), msg)" +
                 "EMIT WITH '10' SECOND";
-
-        SqlParser parser = SqlParser.create(create, config.getParserConfig());
+        SqlParser parser = SqlParser.create(sql, config.getParserConfig());
         try {
-            SqlNode sqlNode = parser.parseStmt();
-            System.out.println(sqlNode.toString());
+            CustomSqlSelectEmit sqlNode = (CustomSqlSelectEmit)parser.parseStmt();
+
+            System.out.println(sqlNode.query.getKind());
 
         } catch (Exception e) {
             e.printStackTrace();
