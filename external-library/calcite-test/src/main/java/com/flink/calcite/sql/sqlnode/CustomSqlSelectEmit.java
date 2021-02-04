@@ -13,19 +13,19 @@ import java.util.List;
 
 public class CustomSqlSelectEmit extends SqlCall {
     public static final SqlSpecialOperator OPERATOR;
-    public static TimeUnit time;
     public static SqlNode query;
-    public static SqlNode wtmstring;
-    public CustomSqlSelectEmit(SqlParserPos pos, SqlNode query, SqlNode wtmstring, TimeUnit time) {
+    public static SqlEmit emit;
+    public CustomSqlSelectEmit(SqlParserPos pos, SqlNode query, SqlEmit emit) {
         super(pos);
         this.query = query;
-        this.wtmstring = wtmstring;
-        this.time = time;
+        this.emit = emit;
     }
     static {
-        OPERATOR = new SqlSpecialOperator("SUBMIT JOB", SqlKind.OTHER_DDL);
+        OPERATOR = new SqlSpecialOperator("EMIT ", SqlKind.OTHER_DDL);
     }
-
+    public SqlEmit getEmit() {
+        return this.emit;
+    }
     @Override
     public SqlKind getKind() {
         return SqlKind.OTHER_DDL;
@@ -42,9 +42,8 @@ public class CustomSqlSelectEmit extends SqlCall {
         this.query.unparse(writer, leftPrec, rightPrec);
         writer.newlineAndIndent();
         writer.keyword("Emit : ");
-        this.wtmstring.unparse(writer, leftPrec, rightPrec);
+        this.emit.unparse(writer, leftPrec, rightPrec);
         writer.newlineAndIndent();
-        writer.keyword("Time : " + this.time.toString());
     }
     @Nonnull
     @Override

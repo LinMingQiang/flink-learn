@@ -271,46 +271,22 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
     /**
      * json的数据源
      */
-    public static void initJsonCleanSource() {
-
-
-        cd1 = baseEventtimeJsonSource
-                .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts())));
-        cd2 = getKafkaDataStreamWithJsonEventTime("test2", "localhost:9092", "latest")
-                .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
-        ;
-
-        cd3 = getKafkaDataStreamWithJsonEventTime("test3", "localhost:9092", "latest")
-                .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
-        ;
-    }
-
-
-    /**
-     * json的数据源
-     */
     public static void initJsonUidMsgSource() {
         uid1T = getKafkaDataStreamWithJsonUidMsg("test", "localhost:9092", "latest")
                 .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeUidMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
                                 .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))
                 );
         uid2T = getKafkaDataStreamWithJsonUidMsg("test2", "localhost:9092", "latest")
                 .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeUidMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
                                 .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))
                 )
         ;
 
         uid3T = getKafkaDataStreamWithJsonUidMsg("test3", "localhost:9092", "latest")
                 .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeUidMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
                                 .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))
                 )
         ;

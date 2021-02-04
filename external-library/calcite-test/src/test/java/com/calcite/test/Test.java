@@ -51,16 +51,14 @@ public class Test {
                 "          'properties.group.id' = '$groupID',\n" +
                 "          'format' = '$format'\n" +
                 "       )";
-        String sql = "(select TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
-                "TUMBLE_END(rowtime, INTERVAL '3' SECOND) as TUMBLE_END," +
-                "TUMBLE_ROWTIME(rowtime, INTERVAL '3' SECOND) as new_rowtime," +
-                "msg,count(1) cnt from test group by TUMBLE(rowtime, INTERVAL '3' SECOND), msg)" +
-                "EMIT WITH '10' SECOND";
+        String sql = "insert into xxx select * from test " +
+                "EMIT \n" +
+                "  WITH DELAY '1'MINUTE BEFORE WATERMARK,\n" +
+                "  WITHOUT DELAY AFTER WATERMARK";
         SqlParser parser = SqlParser.create(sql, config.getParserConfig());
         try {
-            CustomSqlSelectEmit sqlNode = (CustomSqlSelectEmit)parser.parseStmt();
-
-            System.out.println(sqlNode.query.getKind());
+            SqlNode sqlNode = parser.parseStmt();
+            System.out.println(sqlNode);
 
         } catch (Exception e) {
             e.printStackTrace();

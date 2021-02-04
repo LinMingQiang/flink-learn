@@ -18,31 +18,70 @@
 SqlCall CustomSqlSelectEmit():
 {
 SqlNode query;
-SqlNode wtmstring;
-TimeUnit time;
+SqlEmit emit = null;
 }
 {
-    {EmitQueryContext context = new EmitQueryContext();}
-    EmitQuery(context)
-    <EMIT>
-        ( <WITH> wtmstring = StringLiteral()
-            (   time = Minute()
-                |
-                time = Second()
-             )
-         )
-                    {
-    return new CustomSqlSelectEmit(getPos(), context.query, wtmstring, time);
+query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)
+<#--必须是  [] 否则报错-->
+[
+emit = EmitSpecification()
+]
+ {
+return new CustomSqlSelectEmit(getPos(), query, emit);
 }
 }
 
-void EmitQuery(EmitQueryContext context):
+SqlEmit EmitSpecification() :
 {
-        SqlNode query;
+ final Span s;
+ final List<SqlNode> strategies = new ArrayList();
+ SqlNode strategy;
 }
 {
-        context.query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)
+    <EMIT> { s = span(); }
+     strategy = SqlEmitStrategy() {
+      strategies.add(strategy);
+     }
+     (
+        <COMMA> strategy = SqlEmitStrategy() {
+         strategies.add(strategy);
+         } )*
+{
+  return SqlEmit.create(s.end(this), strategies);
 }
+}
+
+SqlNode SqlEmitStrategy() :
+            {
+            String p;
+            SqlIntervalQualifier intervalQualifier;
+            SqlNode delay;
+            Span s;
+            }
+            {
+            (
+            <WITH> <DELAY> { s = span(); }
+                    <QUOTED_STRING> { p = token.image; }
+                        intervalQualifier = IntervalQualifier() {
+                        delay = SqlParserUtil.parseIntervalLiteral(s.end(intervalQualifier),
+                        1, p, intervalQualifier);
+                        }
+                        |
+                        <WITHOUT> <DELAY>
+                                {
+                                delay = SqlEmit.createWithoutDelay(getPos());
+                                }
+                                )
+                                (
+                                <BEFORE> <WATERMARK> {
+                                        return SqlEmit.createBeforeStrategy(delay, getPos());
+                                        }
+                                        |
+                                        <AFTER> <WATERMARK> {
+                                                return SqlEmit.createAfterStrategy(delay, getPos());
+                                                }
+                                                )
+                                                }
 
 <#--            -->
 SqlCall CustomSqlSubmit() :
@@ -1029,7 +1068,7 @@ SqlNode RichSqlInsert() :
     [
         <PARTITION> PartitionSpecCommaList(partitionList)
     ]
-    source = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY) {
+    source = CustomSqlSelectEmit() {
         return new RichSqlInsert(s.end(source), keywordList, extendedKeywordList, table, source,
             columnList, partitionList);
     }

@@ -24,7 +24,7 @@ public class FlinkStreamTableApi extends FlinkSourceBuilder {
 
     public static void runTemJoin() {
         // {"ts":104,"msg":"1"}  {"ts":10,"msg":"1"}  {"ts":100,"msg":"1"}
-        initJsonCleanSource();
+        initJsonSource(true);
         Table orders = getStreamTable(cd1, $("topic"),
                 $("offset"),
                 $("date"),
