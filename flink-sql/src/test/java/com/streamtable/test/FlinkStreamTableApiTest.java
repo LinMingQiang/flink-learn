@@ -77,7 +77,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testTableApiWordCount() throws Exception {
         // {"ts":100,"msg":"hello"}
-        initJsonCleanSource();
+        initJsonSource(true);
         Table a = getStreamTable(cd1, "topic,offset,ts,date,msg");
         tableEnv.createTemporaryView("test", a);
         // 方式1
@@ -105,7 +105,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testTableToStream() throws Exception {
         // {"ts":100,"msg":"hello"}
-        initJsonCleanSource();
+        initJsonSource(true);
         Table a = getStreamTable(cd1, "topic,offset,ts,date,msg");
         tableEnv.createTemporaryView("test", a);
         tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSink_retract"));
@@ -133,7 +133,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testStreamToTable() throws Exception {
         // {"ts":100,"msg":"hello"}
-        initJsonCleanSource();
+        initJsonSource(true);
         Table a = getStreamTable(cd1, "topic,offset,ts,date,msg");
         tableEnv.createTemporaryView("test", a);
 
@@ -161,7 +161,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testInnerJoin() throws Exception {
         // {"ts":1000,"msg":"hello"}  {"ts":500,"msg":"hello"}
-        initJsonCleanSource();
+        initJsonSource(true);
         Table left = getStreamTable(cd1, "topic,offset,ts,date,msg");
         Table right = getStreamTable(cd2,
                 $("topic").as("topic1"),
@@ -185,7 +185,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testJoinUDTF() throws Exception {
         // {"ts":1000,"msg":"hello,world"}  {"ts":500,"msg":"hello"}
-        initJsonCleanSource();
+        initJsonSource(true);
         Table orders = getStreamTable(cd1, "topic,offset,ts,date,msg");
         tableEnv.createTemporarySystemFunction("ts_to_DMH", new TimestampYearHourTableFunc());
         tableEnv.createTemporarySystemFunction("split", new StrSplitTableFunction(","));
@@ -222,7 +222,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         // 最后输入 {"ts":34,"msg":"1"} 只触发了 16的。因为两个流的 wtm还是19，并不是24.
         // 输入 test2 : {"ts":34,"msg":"1"} ,触发24  此时的wtm = 24
         // 可以得到 11 拿的10的 16拿的15的 21拿的20的
-        initJsonCleanSource();
+        initJsonSource(true);
         Table orders = getStreamTable(cd1,
                 $("topic"),
                 $("offset"),
@@ -266,7 +266,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testSelect() throws Exception {
         // {"ts":10,"msg":"hello"}  {"ts":31,"msg":"hello"}
-        initJsonCleanSource();
+        initJsonSource(true);
         Table orders = getStreamTable(cd1, $("topic"),
                 $("offset"),
                 $("date"),
@@ -466,7 +466,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testOverWindow() throws Exception {
         // {"ts":10,"msg":"hello"} {"ts":21,"msg":"hello"} {"ts":40,"msg":"hello"}
-        initJsonCleanSource();
+        initJsonSource(true);
         // $("user"), $("product"), $("amount"), $("rowtime").rowtime()
         Table a = getStreamTable(cd1, $("topic"), $("offset"), $("msg"), $("date"), $("ts").rowtime());
         tableEnv.createTemporaryView("test", a);

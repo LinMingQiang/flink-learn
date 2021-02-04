@@ -40,7 +40,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testDDLWindow() throws Exception {
         // {"rowtime":"2021-01-20 00:00:01","msg":"hello"} {"rowtime":"2021-01-20 00:00:02","msg":"hello"}
-        // {"rowtime":"2021-01-20 00:00:13","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:00:50","msg":"hello"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -49,20 +49,19 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "json"));
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
         // TUMBLE_ROWTIME 返回的字段做为 rowtime
-        String sql = "select" +
-                " TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
-                "TUMBLE_END(rowtime, INTERVAL '3' SECOND) as TUMBLE_END," +
-                "TUMBLE_ROWTIME(rowtime, INTERVAL '3' SECOND) as new_rowtime," +
+//        " TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
+//                "TUMBLE_END(rowtime, INTERVAL '3' SECOND) as TUMBLE_END," +
+//                "TUMBLE_ROWTIME(rowtime, INTERVAL '3' SECOND) as new_rowtime," +
+        String sql = "select " +
                 "msg," +
                 "count(1) cnt" +
                 " from test" +
                 " where msg = 'hello' " +
-                " group by TUMBLE(rowtime, INTERVAL '3' SECOND), msg " +
+                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
                 "";
-        System.out.println(tableEnv.sqlQuery(sql).explain());;
-        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
+        TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
+        re.print();
 
-        streamEnv.execute();
     }
 
     @Test
@@ -79,7 +78,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "test",
                         "json"));
         // TUMBLE_ROWTIME 返回的字段做为 rowtime
-        String sql = "select count(1) over w,sum(`offset`) over w " +
+        String sql = "select count(distinct `offset`) over w,sum(`offset`) over w " +
                 "FROM test " +
                 "window w AS (" +
                 "partition by msg " +
@@ -140,4 +139,105 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
         re.print();
     }
+
+
+    @Test
+    public void testDDLSample2() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:23","msg":"hello"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test2",
+                        "test2",
+                        "test2",
+                        "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+
+        String sql = "select msg, count(1) over w as w_c,sum(`offset`) over w as w_s " +
+                "FROM test " +
+                "window w AS (" +
+                "partition by msg " +
+                "order by rowtime " +
+                "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW" +
+                ")";
+        tableEnv.createTemporaryView("over_test", tableEnv.sqlQuery(sql));
+        String sql2 = "select " +
+                "msg," +
+                "count(1) cnt" +
+                " from test2" +
+                " where msg = 'hello' " +
+                " group by TUMBLE(rowtime, INTERVAL '3' SECOND), msg " +
+                "";
+        tableEnv.createTemporaryView("window_test", tableEnv.sqlQuery(sql2));
+
+        String sql3 = "select a.*,b.* from window_test a join over_test b on a.msg = b.msg";
+
+        tableEnv.toRetractStream(tableEnv.sqlQuery(sql3), Row.class).print();
+
+//        System.out.println(streamEnv.getExecutionPlan());
+//        String sa = tableEnv.sqlQuery(sql).explain();
+//        String sa2 = tableEnv.sqlQuery(sql2).explain();
+//        System.out.println(sa);
+//        System.out.println(sa2);
+
+//        TableResult re = tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg");
+        // 想要输出得
+//        re.print();
+
+    }
+
+
+    /**
+     * 使用了Emit，似乎不会清理窗口状态了，
+     * @throws Exception
+     */
+    @Test
+    public void testDDLTriggerWindow() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:00","msg":"hello"} {"rowtime":"2021-01-20 00:00:02","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:00:40","msg":"hello"}
+//        tableEnv.getConfig().getConfiguration().setBoolean("table.exec.emit.early-fire.enabled", true);
+//        // 每隔 5s 触发一次
+//        tableEnv.getConfig().getConfiguration().setLong("table.exec.emit.early-fire.delay", 5000L);
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+        // TUMBLE_ROWTIME 返回的字段做为 rowtime
+        String sql = "select " +
+                "msg," +
+                "count(1) cnt" +
+                " from test" +
+                " where msg = 'hello' " +
+                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
+                " EMIT \n" +
+                "  WITH DELAY '2' SECOND BEFORE WATERMARK" ;
+               // "  WITH DELAY '2' SECOND AFTER WATERMARK";
+
+        String sql2 = "select " +
+                "msg," +
+                "count(1) cnt" +
+                " from test" +
+                " where msg = 'hello' " +
+                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
+                " EMIT \n" +
+                "  WITH DELAY '10' SECOND BEFORE WATERMARK,\n" +
+                "  WITHOUT DELAY AFTER WATERMARK";
+
+        // TableResult re2 = tableEnv.executeSql("insert into printlnRetractSink " + sql2);
+        // re2.print();
+
+        TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
+        re.print();
+
+
+    }
+
 }

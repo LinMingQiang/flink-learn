@@ -34,8 +34,11 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
 
     @Test
     public void testGroupWindow() throws Exception {
-        // {"ts":10,"msg":"hello"}  {"ts":31,"msg":"hello"}
-        initJsonCleanSource();
+        // {"ts":10,"msg":"hello"}  {"ts":100,"msg":"hello"}
+        // 定时触发
+//        tableEnv.getConfig().getConfiguration().setBoolean("table.exec.emit.early-fire.enabled", true);
+//        tableEnv.getConfig().getConfiguration().setLong("table.exec.emit.early-fire.delay", 5000L);
+        initJsonSource(true);
         Table orders = getStreamTable(cd1, $("topic"),
                 $("offset"),
                 $("date"),
@@ -52,17 +55,24 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
                 )
                 .select($("msg").lowerCase().as("msg"), $("topic"), $("ts"));
 
-        GroupWindowedTable result2 =  result
-                .window(Tumble.over(lit(10).seconds()).on($("ts")).as("hourlyWindow"));
-        WindowGroupedTable result3 =  result2
-                .groupBy($("hourlyWindow"), $("topic"), $("msg"));
-        Table result4 =  result3
+        Table r1 =  result
+                .window(Tumble.over(lit(50).seconds()).on($("ts")).as("hourlyWindow"))
+                .groupBy($("hourlyWindow"), $("topic"), $("msg"))
                 .select($("topic"),
                         $("hourlyWindow").end().as("secWindow"),
                         $("msg")
                                 .count().as("cnt"));
 
-        printlnStringTable(result4);
+        Table r2 = result
+                .window(Tumble.over(lit(10).seconds()).on($("ts")).as("hourlyWindow"))
+                .groupBy($("hourlyWindow"), $("topic"), $("msg"))
+                .select($("topic"),
+                        $("hourlyWindow").end().as("secWindow"),
+                        $("msg")
+                                .count().as("cnt"));
+
+        printlnStringTable(r1);
+        printlnStringTable(r2);
         streamEnv.execute("");
 
     }
@@ -71,7 +81,7 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
     public void testOverWindow() throws Exception {
         // UNBOUNDED_ROW 和 UNBOUNDED_RANGE结果不一样
         // {"ts":13,"msg":"hello"}  {"ts":35,"msg":"hello"} {"ts":35,"msg":"hello"} {"ts":65,"msg":"hello"}
-        initJsonCleanSource();
+        initJsonSource(true);
         Table orders = getStreamTable(cd1, $("topic"),
                 $("offset"),
                 $("date"),
@@ -88,7 +98,7 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
                         .as("w")
                 )
                 .select($("msg"),
-                        $("offset").sum().over($("w")).as("over_offset_sum"),
+                        $("offset").sum().distinct().over($("w")).as("over_offset_sum"),
                         $("offset").min().over($("w")).as("over_offset_min")); // aggregate over the over window w
         printlnStringTable(res);
         streamEnv.execute("");
