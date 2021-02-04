@@ -84,7 +84,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void connectTest() throws Exception {
         // {"ts":200,"msg":"268"}
-        initJsonCleanSource();
+        initJsonSource(true);
         cd1.connect(cd2)
                 .keyBy("msg", "msg")
                 .process(new CoProcessFunction<KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg, String>() {

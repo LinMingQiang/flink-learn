@@ -37,7 +37,7 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
         // test2:   {"ts":10,"msg":"hello"}
         // 输出 ： 四个 0-20 的都会再输出一遍。
         // v2 是曝光，v1是请求，v3是点击
-        initJsonCleanSource();
+        initJsonSource(true);
         SingleOutputStreamOperator<ReportLogPojo> req =
                 cd1
                         .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
