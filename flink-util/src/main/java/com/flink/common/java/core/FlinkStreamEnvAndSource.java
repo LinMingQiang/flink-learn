@@ -14,9 +14,9 @@ public abstract class FlinkStreamEnvAndSource {
     public static StreamTableEnvironment tableEnv = null;
     public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d2 = null;
     public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d1 = null;
-    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd2 = null;
-    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd1 = null;
-    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd3 = null;
+//    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd2 = null;
+//    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd1 = null;
+//    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd3 = null;
 
     public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeUidMsg> uid1T = null;
     public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeUidMsg> uid2T = null;

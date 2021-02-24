@@ -86,10 +86,12 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
         return tableEnv.fromDataStream(source, fields);
     }
 
-    public static Table getStreamTable(SingleOutputStreamOperator source, Expression... fields) {
+    public static Table getStreamTable(KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> source, Expression... fields) {
         return tableEnv.fromDataStream(source, fields);
     }
-
+    public static Table getStreamTable(KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> source, String fields) {
+        return tableEnv.fromDataStream(source, fields);
+    }
     public static Table getStreamTable(SingleOutputStreamOperator source, String fields) {
         return tableEnv.fromDataStream(source, fields);
     }
@@ -293,19 +295,19 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
     }
 
 
-    public static void initSource() {
-        d1 = baseEventtimeKafkaSource
-                .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))
-                ).keyBy(KafkaManager.KafkaTopicOffsetTimeMsg::msg);
-        d2 = getKafkaDataStreamWithEventTime("test2", "localhost:9092", "latest")
-                .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))
-                )
-                .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg());
-    }
+//    public static void initSource() {
+//        d1 = baseEventtimeKafkaSource
+//                .assignTimestampsAndWatermarks(
+//                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+//                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))
+//                ).keyBy(KafkaManager.KafkaTopicOffsetTimeMsg::msg);
+//        d2 = getKafkaDataStreamWithEventTime("test2", "localhost:9092", "latest")
+//                .assignTimestampsAndWatermarks(
+//                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+//                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))
+//                )
+//                .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg());
+//    }
 
     /**
      * json的数据源
