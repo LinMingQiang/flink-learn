@@ -69,6 +69,9 @@ public class CEPDemoTest extends FlinkJavaStreamTableTestBase {
                             }
                         })
                         .within(Time.seconds(40));
+        // baseEventtimeJsonSource.keyBy(x -> x.topic()) 这个地方要注意，
+        // 如果是用msg做keyby，因为规则里面都是用msg。keyby会导致数据分组不同分区，规则也就不符合了
+        // 所以最好是用你报表的key做分区，
         CEP
                 .pattern(baseEventtimeJsonSource.keyBy(x -> x.topic()), req_imp)
                 .inProcessingTime() // 每来一条就触发，eventtime的话就是更加watermark来触发
@@ -86,8 +89,36 @@ public class CEPDemoTest extends FlinkJavaStreamTableTestBase {
 
 
     @Test
-    public void testUntil(){
+    public void testUntil() throws Exception {
+        // {"ts":10,"msg":"1"} {"ts":10,"msg":"8"}
+        Pattern<KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg> pattern = Pattern.<KafkaTopicOffsetTimeMsg>begin("start").where(
+                new SimpleCondition<KafkaTopicOffsetTimeMsg>() {
+                    @Override
+                    public boolean filter(KafkaTopicOffsetTimeMsg event) {
+                        boolean r = event.msg().equals("1");
+                        return r;
+                    }
+                }
+        ).next("middle").where(
+                new SimpleCondition<KafkaTopicOffsetTimeMsg>() {
+                    @Override
+                    public boolean filter(KafkaTopicOffsetTimeMsg event) {
+                        boolean r = event.msg().equals("8");
+                        return r;
+                    }
+                }
+        );
 
+        CEP.pattern(baseEventtimeJsonSource, pattern)
+                .inProcessingTime() // 每来一条就触发，eventtime的话就是更加watermark来触发
+                .select(new PatternSelectFunction<KafkaTopicOffsetTimeMsg, String>() {
+            @Override
+            public String select(Map<String, List<KafkaTopicOffsetTimeMsg>> p) throws Exception {
+                return p.toString();
+            }
+        }).print();
+
+        streamEnv.execute("flink learning cep");
     }
 
     @Test
