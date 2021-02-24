@@ -32,7 +32,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void windowJoinTest() throws Exception {
-        initSource();
+        initJsonSource(true);
         d1.join(d2)
                 .where((KeySelector<KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
                 .equalTo((KeySelector<KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
@@ -85,7 +85,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
     public void connectTest() throws Exception {
         // {"ts":200,"msg":"268"}
         initJsonSource(true);
-        cd1.connect(cd2)
+        d1.connect(d2)
                 .keyBy("msg", "msg")
                 .process(new CoProcessFunction<KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg, String>() {
                     @Override

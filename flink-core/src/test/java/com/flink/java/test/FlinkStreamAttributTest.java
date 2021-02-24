@@ -39,7 +39,7 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
         // v2 是曝光，v1是请求，v3是点击
         initJsonSource(true);
         SingleOutputStreamOperator<ReportLogPojo> req =
-                cd1
+                d1
                         .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
                         .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
                             ValueState<Boolean> has = null;
@@ -59,7 +59,7 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
 
         SingleOutputStreamOperator<ReportLogPojo> imp = req.keyBy((KeySelector<ReportLogPojo, String>) value -> value.req_id)
                 .intervalJoin(
-                        cd2
+                        d1
                                 .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
                                 .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
                                     ValueState<Boolean> has = null;
@@ -90,7 +90,7 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
 
         SingleOutputStreamOperator<ReportLogPojo> click = imp.keyBy((KeySelector<ReportLogPojo, String>) v -> v.req_id)
                 .intervalJoin(
-                        cd3
+                        d2
                                 .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
                                 .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
                                     ValueState<Boolean> has = null;

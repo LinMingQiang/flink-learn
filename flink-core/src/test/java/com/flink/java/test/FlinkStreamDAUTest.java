@@ -59,6 +59,7 @@ public class FlinkStreamDAUTest extends FlinkJavaStreamTableTestBase {
                         uvDec = new ValueStateDescriptor<Long>("uvCount", Types.LONG, 0L);
                     }
                     // 不同的窗口也会进来，所以必须用 context.windowState() ,这个是窗口自己的state。如果在外面定义，那就是operate state，所有公用的
+                    // 触发的时候会拿到当前window的context，这里面包含了window的state： context是ProcessContext
                     @Override
                     public void process(String groupKey,
                                         Context context,
