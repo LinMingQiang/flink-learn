@@ -4,10 +4,12 @@ import com.ddlsql.DDLSourceSQLManager;
 import com.flink.common.java.pojo.TestPoJo;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.functions.co.CoMapFunction;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableResult;
+import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.types.Row;
 import org.junit.Test;
 
@@ -179,7 +181,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
         tableEnv.toRetractStream(tableEnv.sqlQuery(sql3), Row.class).print();
 
-//        System.out.println(streamEnv.getExecutionPlan());
+        System.out.println(streamEnv.getExecutionPlan());
 //        String sa = tableEnv.sqlQuery(sql).explain();
 //        String sa2 = tableEnv.sqlQuery(sql2).explain();
 //        System.out.println(sa);
@@ -193,7 +195,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
 
     /**
-     * 使用了Emit，似乎不会清理窗口状态了，
+     * 使用了Emit，似乎不会清理窗口状态了，需要再sql的windowoperation里面去修改
      * @throws Exception
      */
     @Test
@@ -236,8 +238,5 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
         TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
         re.print();
-
-
     }
-
 }

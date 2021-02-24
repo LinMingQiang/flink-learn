@@ -39,7 +39,7 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
 //        tableEnv.getConfig().getConfiguration().setBoolean("table.exec.emit.early-fire.enabled", true);
 //        tableEnv.getConfig().getConfiguration().setLong("table.exec.emit.early-fire.delay", 5000L);
         initJsonSource(true);
-        Table orders = getStreamTable(cd1, $("topic"),
+        Table orders = getStreamTable(d1, $("topic"),
                 $("offset"),
                 $("date"),
                 $("msg"),
@@ -70,8 +70,7 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
                         $("hourlyWindow").end().as("secWindow"),
                         $("msg")
                                 .count().as("cnt"));
-
-        printlnStringTable(r1);
+        printlnStringTable(r1.addColumns($("dd").proctime()));
         printlnStringTable(r2);
         streamEnv.execute("");
 
@@ -82,7 +81,7 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
         // UNBOUNDED_ROW 和 UNBOUNDED_RANGE结果不一样
         // {"ts":13,"msg":"hello"}  {"ts":35,"msg":"hello"} {"ts":35,"msg":"hello"} {"ts":65,"msg":"hello"}
         initJsonSource(true);
-        Table orders = getStreamTable(cd1, $("topic"),
+        Table orders = getStreamTable(d1, $("topic"),
                 $("offset"),
                 $("date"),
                 $("msg"),
@@ -98,8 +97,10 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
                         .as("w")
                 )
                 .select($("msg"),
-                        $("offset").sum().distinct().over($("w")).as("over_offset_sum"),
+                        $("offset").sum().over($("w")).as("over_offset_sum"),
                         $("offset").min().over($("w")).as("over_offset_min")); // aggregate over the over window w
+//        res.addColumns($("pt").proctime());
+//        res.addColumns($("rt").rowtime()); // 必须要转流，然后再这个才行，table->stream->table才能重新加上timearr
         printlnStringTable(res);
         streamEnv.execute("");
 

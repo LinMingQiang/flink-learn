@@ -25,13 +25,13 @@ public class FlinkStreamTableApi extends FlinkSourceBuilder {
     public static void runTemJoin() {
         // {"ts":104,"msg":"1"}  {"ts":10,"msg":"1"}  {"ts":100,"msg":"1"}
         initJsonSource(true);
-        Table orders = getStreamTable(cd1, $("topic"),
+        Table orders = getStreamTable(d1, $("topic"),
                 $("offset"),
                 $("date"),
                 $("msg").as("o_currency"),
                 $("ts").rowtime().as("o_rowtime"));
 
-        Table ratesHistory = getStreamTable(cd2, "msg,ts.rowtime");// 提供一个汇率历史记录表静态数据集
+        Table ratesHistory = getStreamTable(d2, "msg,ts.rowtime");// 提供一个汇率历史记录表静态数据集
 
         printlnStringTable(ratesHistory);
         printlnStringTable(orders);
