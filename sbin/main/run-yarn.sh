@@ -13,6 +13,7 @@ echo $javaopt
 # -s hdfs://Stream2/user/marketplus/ssp-flink/checkpoint/806c6e5744ac8e3cbd2d2afdc0a09cf6/chk-4
 # flink 10 去掉 -yn参数，taskmanager的个数由 (并行度/slot) +1 决定 否则报 Could not build the program from JAR file.
 # 同时 flink需要hadoop的shade包放在 flink/lib下
+#./yarn-session.sh -tm 2192 -s 8 -jm 1024
 # https://mvnrepository.com/artifact/org.apache.flink/flink-shaded-hadoop-2-uber
 /home/marketplus/flink-1.10.1/bin/flink run \
  -m yarn-cluster  \
