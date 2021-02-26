@@ -16,6 +16,7 @@
   </licenses>
 
   <dependencies>
+
     <!-- Test -->
 <!--    <dependency>-->
 <!--      <groupId>junit</groupId>-->
@@ -125,18 +126,10 @@
   </dependencies>
   <profiles>
     <profile>
-      <id>sourcesink-skip-tests</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>true</skipTests>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
+      <id>skip-srcsink-tests</id>
+      <properties>
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
     </profile>
   </profiles>
   <build>
