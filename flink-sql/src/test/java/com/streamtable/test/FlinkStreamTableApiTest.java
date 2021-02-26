@@ -80,10 +80,12 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         initJsonSource(true);
         Table a = getStreamTable(d1, "topic,offset,ts,date,msg");
         tableEnv.createTemporaryView("test", a);
+
         // 方式1
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
         tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg")
                 .print();// 正常在main里面不需要print，test需要print才能执行
+
 //        tableEnv
 //                .toRetractStream(
 //                        tableEnv.sqlQuery("select msg,count(*) as cnt from test group by msg"),
@@ -92,7 +94,8 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 //                .map(x -> new Tuple2<>(x.f1.getField(0).toString(), Long.valueOf(x.f1.getField(1).toString())))
 //                .returns(Types.TUPLE(Types.STRING, Types.LONG))
 //                .print();
-        // streamEnv.execute(); // table转stream之后需要这个
+//
+//         streamEnv.execute(); // table转stream之后需要这个
     }
 
     /**

@@ -196,6 +196,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
     /**
      * 使用了Emit，似乎不会清理窗口状态了，需要再sql的windowoperation里面去修改
+     *
      * @throws Exception
      */
     @Test
@@ -220,8 +221,8 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                 " where msg = 'hello' " +
                 " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
                 " EMIT \n" +
-                "  WITH DELAY '2' SECOND BEFORE WATERMARK" ;
-               // "  WITH DELAY '2' SECOND AFTER WATERMARK";
+                "  WITH DELAY '2' SECOND BEFORE WATERMARK";
+        // "  WITH DELAY '2' SECOND AFTER WATERMARK";
 
         String sql2 = "select " +
                 "msg," +
@@ -239,4 +240,6 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
         re.print();
     }
+
+
 }

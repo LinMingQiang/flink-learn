@@ -99,7 +99,7 @@ object DDLSourceSQLManager {
        |    `offset` bigint METADATA,
        |    rowtime TIMESTAMP(3),
        |    msg VARCHAR,
-       |    WATERMARK FOR rowtime AS rowtime - INTERVAL '10' SECOND
+       |    proctime AS PROCTIME()
        |) WITH (
        |    'connector' = 'kafka',
        |    'topic' = '$topic',
@@ -109,6 +109,8 @@ object DDLSourceSQLManager {
        |    'format' = '$format'
        |)""".stripMargin
   }
+
+
 
   /**
     * 窗口
@@ -141,6 +143,21 @@ object DDLSourceSQLManager {
        |) WITH (
        |'connector.type' = 'printsink',
        |'println.prefix'='>> : '
+       |)""".stripMargin
+  }
+
+  def createCustomMongoSink(tblName: String): String = {
+    s"""CREATE TABLE ${tblName} (
+       |id VARCHAR,
+       |msg VARCHAR,
+       |uv BIGINT
+       |) WITH (
+       |'connector' = 'custom-mongo',
+       |'mongourl'='localhost:27017',
+       |'mongouser'='admin',
+       |'mongopassw'='123456',
+       |'mongodb'='test',
+       |'collection'='runoob'
        |)""".stripMargin
   }
 
@@ -179,17 +196,18 @@ object DDLSourceSQLManager {
        |)""".stripMargin
   }
 
-  def createFromMysql(sourceTbl: String, targetTbl: String) =
-    s"""CREATE TABLE ${targetTbl} (
-       |    bid_req_num BIGINT,
-       |    md_key VARCHAR
+  def createFromMysql(tblName: String) =
+    s"""CREATE TABLE ${tblName} (
+       |    msg VARCHAR,
+       |    cnt BIGINT,
+       |    PRIMARY KEY (msg) NOT ENFORCED
        |) WITH (
-       |    'connector.type' = 'jdbc',
-       |    'connector.url' = '${FlinkLearnPropertiesUtil.MYSQL_HOST}',
-       |    'connector.table' = '${sourceTbl}',
-       |    'connector.username' = '${FlinkLearnPropertiesUtil.MYSQL_USER}',
-       |    'connector.password' = '${FlinkLearnPropertiesUtil.MYSQL_PASSW}',
-       |    'connector.write.flush.max-rows' = '1'
+       |    'connector' = 'jdbc',
+       |    'url' = '${FlinkLearnPropertiesUtil.MYSQL_HOST}',
+       |    'table-name' = '${tblName}',
+       |    'username' = '${FlinkLearnPropertiesUtil.MYSQL_USER}',
+       |    'password' = '${FlinkLearnPropertiesUtil.MYSQL_PASSW}',
+       |    'sink.buffer-flush.max-rows' = '1'
        |)""".stripMargin
 
 }

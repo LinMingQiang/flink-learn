@@ -84,7 +84,16 @@
 <!--      <artifactId>postgresql</artifactId>-->
 <!--      <version>9.4.1208.jre7</version>-->
 <!--    </dependency>-->
-
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-connector-jdbc_${scala.binary.version}</artifactId>
+      <version>${flink.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.30</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
@@ -128,17 +137,9 @@
   <profiles>
     <profile>
       <id>sql-skip-tests</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skipTests>true</skipTests>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
+      <properties>
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
     </profile>
   </profiles>
   <build>
