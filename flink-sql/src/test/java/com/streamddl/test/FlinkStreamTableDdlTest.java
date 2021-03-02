@@ -2,6 +2,7 @@ package com.streamddl.test;
 
 import com.ddlsql.DDLSourceSQLManager;
 import com.flink.common.java.pojo.TestPoJo;
+import com.flink.learn.sql.func.HyperLogCountDistinctAgg;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -239,6 +240,26 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
         TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
         re.print();
+    }
+
+
+    @Test
+    public void hyperlogCountdistinctTest() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:00","msg":"hello100"} {"rowtime":"2021-01-20 00:00:02","msg":"hello"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.createTemporarySystemFunction("hyperCountDistinct", new HyperLogCountDistinctAgg());
+        tableEnv.toRetractStream(tableEnv.sqlQuery(
+                "select topic,hyperCountDistinct(msg) from test group by topic"), Row.class)
+        .print();
+
+        streamEnv.execute();
+
+
     }
 
 
