@@ -1,4 +1,4 @@
-package com.flink.common.java.core;
+package com.core;
 
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.common.time.Time;

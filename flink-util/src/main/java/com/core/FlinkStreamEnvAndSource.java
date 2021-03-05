@@ -1,4 +1,4 @@
-package com.flink.common.java.core;
+package com.core;
 
 import com.flink.common.kafka.KafkaManager;
 import org.apache.flink.api.java.ExecutionEnvironment;

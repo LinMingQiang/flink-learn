@@ -1,4 +1,4 @@
-package com.flink.common.java.pojo;
+package com.pojo;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 

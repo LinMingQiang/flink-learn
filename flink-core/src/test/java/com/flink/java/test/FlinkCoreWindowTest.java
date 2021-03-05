@@ -1,7 +1,7 @@
 package com.flink.java.test;
 
 import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
-import com.flink.common.java.manager.KafkaSourceManager;
+import com.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetTimeMsg;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
@@ -12,7 +12,6 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
@@ -24,7 +23,6 @@ import org.apache.flink.util.Collector;
 import org.junit.Test;
 
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
 

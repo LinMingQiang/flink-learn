@@ -2,18 +2,15 @@ package com.flink.learn.entry;
 
 import com.flink.common.core.EnvironmentalKey;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.flink.common.deserialize.TopicOffsetMsgDeserialize;
-import com.flink.common.java.core.FlinkEvnBuilder;
-import com.flink.common.java.core.FlinkSourceBuilder;
-import com.flink.common.java.core.FlinkStreamEnvAndSource;
-import com.flink.common.java.manager.KafkaSourceManager;
+import com.core.FlinkEvnBuilder;
+import com.core.FlinkSourceBuilder;
+import com.core.FlinkStreamEnvAndSource;
 import com.flink.common.kafka.KafkaManager;
 import org.apache.flink.cep.CEP;
 import org.apache.flink.cep.PatternSelectFunction;
 import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.cep.pattern.conditions.SimpleCondition;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.List;
 import java.util.Map;

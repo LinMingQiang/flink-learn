@@ -4,10 +4,10 @@ import com.flink.common.core.EnvironmentalKey;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
 import com.flink.common.deserialize.TopicOffsetMsgDeserialize;
 import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
-import com.flink.common.java.core.FlinkEvnBuilder;
-import com.flink.common.java.manager.KafkaSourceManager;
+import com.core.FlinkEvnBuilder;
+import com.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
-import com.flink.function.process.StreamConnectCoProcessFunc;
+import com.func.processfunc.StreamConnectCoProcessFunc;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -17,7 +17,6 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.OutputTag;
 
-import java.io.IOException;
 import java.time.Duration;
 
 public class FlinkCoreOperatorEntry {

@@ -1,4 +1,4 @@
-package com.flink.common.java.manager;
+package com.manager;
 
 import com.flink.common.deserialize.TopicOffsetJsonEventtimeDeserialize;
 import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;

@@ -1,30 +1,22 @@
 package com.flink.java.test;
 
-import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
-import com.flink.common.java.manager.KafkaSourceManager;
-import com.flink.common.java.pojo.WordCountPoJo;
+import com.pojo.WordCountPoJo;
 import com.flink.common.kafka.KafkaManager;
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg;
-import com.flink.function.process.StreamConnectCoProcessFunc;
-import com.flink.function.rich.AsyncIODatabaseRequest;
-import com.flink.learn.richf.WordCountRichFunction;
+import com.func.processfunc.StreamConnectCoProcessFunc;
+import com.func.richfunc.AsyncIODatabaseRequest;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.junit.Test;
 
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 
@@ -48,6 +40,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                 })
                 .returns(Types.STRING)
                 .map(x -> new Tuple2(x, 1L))
+                .setParallelism(1)
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy(x -> x.f0)
                  .sum(1)

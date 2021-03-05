@@ -1,4 +1,4 @@
-package com.flink.common.java.pojo
+package com.pojo
 
 class DayMonthHour extends Serializable {
   var d: String = null;

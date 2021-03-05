@@ -1,4 +1,4 @@
-package com.flink.common.java.pojo;
+package com.pojo;
 
 public class KafkaTopicOffsetMsgPoJo {
     public String topic = "";

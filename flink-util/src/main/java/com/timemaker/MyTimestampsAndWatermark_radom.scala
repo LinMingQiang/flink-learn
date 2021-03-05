@@ -1,4 +1,4 @@
-package com.flink.common.java.timemaker
+package com.timemaker
 
 import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks

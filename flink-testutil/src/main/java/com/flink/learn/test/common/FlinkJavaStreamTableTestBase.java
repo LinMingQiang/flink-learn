@@ -1,5 +1,5 @@
 package com.flink.learn.test.common;
-import com.flink.common.java.core.FlinkSourceBuilder;
+import com.core.FlinkSourceBuilder;
 import org.junit.After;
 import org.junit.Before;
 
