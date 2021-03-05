@@ -45,11 +45,13 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                 // 如果定义了trigger，会每次触发sum操作。最好的方法就是定期清理窗口的数据，不然每次触发都是拿窗口的全部数据做计算
                 .trigger(ContinuousProcessingTimeTrigger.of(Time.seconds(5)))
                 // .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
-                // 是讲窗口数据存成list在state里面，每次reducefunction都是拿窗口所有数据重新算。所以如果设置了，那就没办法跨触发合并数据，结果是不对的
-                // 所以 evictor 和 trigger一起用会导致窗口算的结果不对，除非用process把中间算的结果存起来，参考 FlinkStreamDAUTest
-                 .evictor(TimeEvictor.of(Time.seconds(0), true)) // 只保留 窗口内最近2s的数据做计算
+                // 所以 evictor 和 trigger 一起用会导致窗口算的结果不对 （因为evictor把数据清了，trigger是需要窗口数据做计算），
+                // 除非用process把中间算的结果存起来，参考 FlinkStreamDAUTest
+
+                // .evictor(TimeEvictor.of(Time.seconds(0), true)) // 只保留 窗口内最近2s的数据做计算
                 // 在process才产生 Transformation，上面的定义存在 WindowOperatorBuilder 里面
-                // 这个可以拿到窗口的所有数据，效率低，可以使用AggregateFunction或者reduceFunction。
+                // 如果使用了 evictor，reduce的优势就不存在了，因为数据要全量保存下来然后再reduce。看 ReduceApplyProcessWindowFunction的process
+                // 如果没用用evictor，reduce会变成一个 WindowState:RocksDBReducingState。 WindowState.add(element)调用了reducefunc
                 .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) -> new Tuple2<String, Long>(value1.f0, value2.f1 + value1.f1)
                         , new ProcessWindowFunction<Tuple2<String, Long>,
                                 Tuple3<TimeWindow, String, Long>,
