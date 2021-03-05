@@ -1,26 +1,11 @@
 package com.flink.java.sourcesink.test;
 
-import com.flink.common.java.connect.PrintlnConnect;
-import com.flink.common.java.sourcefunc.HbaseLookupFunction;
-import com.flink.common.java.tablesource.HbaseAyscLookupTableSource;
+import com.connect.PrintlnConnect;
 import com.flink.common.manager.SchemaManager;
 import com.flink.learn.sql.common.DDLSourceSQLManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
-import org.apache.flink.addons.hbase.HBaseTableSource;
-import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.formats.csv.CsvRowFormatFactory;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.descriptors.Json;
-import org.apache.flink.table.factories.StreamTableSourceFactory;
-import org.apache.flink.table.functions.TemporalTableFunction;
-import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.junit.Test;
 

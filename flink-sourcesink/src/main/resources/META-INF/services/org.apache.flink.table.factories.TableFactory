@@ -1,7 +1,7 @@
-com.flink.common.source.java.factory.PrintlnAppendStreamFactory
-com.flink.common.source.java.factory.PrintlnRetractStreamFactory
-com.flink.common.source.java.factory.PrintlnUpsertStreamFactory
-com.flink.common.source.java.factory.HbaseRetractStreamFactory
-com.flink.common.source.java.factory.HbaseLookUpFactory
-com.flink.common.java.csvformat.CsvCustomRowFormatFactory
-com.flink.common.source.java.factory.ElasticsearchRetractStreamFactory
+com.factory.deprecatedfactory.PrintlnAppendStreamFactory
+com.factory.deprecatedfactory.PrintlnRetractStreamFactory
+com.factory.deprecatedfactory.PrintlnUpsertStreamFactory
+com.factory.deprecatedfactory.HbaseRetractStreamFactory
+com.factory.deprecatedfactory.HbaseLookUpFactory
+com.format.csvformat.CsvCustomRowFormatFactory
+com.factory.deprecatedfactory.ElasticsearchRetractStreamFactory

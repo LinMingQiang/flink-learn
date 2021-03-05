@@ -1,3 +1,4 @@
-com.flink.common.source.java.dynamicfactory.PrintlnRetractDynamicTableSinkFactory
-com.flink.common.source.java.dynamicfactory.MongoDynamicTableSinkFactory
-com.flink.common.java.format.CustomJsonRowDataFormatFactory
+com.factory.dynamicfactory.sink.PrintlnRetractDynamicTableSinkFactory
+com.factory.dynamicfactory.sink.MongoDynamicTableSinkFactory
+com.factory.dynamicfactory.source.HbaseLookupTableSourceFactory
+com.format.jsonformat.CustomJsonRowDataFormatFactory

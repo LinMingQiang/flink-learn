@@ -1,14 +1,5 @@
 package com.flink.commom.scala.streamsink
 
-import com.flink.common.java.tablesink.PrintlnAppendStreamTableSink
-import com.flink.common.manager.{SchemaManager, TableSourceConnectorManager}
-import com.flink.sql.common.format.ConnectorFormatDescriptorUtils
-import org.apache.flink.api.common.typeinfo.{TypeInformation, Types}
-import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
-import org.apache.flink.table.descriptors.{Csv, FileSystem}
-import org.apache.flink.table.sinks.CsvTableSink
-
 object TableSinkManager {
 
 //  def registerCsvTableSink(tEnv: StreamTableEnvironment,
