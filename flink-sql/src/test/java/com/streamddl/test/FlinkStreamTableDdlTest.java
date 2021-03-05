@@ -190,14 +190,14 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
 
     /**
-     * 使用了Emit，似乎不会清理窗口状态了，需要再sql的windowoperation里面去修改
-     *
+     * 需要再sql的 WindowOperator 里面去修改
+     * 必须是insert xx select... emit
      * @throws Exception
      */
     @Test
     public void testDDLTriggerWindow() throws Exception {
         // {"rowtime":"2021-01-20 00:00:00","msg":"hello"} {"rowtime":"2021-01-20 00:00:02","msg":"hello"}
-        // {"rowtime":"2021-01-20 00:00:40","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:02:50","msg":"hello"}
 //        tableEnv.getConfig().getConfiguration().setBoolean("table.exec.emit.early-fire.enabled", true);
 //        // 每隔 5s 触发一次
 //        tableEnv.getConfig().getConfiguration().setLong("table.exec.emit.early-fire.delay", 5000L);
@@ -210,7 +210,9 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
         // TUMBLE_ROWTIME 返回的字段做为 rowtime
         String sql = "select " +
-                "msg," +
+                "CONCAT_WS('--',cast(TUMBLE_START(rowtime, INTERVAL '30' SECOND) as VARCHAR)," +
+                "cast(TUMBLE_END(rowtime, INTERVAL '30' SECOND)  as VARCHAR)," +
+                "msg) as msg," +
                 "count(1) cnt" +
                 " from test" +
                 " where msg = 'hello' " +
@@ -220,7 +222,9 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         // "  WITH DELAY '2' SECOND AFTER WATERMARK";
 
         String sql2 = "select " +
-                "msg," +
+                "CONCAT_WS('--',TUMBLE_START(rowtime, INTERVAL '30' SECOND)," +
+                "TUMBLE_END(rowtime, INTERVAL '30' SECOND)," +
+                "msg) as msg," +
                 "count(1) cnt" +
                 " from test" +
                 " where msg = 'hello' " +
@@ -231,9 +235,10 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
         // TableResult re2 = tableEnv.executeSql("insert into printlnRetractSink " + sql2);
         // re2.print();
-
+//        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
         TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
         re.print();
+        streamEnv.execute();
     }
 
 

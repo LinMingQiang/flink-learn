@@ -99,14 +99,16 @@ object DDLSourceSQLManager {
        |    `offset` bigint METADATA,
        |    rowtime TIMESTAMP(3),
        |    msg VARCHAR,
-       |    proctime AS PROCTIME()
+       |    proctime AS PROCTIME(),
+       |    WATERMARK FOR rowtime AS rowtime - INTERVAL '10' SECOND
        |) WITH (
        |    'connector' = 'kafka',
        |    'topic' = '$topic',
        |    'scan.startup.mode' = 'latest-offset',
        |    'properties.bootstrap.servers' = '$broker',
        |    'properties.group.id' = '$groupID',
-       |    'format' = '$format'
+       |    'format' = '$format',
+       |    'json.ignore-parse-errors' = 'true'
        |)""".stripMargin
   }
 
