@@ -104,6 +104,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
     }
 
 
+    // 时态表函数
     @Test
     public void temporalTableFunctionTest() throws Exception {
         // {"rowtime":"2021-01-20 00:00:23","msg":"hello"}
@@ -141,6 +142,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
 
 
+    // 时态表
     @Test
     public void lookupTableTest() throws Exception {
         tableEnv.executeSql(
