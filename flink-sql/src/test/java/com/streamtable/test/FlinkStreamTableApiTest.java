@@ -1,21 +1,15 @@
 package com.streamtable.test;
 
-import com.flink.commom.scala.streamsink.TableSinkManager;
-import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
-import com.flink.common.java.pojo.TestRowPoJo;
-import com.flink.common.java.pojo.WordCountPoJo;
-import com.flink.common.java.sourcefunc.HbaseLookupFunction;
-import com.flink.common.java.tablesink.HbaseRetractStreamTableSink;
-import com.flink.common.manager.SchemaManager;
-import com.flink.common.manager.TableSourceConnectorManager;
-import com.flink.function.common.AbstractHbaseQueryFunction;
-import com.flink.function.process.HbaseQueryProcessFunction;
+import com.pojo.KafkaTopicOffsetMsgPoJo;
+import com.pojo.TestRowPoJo;
+import com.pojo.WordCountPoJo;
+import com.func.processfunc.AbstractHbaseQueryFunction;
+import com.func.processfunc.HbaseQueryProcessFunction;
 import com.flink.learn.sql.func.StrSplitTableFunction;
 import com.flink.learn.sql.func.StrSplitToMultipleRowTableFunction;
 import com.flink.learn.sql.func.TimestampYearHour;
 import com.flink.learn.sql.func.TimestampYearHourTableFunc;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
-import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -24,23 +18,14 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.table.api.*;
-import org.apache.flink.table.descriptors.Json;
-import org.apache.flink.table.descriptors.Kafka;
-import org.apache.flink.table.descriptors.Schema;
-import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.table.functions.TemporalTableFunction;
-import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
 import org.apache.hadoop.hbase.client.Result;
 import org.junit.Test;
 import com.ddlsql.DDLSourceSQLManager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.flink.table.api.Expressions.*;
@@ -448,22 +433,22 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 
 
 //    @Test
-//    public void testTableFunction() throws Exception {
-//        Table a = getStreamTable(
-//                getKafkaDataStream("test", "localhost:9092", "latest"),
-//                "topic,offset,msg")
-//                .renameColumns("offset as offsets");
-//        tableEnv.createTemporaryView("test", a);
-//        tableEnv.createTemporarySystemFunction("TimestampYearHourTableFunc", TimestampYearHourTableFunc.class);
-//        Table b = tableEnv.sqlQuery("select tttable.*,tmpTable.*,tmpTable2.* from test as tttable," +
-//                " LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable(d, m, h)," +
-//                "LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable2(d1, m1, h1)");
-//        b.printSchema();
-//        tableEnv.toRetractStream(b,
-//                Row.class)
-//                .print();
-//        streamEnv.execute("");
-//    }
+    public void testTableFunction() throws Exception {
+        Table a = getStreamTable(
+                getKafkaDataStream("test", "localhost:9092", "latest"),
+                "topic,offset,msg")
+                .renameColumns("offset as offsets");
+        tableEnv.createTemporaryView("test", a);
+        tableEnv.createTemporarySystemFunction("TimestampYearHourTableFunc", TimestampYearHourTableFunc.class);
+        Table b = tableEnv.sqlQuery("select tttable.*,tmpTable.*,tmpTable2.* from test as tttable," +
+                " LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable(d, m, h)," +
+                "LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable2(d1, m1, h1)");
+        b.printSchema();
+        tableEnv.toRetractStream(b,
+                Row.class)
+                .print();
+        streamEnv.execute("");
+    }
 
 
     @Test

@@ -1,16 +1,9 @@
 package com.streamddl.test;
 
 import com.ddlsql.DDLSourceSQLManager;
-import com.flink.common.java.pojo.TestPoJo;
 import com.flink.learn.sql.func.HyperLogCountDistinctAgg;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
-import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.functions.co.CoMapFunction;
-import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableResult;
-import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.types.Row;
 import org.junit.Test;
 
@@ -24,6 +17,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testDDLSample() throws Exception {
+        // create table 不会触发任务,只有insert会
         // {"rowtime":"2021-01-20 00:00:23","msg":"hello"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",

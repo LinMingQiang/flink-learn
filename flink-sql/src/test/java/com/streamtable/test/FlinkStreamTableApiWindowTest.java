@@ -1,32 +1,8 @@
 package com.streamtable.test;
 
-import com.ddlsql.DDLSourceSQLManager;
-import com.flink.common.java.pojo.KafkaTopicOffsetMsgPoJo;
-import com.flink.common.java.pojo.TestRowPoJo;
-import com.flink.common.java.pojo.WordCountPoJo;
-import com.flink.function.common.AbstractHbaseQueryFunction;
-import com.flink.function.process.HbaseQueryProcessFunction;
-import com.flink.learn.sql.func.StrSplitTableFunction;
-import com.flink.learn.sql.func.StrSplitToMultipleRowTableFunction;
-import com.flink.learn.sql.func.TimestampYearHour;
-import com.flink.learn.sql.func.TimestampYearHourTableFunc;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
-import org.apache.flink.api.common.typeinfo.TypeHint;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.table.api.*;
-import org.apache.flink.table.functions.TemporalTableFunction;
-import org.apache.flink.types.Row;
-import org.apache.flink.util.OutputTag;
-import org.apache.hadoop.hbase.client.Result;
 import org.junit.Test;
-
-import java.util.List;
 
 import static org.apache.flink.table.api.Expressions.*;
 

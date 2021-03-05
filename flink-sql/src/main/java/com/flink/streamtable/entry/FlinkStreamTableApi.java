@@ -1,8 +1,7 @@
 package com.flink.streamtable.entry;
-import com.flink.common.java.core.FlinkSourceBuilder;
+import com.core.FlinkSourceBuilder;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.functions.TemporalTableFunction;
-import org.apache.flink.table.runtime.operators.join.temporal.BaseTwoInputStreamOperatorWithStateRetention;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;

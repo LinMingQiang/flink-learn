@@ -161,6 +161,14 @@ object DDLSourceSQLManager {
        |)""".stripMargin
   }
 
+  def createHbaseLookupSource(tblName: String): String = {
+    s"""CREATE TABLE ${tblName} (
+       |word VARCHAR
+       |) WITH (
+       |'connector' = 'custom-hbase-lookup'
+       |)""".stripMargin
+  }
+
   /**
    * 新版的是connector,旧版是 connector.type
    * @param printlnSinkTbl
