@@ -13,6 +13,7 @@
           <artifactId>elasticsearch-shade</artifactId>
           <groupId>com.flink.learn</groupId>
           <version>${project.version}</version>
+          <scope>provided</scope>
       </dependency>
       <dependency>
           <groupId>org.apache.flink</groupId>
@@ -38,41 +39,26 @@
       <dependency>
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
-          <version>${flink.version}</version>
           <scope>provided</scope>
       </dependency>
       <dependency>
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-clients_${scala.binary.version}</artifactId>
-          <version>${flink.version}</version>
           <scope>provided</scope>
       </dependency>
       <dependency>
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
-          <version>${flink.version}</version>
           <scope>provided</scope>
       </dependency>
       <dependency>
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
-          <version>${flink.version}</version>
           <scope>provided</scope>
-          <exclusions>
-              <exclusion>
-                  <artifactId>janino</artifactId>
-                  <groupId>org.codehaus.janino</groupId>
-              </exclusion>
-              <exclusion>
-                  <artifactId>commons-compiler</artifactId>
-                  <groupId>org.codehaus.janino</groupId>
-              </exclusion>
-          </exclusions>
       </dependency>
       <dependency>
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-table-common</artifactId>
-          <version>${flink.version}</version>
           <scope>provided</scope>
       </dependency>
 <!--      <dependency>-->
@@ -89,7 +75,6 @@
       <dependency>
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
-          <version>${flink.version}</version>
           <scope>provided</scope>
       </dependency>
 <!--      <dependency>-->

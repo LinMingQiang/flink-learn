@@ -1,11 +1,27 @@
 package com.streamddl.test;
 
 import com.ddlsql.DDLSourceSQLManager;
+import com.flink.common.kafka.KafkaManager;
 import com.flink.learn.sql.func.HyperLogCountDistinctAgg;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.java.tuple.Tuple;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.types.Row;
 import org.junit.Test;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+import static org.apache.flink.table.api.Expressions.$;
 
 public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
@@ -34,6 +50,8 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
     }
 
 
+    // window的source表不能是 update表，
+    // union的话是需要两边的wtm都达到才可以触发
     @Test
     public void testDDLWindow() throws Exception {
         // {"rowtime":"2021-01-20 00:00:01","msg":"hello"} {"rowtime":"2021-01-20 00:00:02","msg":"hello"}
@@ -44,6 +62,15 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "test",
                         "test",
                         "json"));
+
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test2",
+                        "test2",
+                        "test",
+                        "json"));
+
+
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
         // TUMBLE_ROWTIME 返回的字段做为 rowtime
 //        " TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
@@ -52,7 +79,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         String sql = "select " +
                 "msg," +
                 "count(1) cnt" +
-                " from test" +
+                " from (select * from (select * from test) union all (select * from test2))" +
                 " where msg = 'hello' " +
                 " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
                 "";
@@ -192,6 +219,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
     /**
      * 需要再sql的 WindowOperator 里面去修改
      * 必须是insert xx select... emit
+     *
      * @throws Exception
      */
     @Test
@@ -254,12 +282,86 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         tableEnv.createTemporarySystemFunction("hyperCountDistinct", new HyperLogCountDistinctAgg());
         tableEnv.toRetractStream(tableEnv.sqlQuery(
                 "select topic,hyperCountDistinct(msg) from test group by topic"), Row.class)
-        .print();
+                .print();
 
         streamEnv.execute();
-
-
     }
 
+
+    /**
+     * 在流表转换中的时间字段的定义
+     * 正常情况下，我们要定义rowtime和watermark （只有窗口中用到）。我们只能在ddl。或者在TableApi的时候定义
+     * 但是如果我们有一个Table里面带有时间字段，但他不是rowtime，这个表我们是无法使用window操作的。
+     * 例如我们有个table是经过多个table转换过来的。
+     * 1: 将table转stream
+     * 2：在stream中定义watermark
+     * 3：stream转table，同时指定rowtime
+     * 注意： 简单的表转换是不会丢失时间信息的。只要不变换时间字段
+     */
+
+    @Test
+    public void streamToTableTimeAttributesTest() throws Exception {
+        // {"rowtime":"2021-01-20 01:00:00","msg":"hello"}
+        // {"rowtime":"2021-01-20 01:01:11","msg":"hello"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+
+        tableEnv.createTemporaryView("test2", tableEnv.sqlQuery("select CONCAT(msg , '-hai') as msg,rowtime from test where msg is not null"));
+        tableEnv.createTemporaryView("test3", tableEnv.sqlQuery("select msg,rowtime from test group by msg,rowtime"));
+
+
+        tableEnv.createTemporaryView("test4", tableEnv.sqlQuery("select * from (select * from test) union all (select * from test)"));
+//        tableEnv.from("test2").printSchema();
+//        tableEnv.from("test3").printSchema();
+//        tableEnv.from("test4").printSchema();
+        // 这里只能用test2,test4，test3报错没有时间字段
+        String sql = "select " +
+                "msg," +
+                "count(1) cnt" +
+                " from test2 " +
+                " where msg = 'hello' " +
+                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
+                "";
+        // 现在开始将test3的情况转变一下
+        // 1: table转stream。同时指定 wtm的时间抽取
+        // 这里只能用test2，用test3 wtm好像不准，触发的时间都不对。
+        SingleOutputStreamOperator r = tableEnv.toRetractStream(tableEnv.from("test2"), Row.class)
+                .filter(x -> x.f0)
+                .map(new MapFunction<Tuple2<Boolean, Row>, Tuple2<String, Long>>() {
+                    SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+                    @Override
+                    public Tuple2<String, Long> map(Tuple2<Boolean, Row> value) throws Exception {
+                        String formatstr = value.f1.getField(1).toString();
+                        if (formatstr.length() < 19) formatstr += ":00";
+                        return new Tuple2<>(value.f1.getField(0).toString(),
+                                s.parse(formatstr).getTime()
+                        );
+                    }
+                })
+                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+                .assignTimestampsAndWatermarks(
+                        WatermarkStrategy.<Tuple2<String, Long>>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                .withTimestampAssigner(((element, recordTimestamp) -> element.f1))
+                );
+
+        tableEnv.createTemporaryView("test5",
+                r,
+                $("msg"),
+                $("rowtime").rowtime());
+        String sql5 = "select " +
+                "msg," +
+                "count(1) cnt" +
+                " from test5 " +
+                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
+                "";
+        TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql5);
+        re.print();
+    }
 
 }

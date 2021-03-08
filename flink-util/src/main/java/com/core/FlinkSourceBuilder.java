@@ -41,8 +41,7 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
                 FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());
         tableEnv = FlinkEvnBuilder.buildStreamTableEnv(
                 streamEnv,
-                Time.minutes(1),
-                Time.minutes(6));
+                Duration.ofHours(2));
         baseKafkaSource = getKafkaDataStream("test", "localhost:9092", "latest");
         baseEventtimeKafkaSource = getKafkaDataStreamWithEventTime("test", "localhost:9092", "latest");
         baseEventtimeJsonSource = getKafkaDataStreamWithJsonEventTime("test", "localhost:9092", "latest");

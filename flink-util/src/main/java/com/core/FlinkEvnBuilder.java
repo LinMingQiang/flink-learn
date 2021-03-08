@@ -14,6 +14,7 @@ import org.apache.flink.table.api.bridge.java.BatchTableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 import java.io.IOException;
+import java.time.Duration;
 
 public class FlinkEvnBuilder {
 
@@ -33,8 +34,6 @@ public class FlinkEvnBuilder {
         // env.getConfig().setAutoWatermarkInterval(10000L); // 每10s触发一次 wtm
         if(checkPointInterval > 0L)
         env.enableCheckpointing(checkPointInterval); //更新offsets。每60s提交一次
-        env.setMaxParallelism(2);
-        env.setParallelism(2);
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(checkPointInterval); //; 两个chk最小间隔
         //超时
         //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
@@ -55,7 +54,7 @@ public class FlinkEvnBuilder {
         }
         // state.backend.rocksdb.ttl.compaction.filter.enabled
         // 说是存储在hdfs，看代码好像不支持 hdfs // rocksdb本地路径，默认在tm临时路径下
-        rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage");
+//        rocksDBStateBackend.setDbStoragePath(checkpointPath + "/rocksdbstorage");
          env.setStateBackend(rocksDBStateBackend);
         return env;
     }
@@ -75,13 +74,12 @@ public class FlinkEvnBuilder {
 
 
     public static StreamTableEnvironment buildStreamTableEnv(StreamExecutionEnvironment streamEnv,
-                                                             Time stateMinT,
-                                                             Time stateMaxT) throws IOException {
+                                                             Duration stateTTL) throws IOException {
         EnvironmentSettings sett =
                 EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamTableEnvironment streamTableEnv = StreamTableEnvironment.create(streamEnv, sett);
         // 状态 时间少于 stateMinT 不会被清除， 状态时间大于stateMaxT，将会被清除。 状态时间在中间的不会被清除。
-        streamTableEnv.getConfig().setIdleStateRetentionTime(stateMinT, stateMaxT);
+        streamTableEnv.getConfig().setIdleStateRetention(stateTTL);
         return streamTableEnv;
     }
 

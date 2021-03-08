@@ -2,7 +2,6 @@ package com.flink.java.sourcesink.test;
 
 import com.connect.PrintlnConnect;
 import com.flink.common.manager.SchemaManager;
-import com.flink.learn.sql.common.DDLSourceSQLManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
 import org.apache.flink.table.api.Table;
@@ -117,19 +116,19 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
     @Test
     public void testLookupTableSource() throws Exception {
         // {"id":"id2","name":"name","age":1}
-        tableEnv.sqlUpdate(
-                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
-                        "localhost:2181",
-                        "test",
-                        "test",
-                        ","));
-        // 方法1
-        tableEnv.sqlUpdate(DDLSourceSQLManager.createHbaseLookupSourceTbl("hbaselookup"));
-        tableEnv.toAppendStream(
-                tableEnv.sqlQuery("select * from test as t left join" +
-                        " hbaselookup FOR SYSTEM_TIME AS OF t.proctime AS hb" +
-                        " on hb.id = t.id and t.name = hb.name"), Row.class)
-                .print();
+//        tableEnv.sqlUpdate(
+//                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
+//                        "localhost:2181",
+//                        "test",
+//                        "test",
+//                        ","));
+//        // 方法1
+//        tableEnv.sqlUpdate(DDLSourceSQLManager.createHbaseLookupSourceTbl("hbaselookup"));
+//        tableEnv.toAppendStream(
+//                tableEnv.sqlQuery("select * from test as t left join" +
+//                        " hbaselookup FOR SYSTEM_TIME AS OF t.proctime AS hb" +
+//                        " on hb.id = t.id and t.name = hb.name"), Row.class)
+//                .print();
 
 // 方法2
 //        tableEnv.registerFunction("hbaselookup", HbaseLookupFunction.builder()
@@ -148,90 +147,90 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
     @Test
     public void testCustomJsonFormat() throws Exception {
         // {"id":"id2","name":"name}
-        tableEnv.sqlUpdate(
-                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
-                        "localhost:2181",
-                        "test",
-                        "test",
-                        "test"));
-
-        tableEnv.toAppendStream(
-                tableEnv.from("test"), Row.class)
-                .print();
-
-        streamEnv.execute("");
+//        tableEnv.sqlUpdate(
+//                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
+//                        "localhost:2181",
+//                        "test",
+//                        "test",
+//                        "test"));
+//
+//        tableEnv.toAppendStream(
+//                tableEnv.from("test"), Row.class)
+//                .print();
+//
+//        streamEnv.execute("");
     }
 
     @Test
     public void testCSV() throws Exception {
         // {"id":"id2","name":"name}
-        tableEnv.sqlUpdate(
-                DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
-                        "localhost:2181",
-                        "test",
-                        "test",
-                        ",",
-                        "test"));
-
-        tableEnv.toAppendStream(
-                tableEnv.from("test"), Row.class)
-                .print();
-
-        streamEnv.execute("");
+//        tableEnv.sqlUpdate(
+//                DDLSourceSQLManager.createStreamFromKafka_CSV("localhost:9092",
+//                        "localhost:2181",
+//                        "test",
+//                        "test",
+//                        ",",
+//                        "test"));
+//
+//        tableEnv.toAppendStream(
+//                tableEnv.from("test"), Row.class)
+//                .print();
+//
+//        streamEnv.execute("");
     }
 
     @Test
     public void testCustomCSV() throws Exception {
         // {"id":"id2","name":"name}
-        tableEnv.sqlUpdate(
-                DDLSourceSQLManager.createStreamFromKafka_CUSTOMCSV("localhost:9092",
-                        "localhost:2181",
-                        "test",
-                        "test",
-                        ",",
-                        "test"));
-
-        tableEnv.toAppendStream(
-                tableEnv.from("test"), Row.class)
-                .print();
-
-        streamEnv.execute("");
+//        tableEnv.sqlUpdate(
+//                DDLSourceSQLManager.createStreamFromKafka_CUSTOMCSV("localhost:9092",
+//                        "localhost:2181",
+//                        "test",
+//                        "test",
+//                        ",",
+//                        "test"));
+//
+//        tableEnv.toAppendStream(
+//                tableEnv.from("test"), Row.class)
+//                .print();
+//
+//        streamEnv.execute("");
     }
 
 
     @Test
     public void testTemporalTable() throws Exception {
         // {"id":"id2","name":"name}
-        tableEnv.sqlUpdate(
-                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
-                        "localhost:2181",
-                        "test",
-                        "test",
-                        ","));
-        tableEnv.sqlUpdate(
-                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
-                        "localhost:2181",
-                        "test2",
-                        "test2",
-                        ","));
-
-        tableEnv.createTemporarySystemFunction("productInfoFunc",
-                tableEnv.from("test2").createTemporalTableFunction("proctime", "id"));
-
-
-        tableEnv.toAppendStream(
-                tableEnv.sqlQuery("select * from test"), Row.class)
-                .print();
-        tableEnv.toAppendStream(
-                tableEnv.sqlQuery("select * from test2"), Row.class)
-                .print();
-        tableEnv.toAppendStream(
-                tableEnv.sqlQuery("select productInfo.id,t.id,t.name from test as t," +
-                        "LATERAL TABLE(productInfoFunc(t.proctime)) as productInfo " +
-                        "WHERE t.id=productInfo.id"), Row.class)
-                .print();
-
-        streamEnv.execute("");
+//        tableEnv.sqlUpdate(
+//                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
+//                        "localhost:2181",
+//                        "test",
+//                        "test",
+//                        ","));
+//        tableEnv.sqlUpdate(
+//                DDLSourceSQLManager.createStreamFromKafkaProcessTime("localhost:9092",
+//                        "localhost:2181",
+//                        "test2",
+//                        "test2",
+//                        ","));
+//
+//        tableEnv.createTemporarySystemFunction("productInfoFunc",
+//                tableEnv.from("test2").createTemporalTableFunction("proctime", "id"));
+//
+//
+//        tableEnv.toAppendStream(
+//                tableEnv.sqlQuery("select * from test"), Row.class)
+//                .print();
+//        tableEnv.toAppendStream(
+//                tableEnv.sqlQuery("select * from test2"), Row.class)
+//                .print();
+//        tableEnv.toAppendStream(
+//                tableEnv.sqlQuery("select productInfo.id,t.id,t.name from test as t," +
+//                        "LATERAL TABLE(productInfoFunc(t.proctime)) as productInfo " +
+//                        "WHERE t.id=productInfo.id"), Row.class)
+//                .print();
+//
+//        streamEnv.execute("");
     }
 
 }

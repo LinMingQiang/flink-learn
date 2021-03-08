@@ -10,7 +10,6 @@ public class FlinkJavaStreamTableTestBase extends FlinkSourceBuilder implements 
     @Before
     public void before() throws Exception {
         init();
-
     }
 
     @After
