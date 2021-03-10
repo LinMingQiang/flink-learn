@@ -272,7 +272,8 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void hyperlogCountdistinctTest() throws Exception {
-        // {"rowtime":"2021-01-20 00:00:00","msg":"hello100"} {"rowtime":"2021-01-20 00:00:02","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:00:00","msg":"hello100"}
+        // {"rowtime":"2021-01-20 00:00:44","msg":"hello"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -280,11 +281,16 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "test",
                         "json"));
         tableEnv.createTemporarySystemFunction("hyperCountDistinct", new HyperLogCountDistinctAgg());
-        tableEnv.toRetractStream(tableEnv.sqlQuery(
-                "select topic,hyperCountDistinct(msg) from test group by topic"), Row.class)
-                .print();
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+        String sql = "select " +
+                "msg," +
+                "hyperCountDistinct(msg) cnt" +
+                " from test " +
+                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
+                "";
+        TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
+        re.print();
 
-        streamEnv.execute();
     }
 
 
@@ -297,6 +303,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
      * 2：在stream中定义watermark
      * 3：stream转table，同时指定rowtime
      * 注意： 简单的表转换是不会丢失时间信息的。只要不变换时间字段
+     * 注意：Datastream里面不能做keyby或者groupby操作，否则窗口触发不了
      */
 
     @Test
