@@ -32,9 +32,10 @@ public class FlinkEvnBuilder {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.getConfig().setGlobalJobParameters(parameters); // 广播配置
         // env.getConfig().setAutoWatermarkInterval(10000L); // 每10s触发一次 wtm
-        if(checkPointInterval > 0L)
-        env.enableCheckpointing(checkPointInterval); //更新offsets。每60s提交一次
+        if (checkPointInterval > 0L) {
+            env.enableCheckpointing(checkPointInterval); //更新offsets。每60s提交一次
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(checkPointInterval); //; 两个chk最小间隔
+    }
         //超时
         //env.getCheckpointConfig.setCheckpointTimeout(5000) // 默认10min
         env.getConfig().setAutoWatermarkInterval(1L); // 设置 触发水位计算 间隔
