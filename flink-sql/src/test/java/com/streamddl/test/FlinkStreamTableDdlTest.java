@@ -309,7 +309,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void streamToTableTimeAttributesTest() throws Exception {
         // {"rowtime":"2021-01-20 01:00:00","msg":"hello"}
-        // {"rowtime":"2021-01-20 01:01:11","msg":"hello"}
+        // {"rowtime":"2021-01-20 01:11:11","msg":"hello"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -318,26 +318,26 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "json"));
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
 
-        tableEnv.createTemporaryView("test2", tableEnv.sqlQuery("select CONCAT(msg , '-hai') as msg,rowtime from test where msg is not null"));
+//        tableEnv.createTemporaryView("test3", tableEnv.sqlQuery("select CONCAT(msg , '-hai') as msg,rowtime from test where msg is not null"));
         tableEnv.createTemporaryView("test3", tableEnv.sqlQuery("select msg,rowtime from test group by msg,rowtime"));
 
 
-        tableEnv.createTemporaryView("test4", tableEnv.sqlQuery("select * from (select * from test) union all (select * from test)"));
+//        tableEnv.createTemporaryView("test4", tableEnv.sqlQuery("select * from (select * from test) union all (select * from test)"));
 //        tableEnv.from("test2").printSchema();
 //        tableEnv.from("test3").printSchema();
 //        tableEnv.from("test4").printSchema();
         // 这里只能用test2,test4，test3报错没有时间字段
-        String sql = "select " +
-                "msg," +
-                "count(1) cnt" +
-                " from test2 " +
-                " where msg = 'hello' " +
-                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
-                "";
+//        String sql = "select " +
+//                "msg," +
+//                "count(1) cnt" +
+//                " from test2 " +
+//                " where msg = 'hello' " +
+//                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
+//                "";
         // 现在开始将test3的情况转变一下
         // 1: table转stream。同时指定 wtm的时间抽取
         // 这里只能用test2，用test3 wtm好像不准，触发的时间都不对。
-        SingleOutputStreamOperator r = tableEnv.toRetractStream(tableEnv.from("test2"), Row.class)
+        SingleOutputStreamOperator r = tableEnv.toRetractStream(tableEnv.from("test3"), Row.class)
                 .filter(x -> x.f0)
                 .map(new MapFunction<Tuple2<Boolean, Row>, Tuple2<String, Long>>() {
                     SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

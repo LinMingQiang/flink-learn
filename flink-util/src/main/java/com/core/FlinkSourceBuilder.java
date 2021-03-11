@@ -22,17 +22,11 @@ import java.time.Duration;
 import static org.apache.flink.table.api.Expressions.call;
 
 public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
-//    public static StreamExecutionEnvironment streamEnv = null;
-//    public static StreamTableEnvironment tableEnv = null;
-//    public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d2 = null;
-//    public static KeyedStream<KafkaManager.KafkaTopicOffsetTimeMsg, String> d1 = null;
-//    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd2 = null;
-//    public static SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> cd1 = null;
-//    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> baseKafkaSource;
-//    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeKafkaSource;
-//    public static  DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> baseEventtimeJsonSource;
-//
 
+    /**
+     * 对于不是测试类，需要手动init
+     * @throws IOException
+     */
     public static void init() throws IOException {
         FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
                 "local-test");
