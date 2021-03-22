@@ -20,6 +20,7 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
+            <scope>${scope.value}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -39,7 +40,6 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
-            <scope>${scope.value}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -53,13 +53,19 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+            <scope>${scope.value}</scope>
+
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-table-api-java</artifactId>-->
+<!--            <scope>${scope.value}</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-api-java</artifactId>
+            <artifactId>flink-table-api-java-bridge_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.flink.learn</groupId>
             <artifactId>flink-util</artifactId>

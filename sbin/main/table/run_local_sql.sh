@@ -5,5 +5,5 @@
 #-s file:///Users/eminem/workspace/flink/flink-learn/savepoint/savepoint-c4fb21-d0e5d7045b40 \
 
 echo "start ........"
-flink run -c com.flink.streamsql.entry.FlinkSQLEntry \
+flink run -c com.flink.streamsql.entry.FlinkSQLFactoryEntry \
 /Users/eminem/workspace/flink/flink-learn/flink-sql/target/flink-sql-1.0.0.jar \
