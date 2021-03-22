@@ -219,5 +219,18 @@ object DDLSourceSQLManager {
        |    'password' = '${FlinkLearnPropertiesUtil.MYSQL_PASSW}',
        |    'sink.buffer-flush.max-rows' = '1'
        |)""".stripMargin
-
+  def createCustomESSink(tblName: String): String = {
+    s"""CREATE TABLE ${tblName} (
+       |id VARCHAR,
+       |msg VARCHAR,
+       |uv BIGINT
+       |) WITH (
+       |'connector' = 'custom-es',
+       |'es.address'='localhost:27017',
+       |'es.clustername'='admin',
+       |'es.passw'='123456',
+       |'es.index'='test',
+       |'es.commit.size'='runoob'
+       |)""".stripMargin
+  }
 }

@@ -55,6 +55,28 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         re.print();
     }
 
+    @Test
+    public void elasticsearchSinkTest() {
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        System.out.println(DDLSourceSQLManager.createCustomESSink("essinktest"));
+        tableEnv.executeSql(DDLSourceSQLManager.createCustomESSink("essinktest"));
+        TableResult re = tableEnv.executeSql("insert into essinktest" +
+                " select " +
+                "'id' as id," +
+                "msg," +
+                "count(1) uv " +
+                "from test" +
+                " group by" +
+                " msg," +
+                " TUMBLE(proctime, INTERVAL '10' SECOND)");
+//        TableResult re = tableEnv.executeSql("insert into mongotest select msg as id,msg,count(1) uv from test3 group by msg");
+        re.print();
+    }
 
     @Test
     public void temporalTableTest() throws Exception {
@@ -132,14 +154,13 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         tableEnv.createTemporarySystemFunction("rates", rates);
 
         tableEnv.toAppendStream(tableEnv.sqlQuery("select * from test," +
-                " LATERAL TABLE(rates(proctime))"+
+                " LATERAL TABLE(rates(proctime))" +
                 " WHERE " +
                 "  msg = r_msg" +
                 ""), Row.class).print();
         streamEnv.execute();
 
     }
-
 
 
     // 时态表

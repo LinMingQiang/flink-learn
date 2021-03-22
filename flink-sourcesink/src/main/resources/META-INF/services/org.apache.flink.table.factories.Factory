@@ -1,4 +1,5 @@
 com.factory.dynamicfactory.sink.PrintlnRetractDynamicTableSinkFactory
+com.factory.dynamicfactory.sink.ElasticsearchFactory
 com.factory.dynamicfactory.sink.MongoDynamicTableSinkFactory
 com.factory.dynamicfactory.source.HbaseLookupTableSourceFactory
 com.format.jsonformat.CustomJsonRowDataFormatFactory

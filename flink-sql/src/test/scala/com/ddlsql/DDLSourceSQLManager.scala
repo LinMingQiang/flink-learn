@@ -148,6 +148,21 @@ object DDLSourceSQLManager {
        |)""".stripMargin
   }
 
+  def createCustomESSink(tblName: String): String = {
+    s"""CREATE TABLE ${tblName} (
+       |id VARCHAR,
+       |msg VARCHAR,
+       |uv BIGINT
+       |) WITH (
+       |'connector' = 'custom-es',
+       |'es.address'='localhost:27017',
+       |'es.clustername'='admin',
+       |'es.passw'='123456',
+       |'es.index'='test',
+       |'es.commit.size'='runoob'
+       |)""".stripMargin
+  }
+
   def createCustomMongoSink(tblName: String): String = {
     s"""CREATE TABLE ${tblName} (
        |id VARCHAR,
@@ -162,7 +177,6 @@ object DDLSourceSQLManager {
        |'collection'='runoob'
        |)""".stripMargin
   }
-
   def createHbaseLookupSource(tblName: String): String = {
     s"""CREATE TABLE ${tblName} (
        |word VARCHAR

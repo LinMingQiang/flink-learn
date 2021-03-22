@@ -57,7 +57,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
         // d1: {"ts":15,"msg":"1"}
         // d2 {"ts":25,"msg":"1"} {"ts":5,"msg":"1"} // 正常输出
         // d2 : {"ts":26,"msg":"1"} {"ts":4,"msg":"1"}  // join 不到
-        initJsonSource(true);
+        initJsonSource(false);
         d1.intervalJoin(d2)
                 .between(Time.seconds(-10), Time.seconds(10))
                 .process(new ProcessJoinFunction<KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg, String>() {
