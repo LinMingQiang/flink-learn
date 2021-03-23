@@ -45,7 +45,7 @@ class ElasticsearchTableRichSinkFunction
   }
 
   override def invoke(value: RowData, context: SinkFunction.Context): Unit = {
-    println(value)
+    println(value, value.getClass)
     value.getRowKind match {
       case RowKind.INSERT =>
         bufferedElements.put(value.getString(0).toString, value)
@@ -89,6 +89,9 @@ class ElasticsearchTableRichSinkFunction
         bufferedElements.put(element.getString(0).toString, element)
       }
       println("--- initializeState ---", bufferedElements.size)
+      bufferedElements.foreach(x => {
+       println("恢复 > ", x)
+      })
     }
   }
 }
