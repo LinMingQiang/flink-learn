@@ -67,7 +67,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         tableEnv.executeSql(DDLSourceSQLManager.createCustomESSink("essinktest"));
         TableResult re = tableEnv.executeSql("insert into essinktest" +
                 " select " +
-                "'id' as id," +
+                "CONCAT_WS(',',msg) as id," +
                 "msg," +
                 "count(1) uv " +
                 "from test" +

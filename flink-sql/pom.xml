@@ -16,6 +16,11 @@
             <version>2.7.0</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-json</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.flink.learn</groupId>
             <artifactId>flink-util</artifactId>
             <version>${parent.version}</version>
@@ -84,6 +89,7 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-common</artifactId>
+            <scope>${scope.value}</scope>
         </dependency>
 
         <!--    <dependency>-->

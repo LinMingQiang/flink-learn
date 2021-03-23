@@ -12,7 +12,7 @@ import java.time.Duration;
 
 public class FlinkSQLFactoryEntry {
     public static StreamTableEnvironment tableEnv = null;
-
+// {"rowtime":"2021-01-20 00:00:23","msg":"hello2"}
     public static void main(String[] args) throws IOException {
         StreamExecutionEnvironment streamEnv = null;
         FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),

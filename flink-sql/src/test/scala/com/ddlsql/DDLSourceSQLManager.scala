@@ -159,7 +159,9 @@ object DDLSourceSQLManager {
        |'es.clustername'='admin',
        |'es.passw'='123456',
        |'es.index'='test',
-       |'es.commit.size'='runoob'
+       |'es.commit.intervalsec' = '10',
+       |'es.commit.size'= '10',
+       |'es.rowkey'='id'
        |)""".stripMargin
   }
 

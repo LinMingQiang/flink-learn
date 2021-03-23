@@ -1,20 +1,28 @@
 package com.flink.common.dbutil
 
-import java.net.InetAddress
+import org.apache.flink.api.common.typeinfo.Types
+import org.apache.flink.table.data.RowData
+import org.apache.flink.table.types.logical.{BigIntType, DoubleType, IntType, RowType, VarCharType}
+import org.apache.flink.types.Row
 
+import java.net.InetAddress
 import org.elasticsearch.action.bulk.{BackoffPolicy, BulkProcessor, BulkRequest, BulkResponse}
 import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.TransportAddress
 import org.elasticsearch.common.unit.TimeValue
-import org.elasticsearch.common.xcontent.XContentFactory
+import org.elasticsearch.common.xcontent.{XContentBuilder, XContentFactory}
 import org.elasticsearch.transport.client.PreBuiltTransportClient
+import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient
 import org.slf4j.LoggerFactory
+
+import scala.collection.mutable
 
 object ElasticsearchHandler {
   lazy val _log = LoggerFactory.getLogger(ElasticsearchHandler.getClass)
   var client: TransportClient = null
+  var preClient: PreBuiltXPackTransportClient = null;
   // 解决es 报错
   System.setProperty("es.set.netty.runtime.available.processors", "false")
 
@@ -39,6 +47,72 @@ object ElasticsearchHandler {
       }
       println("init es success")
     }
+    client
+  }
+
+  System.setProperty("es.set.netty.runtime.available.processors", "false")
+
+  /**
+    *
+    * @param address
+    * @return
+    */
+  def getGlobalEsPreClient(address: String,
+                           clustername: String,
+                           userPassw: String,
+                           path: String = "elastic-certificates.p12")
+    : PreBuiltXPackTransportClient = {
+    if (preClient == null) {
+      preClient = getEsPreClient(address, clustername, userPassw, path)
+    }
+    preClient
+  }
+
+  /**
+    *
+    * @param address
+    * @param clustername
+    * @param userPassw
+    * @return
+    */
+  def getEsPreClient(address: String,
+                     clustername: String,
+                     userPassw: String,
+                     path: String = "elastic-certificates.p12")
+    : PreBuiltXPackTransportClient = {
+    _log.info("init es client")
+    //    val path = ElasticsearchHandler.getClass
+    //      .getClassLoader()
+    //      .getResource("elastic-certificates.p12")
+    //      .getFile()
+    val client = if (!userPassw.isEmpty) {
+      new PreBuiltXPackTransportClient(
+        Settings
+          .builder()
+          .put("cluster.name", clustername)
+          .put("xpack.security.user", userPassw)
+          .put("xpack.security.transport.ssl.enabled", true)
+          .put("xpack.security.transport.ssl.verification_mode", "certificate")
+          .put("xpack.security.transport.ssl.keystore.path", path)
+          .put("xpack.security.transport.ssl.truststore.path", path)
+          .put("thread_pool.search.size", 8)
+          .build())
+    } else {
+      new PreBuiltXPackTransportClient(
+        Settings
+          .builder()
+          .put("cluster.name", clustername)
+          .build())
+    }
+    address.split(",").map(_.split(":", -1)).foreach {
+      case Array(host, port) =>
+        client.addTransportAddresses(
+          new TransportAddress(InetAddress.getByName(host), port.toInt))
+      case Array(host) =>
+        client.addTransportAddresses(
+          new TransportAddress(InetAddress.getByName(host), 9300))
+    }
+    _log.info("init es success")
     client
   }
 
@@ -86,6 +160,7 @@ object ElasticsearchHandler {
           //这个方法是在bulk执行前触发的。你可以在方法内request.numberOfActions()
           override def beforeBulk(executionId: Long,
                                   request: BulkRequest): Unit = {}
+
           //这个方法在bulk执行成功后触发的。你可以在方法内使用response.hasFailures()
           override def afterBulk(l: Long,
                                  bulkRequest: BulkRequest,
@@ -133,12 +208,45 @@ object ElasticsearchHandler {
       .startObject("day")
       .field("type", "keyword") // 设置数据类型
       .endObject()
-      // .....
+    // .....
     mapping
       .endObject()
       .endObject()
     creatIndexReq.addMapping(indextype, mapping)
     creatIndexReq.execute().actionGet()
+  }
+
+  /**
+    * 第一个字段是indexname。第二个是 key。后面是字段了。
+    *
+    * @param value
+    * @return
+    * @throws IOException
+    */
+  def createUpdateReqestFromRowData(
+      indexName: String,
+      idIndex: Int,
+      value: RowData,
+      fieldTypes: mutable.Buffer[RowType.RowField]): UpdateRequest = {
+    val creatDoc = XContentFactory.jsonBuilder.startObject
+    val id = value.getString(idIndex).toString
+    for (i <- 0 until (fieldTypes.length-1)) {
+      if (i != idIndex) {
+        fieldTypes(i).getType match {
+          case _ : VarCharType => creatDoc.field(fieldTypes(i).getName, value.getString(i).toString)
+          case _ : DoubleType => creatDoc.field(fieldTypes(i).getName, value.getDouble(i))
+          case _ : BigIntType => creatDoc.field(fieldTypes(i).getName, value.getLong(i))
+          case _ : IntType => creatDoc.field(fieldTypes(i).getName, value.getInt(i))
+          case _ => println("类型不对 。。。")
+        }
+      }
+    }
+    creatDoc.endObject
+    val updater = new UpdateRequest(indexName, id)
+      .upsert(creatDoc)
+      .retryOnConflict(3)
+      .doc(creatDoc)
+    updater
   }
 
   def main(args: Array[String]): Unit = {}

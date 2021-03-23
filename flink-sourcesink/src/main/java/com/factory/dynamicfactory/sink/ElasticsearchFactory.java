@@ -31,14 +31,16 @@ public class ElasticsearchFactory implements DynamicTableSinkFactory {
             .stringType()
             .noDefaultValue();
 
-    public static final ConfigOption<String> ES_COMMIT_SIZE = key("es.commit.size")
-            .stringType()
+    public static final ConfigOption<Long> ES_COMMIT_SIZE = key("es.commit.size")
+            .longType()
             .noDefaultValue();
 
-    public static final ConfigOption<String> ES_COMMIT_INTERVAL = key("es.commit.interval")
+    public static final ConfigOption<Long> ES_COMMIT_INTERVAL = key("es.commit.intervalsec")
+            .longType()
+            .noDefaultValue();
+    public static final ConfigOption<String> ES_ROWKEY = key("es.rowkey")
             .stringType()
             .noDefaultValue();
-
     @Override
     public DynamicTableSink createDynamicTableSink(Context context) {
         FactoryUtil.TableFactoryHelper helper = FactoryUtil.createTableFactoryHelper(this, context);
@@ -71,6 +73,7 @@ public class ElasticsearchFactory implements DynamicTableSinkFactory {
         options.add(ES_PASSW);
         options.add(ES_COMMIT_SIZE);
         options.add(ES_COMMIT_INTERVAL);
+        options.add(ES_ROWKEY);
         return options;
     }
 }
