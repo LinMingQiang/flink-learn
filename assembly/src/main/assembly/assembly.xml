@@ -63,6 +63,13 @@
             </includes>
         </fileSet>
         <fileSet>
+            <directory>${project.parent.basedir}/external-library/flink-datalake/target/</directory>
+            <outputDirectory>/lib</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>${project.parent.basedir}/external-library/flink-monitor/target/</directory>
             <outputDirectory>/lib</outputDirectory>
             <includes>

@@ -55,6 +55,7 @@ public class ElasticSinkFunction extends RichSinkFunction<Row> implements Checkp
                     .getGlobalJobParameters();
             FlinkLearnPropertiesUtil.init(parame);
             // 需要 env.registerCachedFile("hdfs:///path/to/your/file", "hdfsFile")
+            // 需要 env.registerCachedFile("file:///path/to/your/file", "hdfsFile")
             File myFile = getRuntimeContext().getDistributedCache().getFile("es_pack_file");
             client = ElasticsearchHandler7.getGlobalEsClient(
                     FlinkLearnPropertiesUtil.ES_HOSTS(),

@@ -181,7 +181,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         Table result = orders
                 .joinLateral(call("ts_to_DMH", $("ts"))) // 因为返回的是Row，所以不需要as
                 .joinLateral(call("split", $("msg")).as("key", "value")) // 一行转多列,不as的话是 f0,f1
-                .joinLateral(call("split_multiple_row", $("msg")).as("v")) // 一行转多行
+                .joinLateral(call("split_multiple_row", $("msg")).as("v")) // 一行转多行，用两次会1条变4条
                 .select($("*"));
         // TableAggregateFunction 用于多行转多行
         // 以下两个效果等同

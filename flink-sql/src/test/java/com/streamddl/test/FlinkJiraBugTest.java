@@ -16,7 +16,6 @@ public class FlinkJiraBugTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void udftest() throws Exception {
         tableEnv.createTemporaryView("test" ,tableEnv.fromDataStream(streamEnv.fromElements("a", "b", "c", "d", "e"), "msg"));
-
         tableEnv.registerFunction("sample", new SampleFunction());
         Table tm = tableEnv.sqlQuery("select msg, sample() as c from test");
         tableEnv.createTemporaryView("tmp", tm);

@@ -13,10 +13,10 @@
         <module>flink-core</module>
         <module>resources</module>
         <module>flink-sql</module>
-        <module>assembly</module>
         <module>external-library</module>
         <module>external-library/flink-druid</module>
         <module>external-library/flink-datalake</module>
+        <module>assembly</module>
     </modules>
     <name>${project.artifactId}</name>
     <description>My wonderfull scala app</description>
@@ -71,6 +71,11 @@
     <dependencyManagement>
 
         <dependencies>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-orc_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
             <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-connector-elasticsearch7 -->
             <dependency>
                 <groupId>org.apache.flink</groupId>
@@ -144,6 +149,11 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-json</artifactId>
+                <version>${flink.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>

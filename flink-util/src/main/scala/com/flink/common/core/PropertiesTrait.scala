@@ -1,9 +1,9 @@
 package com.flink.common.core
 
 import java.io.File
-
 import org.apache.flink.api.java.utils.ParameterTool
 
+import java.util
 import scala.collection.JavaConverters._
 trait PropertiesTrait {
   var proName = ""
@@ -21,6 +21,20 @@ trait PropertiesTrait {
     param = ParameterTool.fromPropertiesFile(path)
   }
 
+  /**
+   * 用于driver端初始化
+   */
+  def init(proName: String, path: java.util.List[String]): Unit = {
+    this.proName = proName
+    var map = new util.HashMap[String, String]()
+    path.asScala.foreach(p => {
+      val file = new File(p)
+      if (file.exists()) {
+        map.putAll(ParameterTool.fromPropertiesFile(p).toMap)
+      }
+    })
+    param = ParameterTool.fromMap(map)
+  }
   /**
    * 用于在operate func初始化
    * @param param

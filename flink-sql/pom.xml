@@ -138,7 +138,7 @@
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
             </plugin>
-<!--            shade 和 assemble不能共存 -->
+<!--            shade 和 assemble不能共存 会导致 factory打不进去-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
