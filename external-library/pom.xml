@@ -11,7 +11,7 @@
   <modules>
     <module>elasticsearch-shade</module>
     <module>flink-monitor</module>
-    <module>calcite-test</module>
+<!--    <module>calcite-test</module>-->
   </modules>
 
 
