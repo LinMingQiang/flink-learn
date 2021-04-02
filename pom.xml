@@ -13,9 +13,9 @@
         <module>flink-core</module>
         <module>resources</module>
         <module>flink-sql</module>
+        <module>flink-datalake</module>
         <module>external-library</module>
         <module>external-library/flink-druid</module>
-        <module>external-library/flink-datalake</module>
         <module>assembly</module>
     </modules>
     <name>${project.artifactId}</name>
@@ -447,30 +447,31 @@
                                 </filters>
                                 <transformers combine.children="append">
                                     <!-- The service transformer is needed to merge META-INF/services files -->
-                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                    <transformer
+                                            implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 </transformers>
                             </configuration>
                         </execution>
                     </executions>
                 </plugin>
-<!--                <plugin>-->
-<!--                    <artifactId>maven-assembly-plugin</artifactId>-->
-<!--                    <version>3.3.0</version>-->
-<!--                    <configuration>-->
-<!--                        <descriptorRefs>-->
-<!--                            <descriptorRef>jar-with-dependencies</descriptorRef>-->
-<!--                        </descriptorRefs>-->
-<!--                    </configuration>-->
-<!--                    <executions>-->
-<!--                        <execution>-->
-<!--                            <id>make-assembly</id>-->
-<!--                            <phase>package</phase>-->
-<!--                            <goals>-->
-<!--                                <goal>assembly</goal>-->
-<!--                            </goals>-->
-<!--                        </execution>-->
-<!--                    </executions>-->
-<!--                </plugin>-->
+                <!--                <plugin>-->
+                <!--                    <artifactId>maven-assembly-plugin</artifactId>-->
+                <!--                    <version>3.3.0</version>-->
+                <!--                    <configuration>-->
+                <!--                        <descriptorRefs>-->
+                <!--                            <descriptorRef>jar-with-dependencies</descriptorRef>-->
+                <!--                        </descriptorRefs>-->
+                <!--                    </configuration>-->
+                <!--                    <executions>-->
+                <!--                        <execution>-->
+                <!--                            <id>make-assembly</id>-->
+                <!--                            <phase>package</phase>-->
+                <!--                            <goals>-->
+                <!--                                <goal>assembly</goal>-->
+                <!--                            </goals>-->
+                <!--                        </execution>-->
+                <!--                    </executions>-->
+                <!--                </plugin>-->
             </plugins>
         </pluginManagement>
     </build>
