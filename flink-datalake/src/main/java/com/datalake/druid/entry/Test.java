@@ -1,7 +1,11 @@
-package com.java.test;
+package com.datalake.druid.entry;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Properties;
+
 public class Test {
     public static void main(String[] args) throws Exception {
         // 1. 加载Druid JDBC驱动

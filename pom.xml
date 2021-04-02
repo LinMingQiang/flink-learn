@@ -15,7 +15,6 @@
         <module>flink-sql</module>
         <module>flink-datalake</module>
         <module>external-library</module>
-        <module>external-library/flink-druid</module>
         <module>assembly</module>
     </modules>
     <name>${project.artifactId}</name>
