@@ -5,6 +5,7 @@ MOBSSP_HOME="$(cd "`dirname "$0"`"/../..; pwd)"
 source ${MOBSSP_HOME}/conf/mobssp-env.sh
 javaopt="-Dlog4j.configuration=file:./log4j.properties"
 echo $javaopt
+#flink savepoint 51a0ba8cce5135a055b81efbb233295a hdfs://ShareSdkHadoop/tmp/flink/checkpoint
 # -p 并行度 5
 # -yn taskmanager  yarn 的 container 的数量 4
 # -yjm JobManager 内存

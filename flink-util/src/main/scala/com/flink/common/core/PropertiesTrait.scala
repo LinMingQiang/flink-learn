@@ -1,9 +1,10 @@
 package com.flink.common.core
 
-import java.io.File
+import java.io.{File, InputStreamReader}
 import org.apache.flink.api.java.utils.ParameterTool
 
 import java.util
+import java.util.Properties
 import scala.collection.JavaConverters._
 trait PropertiesTrait {
   var proName = ""
@@ -19,6 +20,13 @@ trait PropertiesTrait {
     val file = new File(path)
     if(file.exists())
     param = ParameterTool.fromPropertiesFile(path)
+    else {
+      val in = classOf[PropertiesTrait].getResourceAsStream(path)
+      val props = new Properties
+      val inputStreamReader = new InputStreamReader(in, "UTF-8")
+      props.load(inputStreamReader)
+      param = ParameterTool.fromMap(props.asScala.toMap.asJava)
+    }
   }
 
   /**

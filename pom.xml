@@ -338,17 +338,12 @@
                             </goals>
                         </execution>
                     </executions>
-                    <configuration>
-                        <jvmArgs>
-                            <jvmArg>-Xms128m</jvmArg>
-                            <jvmArg>-Xmx512m</jvmArg>
-                        </jvmArgs>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.scala-tools</groupId>
                     <artifactId>maven-scala-plugin</artifactId>
                     <version>2.15.2</version>
+
                     <executions>
                         <execution>
                             <id>compile</id>

@@ -39,3 +39,4 @@ StreamExecutionEnvironment : 流式相关。不能使用SQL的API。如果要在
 StreamTableEnvironment ： 流式SQL相关。可以使用 SQL的API。如果要用Stream相关的，需要将tableData.toRetractStream[Row]
 ```
 ---
+mvn编译参数 -Xmx2g -XX:MaxMetaspaceSize=1024m
