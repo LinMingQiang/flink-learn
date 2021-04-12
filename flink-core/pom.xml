@@ -115,27 +115,10 @@
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
             </plugin>
-
-<!--            <plugin>-->
-<!--                <artifactId>maven-assembly-plugin</artifactId>-->
-<!--                <version>2.5.5</version>-->
-<!--                <configuration>-->
-<!--                    <appendAssemblyId>false</appendAssemblyId>-->
-<!--                    <descriptorRefs>-->
-<!--                        <descriptorRef>jar-with-dependencies</descriptorRef>-->
-<!--                    </descriptorRefs>-->
-<!--                </configuration>-->
-<!--                &lt;!&ndash;   jar包打一起         &ndash;&gt;-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>make-assembly</id>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>assembly</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 </project>
