@@ -95,9 +95,7 @@ public class FlinkCoreOperatorEntry {
         SingleOutputStreamOperator resultStream =
                 a
                         .connect(b)
-
                         .keyBy(KafkaManager.KafkaTopicOffsetTimeMsg::msg, KafkaManager.KafkaTopicOffsetTimeMsg::msg)
-
                         .process(new StreamConnectCoProcessFunc(rejectedWordsTag))
                         .setParallelism(2);
 

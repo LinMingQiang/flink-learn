@@ -1,6 +1,5 @@
 package com.flink.learn.trans;
 
-import com.flink.learn.bean.CaseClassUtil;
 import com.flink.learn.bean.TranWordCountPoJo;
 import com.flink.learn.bean.WordCountPoJo;
 import org.apache.flink.api.common.state.ValueState;

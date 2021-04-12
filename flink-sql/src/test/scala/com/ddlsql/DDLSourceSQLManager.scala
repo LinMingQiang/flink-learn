@@ -233,7 +233,9 @@ object DDLSourceSQLManager {
        |    'table-name' = '${tblName}',
        |    'username' = '${FlinkLearnPropertiesUtil.MYSQL_USER}',
        |    'password' = '${FlinkLearnPropertiesUtil.MYSQL_PASSW}',
-       |    'sink.buffer-flush.max-rows' = '1'
+       |    'sink.buffer-flush.max-rows' = '100',
+       |    'sink.buffer-flush.interval' = '100s'
+       |
        |)""".stripMargin
 
 }

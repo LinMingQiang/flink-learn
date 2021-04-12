@@ -2,7 +2,7 @@
 ---
 |   Flink                 | scala version      |Kafka version   |
 |:------------------:|:------------------:|:------------------:|
-| **1.10.0**    | 2.11+             | 0.10+               |
+| **1.12.1**    | **2.12+**             | **0.10+**             |
 ---
 ```
 Maven 模板 : https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/jar.html <br>
@@ -39,4 +39,6 @@ StreamExecutionEnvironment : 流式相关。不能使用SQL的API。如果要在
 StreamTableEnvironment ： 流式SQL相关。可以使用 SQL的API。如果要用Stream相关的，需要将tableData.toRetractStream[Row]
 ```
 ---
+```
 mvn编译参数 -Xmx2g -XX:MaxMetaspaceSize=1024m
+```

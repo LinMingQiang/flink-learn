@@ -78,6 +78,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         re.print();
     }
 
+    // 时态表
     @Test
     public void temporalTableTest() throws Exception {
         // {"rowtime":"2021-01-20 00:00:23","msg":"hello,world"}
@@ -98,8 +99,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         streamEnv.execute();
     }
 
-    // 不能在ddl中定义时态表函数
-    @Test
+     @Test
     public void UDTFTest() throws Exception {
         // {"rowtime":"2021-01-20 00:00:23","msg":"hello,world"}
 
@@ -127,9 +127,16 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
 
     // 时态表函数
+    // 不能在ddl中定义时态表函数
+    // 时态表函数和时态表 DDL 最大的区别在于，时态表 DDL 可以在纯 SQL 环境中使用但是时态表函数不支持，用时态表 DDL 声明的时态表支持 changelog 流和 append-only 流但时态表函数仅支持 append-only 流。
     @Test
     public void temporalTableFunctionTest() throws Exception {
-        // {"rowtime":"2021-01-20 00:00:23","msg":"hello"}
+        // test: {"rowtime":"2021-01-20 00:00:24","msg":"hello"}
+        // test2: {"rowtime":"2021-01-20 00:00:00","msg":"hello"}
+        // 输出 00匹配结果
+        // test2: {"rowtime":"2021-01-20 00:00:11","msg":"hello"}
+        // test : {"rowtime":"2021-01-20 00:00:24","msg":"hello"}
+        // 输出 11匹配结果
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -145,9 +152,11 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
                         "json"));
 
 
+        // 时态表函数
         TemporalTableFunction rates = tableEnv.from("test2")
                 .renameColumns($("msg").as("r_msg"),
-                        $("proctime").as("r_proctime")).createTemporalTableFunction(
+                        $("proctime").as("r_proctime"))
+                .createTemporalTableFunction(
                         $("r_proctime"),
                         $("r_msg"));
 
@@ -162,8 +171,10 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
     }
 
-
-    // 时态表
+//注意 理论上讲任意都能用作时态表并在基于处理时间的时态表
+// Join 中使用，但当前支持作为时态表的普通表必须实现接口 LookupableTableSource。
+// 接口 LookupableTableSource 的实例只能作为时态表用于基于处理时间的时态 Join 。
+    // 时态表-lookup表
     @Test
     public void lookupTableTest() throws Exception {
         tableEnv.executeSql(

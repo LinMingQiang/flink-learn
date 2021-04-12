@@ -79,7 +79,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void connectTest() throws Exception {
-        // {"ts":200,"msg":"268"}
+        // {"ts":100,"msg":"268"}
         initJsonSource(true);
         d1.connect(d2)
                 .keyBy("msg", "msg")
@@ -99,18 +99,6 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
         streamEnv.execute();
     }
 
-
-    /**
-     * 在sql里面,
-     * 1： LookupableTableSource
-     * 2： 注册udf，然后 LATERAL TABLE (hbaselookup(id, name))
-     * 3:  lookup 就是普通的 TableFunction。只是分同步还是异步
-     */
-    @Test
-    public void lookupFunTest() {
-        // {"ts":200,"msg":"268"}
-
-    }
 
 
     /**

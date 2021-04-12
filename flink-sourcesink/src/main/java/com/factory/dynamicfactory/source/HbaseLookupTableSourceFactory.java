@@ -1,6 +1,6 @@
 package com.factory.dynamicfactory.source;
 
-// TableSoure有两种，一种是scan，一种是lookup,lookup是join的时候去读取，kafka是scan读取全部
+// TableSoure有两种，一种是scan，一种是lookup, lookup是join的时候去读取，kafka是scan读取全部
 
 import com.func.dynamicfunc.source.tablesource.HbaseLookupTableSource;
 import org.apache.flink.configuration.ConfigOption;

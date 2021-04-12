@@ -146,6 +146,31 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         streamEnv.execute();
     }
 
+    @Test
+    public void joinTest() throws Exception {
+        // {"rowtime":"2021-01-20 00:00:13","msg":"hello"}
+        // join结果不能带上 rowtime。因为没用到rowtime所以不允许带
+        //
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test2",
+                        "test2",
+                        "test2",
+                        "json"));
+
+        String sql = " SELECT o.msg,s.msg " +
+                "FROM test o join test2 s " +
+                "on o.msg = s.msg ";
+        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
+
+        streamEnv.execute();
+    }
     /**
      * 自定义的format
      *
