@@ -41,4 +41,8 @@ StreamTableEnvironment ： 流式SQL相关。可以使用 SQL的API。如果要�
 ---
 ```
 mvn编译参数 -Xmx2g -XX:MaxMetaspaceSize=1024m
+
+window 系统在 assembly.xml 里面使用 <outputDirectory>./</outputDirectory> 否则报错：
+OS=Windows and the assembly descriptor contains a *nix-specific root-relative-reference (starting with slash)
+
 ```
