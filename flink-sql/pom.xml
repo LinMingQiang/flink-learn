@@ -117,7 +117,7 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>sql-skip-tests</id>
+            <id>skip-tests_flink-sql</id>
             <properties>
                 <maven.test.skip>true</maven.test.skip>
             </properties>

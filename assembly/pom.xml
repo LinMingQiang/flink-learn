@@ -13,6 +13,7 @@
 
     <build>
         <plugins>
+<!--            clean的时候dist也会清除 -->
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <configuration>

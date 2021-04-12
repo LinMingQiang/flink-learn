@@ -116,14 +116,9 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <profiles>
-    <profile>
-      <id>skip-srcsink-tests</id>
-      <properties>
-        <maven.test.skip>true</maven.test.skip>
-      </properties>
-    </profile>
-  </profiles>
+  <properties>
+    <maven.test.skip>true</maven.test.skip>
+  </properties>
   <build>
     <plugins>
       <plugin>

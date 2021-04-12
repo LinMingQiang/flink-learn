@@ -30,7 +30,7 @@ public class FlinkEvnBuilder {
             env.getCheckpointConfig().setMinPauseBetweenCheckpoints(checkPointInterval); //; 两个chk最小间隔
         }
         // 默认 200
-        env.getConfig().setAutoWatermarkInterval(1L); // 设置 触发水位计算 间隔
+        env.getConfig().setAutoWatermarkInterval(20L); // 设置 触发水位计算 间隔
         // 同一时间只允许进行一个检查点
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
         // 不设置的话，任务cancle后会删除ckp

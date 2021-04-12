@@ -85,7 +85,7 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>core-skip-tests</id>
+            <id>skip-tests_flink-core</id>
             <build>
                 <plugins>
                     <plugin>
