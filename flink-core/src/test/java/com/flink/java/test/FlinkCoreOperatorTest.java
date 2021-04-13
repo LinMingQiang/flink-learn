@@ -2,7 +2,7 @@ package com.flink.java.test;
 
 import com.pojo.WordCountPoJo;
 import com.flink.common.kafka.KafkaManager;
-import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg;
+import com.flink.common.kafka.KafkaManager.KafkaMessge;
 import com.func.processfunc.StreamConnectCoProcessFunc;
 import com.func.richfunc.AsyncIODatabaseRequest;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
@@ -32,8 +32,9 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testWordCount() throws Exception {
-        baseKafkaSource
-                .flatMap((FlatMapFunction<KafkaTopicOffsetMsg, String>) (value, out) -> {
+        // {"msg":"hello"}
+        kafkaDataSource
+                .flatMap((FlatMapFunction<KafkaMessge, String>) (value, out) -> {
                     for (String s : value.msg().split(",", -1)) {
                         out.collect(s);
                     }
@@ -57,11 +58,10 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
     public void testOutputTag() throws Exception {
         OutputTag<WordCountPoJo> rejectedWordsTag = new OutputTag<WordCountPoJo>("rejected") {
         };
-        SingleOutputStreamOperator<WordCountPoJo> sourceStream = baseKafkaSource
-                .keyBy(KafkaTopicOffsetMsg::msg)
-                .process(new KeyedProcessFunction<String, KafkaTopicOffsetMsg, WordCountPoJo>() {
+        SingleOutputStreamOperator<WordCountPoJo> sourceStream = kafkaDataSource
+                .process(new KeyedProcessFunction<String, KafkaMessge, WordCountPoJo>() {
                     @Override
-                    public void processElement(KafkaManager.KafkaTopicOffsetMsg value, Context ctx, Collector<WordCountPoJo> out) {
+                    public void processElement(KafkaMessge value, Context ctx, Collector<WordCountPoJo> out) {
                         if (!value.msg().matches("^[0-9]*$")) {
                             ctx.output(rejectedWordsTag, new WordCountPoJo("rejested", 1));
                         } else {
@@ -97,15 +97,14 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testConnectStream() throws Exception {
-        initJsonSource(true);
         // 10s过期
         OutputTag<String> rejectedWordsTag = new OutputTag<String>("rejected") {
         };
 
         SingleOutputStreamOperator resultStream =
-                d1
-                        .connect(d2)
-                        .keyBy(KafkaManager.KafkaTopicOffsetTimeMsg::msg, KafkaManager.KafkaTopicOffsetTimeMsg::msg)
+                kafkaDataSource
+                        .connect(getKafkaKeyStream("test2", "localhost:9092", "latest"))
+                        .keyBy(KafkaMessge::msg, KafkaMessge::msg)
                         .process(new StreamConnectCoProcessFunc(rejectedWordsTag))
                         .setParallelism(4);
 
@@ -121,10 +120,8 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testAsyncIo() throws Exception {
-        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> stream = getKafkaDataStream(
-                "test", "localhost:9092", "latest");
         AsyncDataStream.unorderedWait(
-                stream,
+                kafkaDataSource,
                 new AsyncIODatabaseRequest(),
                 4,
                 TimeUnit.SECONDS,

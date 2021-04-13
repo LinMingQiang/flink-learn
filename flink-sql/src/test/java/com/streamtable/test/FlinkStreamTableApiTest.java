@@ -61,11 +61,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testTableApiWordCount() throws Exception {
-        // {"ts":100,"msg":"hello"}
-        initJsonSource(true);
-        Table a = getStreamTable(d1, "topic,offset,ts,date,msg");
-        tableEnv.createTemporaryView("test", a);
-
+        tableEnv.createTemporaryView("test", kafkaDataTable);
         // 方式1
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
         tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg")
@@ -93,9 +89,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testTableToStream() throws Exception {
         // {"ts":100,"msg":"hello"}
-        initJsonSource(true);
-        Table a = getStreamTable(d1, "topic,offset,ts,date,msg");
-        tableEnv.createTemporaryView("test", a);
+        tableEnv.createTemporaryView("test", kafkaDataTable);
         tableEnv.executeSql(DDLSourceSQLManager.createCustomPrintlnRetractSinkTbl("printlnSink_retract"));
 
         // 方式1
@@ -121,9 +115,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testStreamToTable() throws Exception {
         // {"ts":100,"msg":"hello"}
-        initJsonSource(true);
-        Table a = getStreamTable(d1, "topic,offset,ts,date,msg");
-        tableEnv.createTemporaryView("test", a);
+        tableEnv.createTemporaryView("test", kafkaDataTable);
 
         // table -
         DataStream stream = tableEnv.toRetractStream(
@@ -149,13 +141,12 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testInnerJoin() throws Exception {
         // {"ts":1000,"msg":"hello"}  {"ts":500,"msg":"hello"}
-        initJsonSource(true);
-        Table left = getStreamTable(d1, "topic,offset,ts,date,msg");
-        Table right = getStreamTable(d2,
+        Table left = kafkaDataTable;
+        Table right = getStreamTable(
+                "test2", "localhost:9092","latest",
                 $("topic").as("topic1"),
                 $("msg").as("msg2"),
                 $("ts").as("ts2"));
-
         Table result = left.join(right)
                 .where($("msg").isEqual($("msg2")))
                 .select($("*"));
@@ -173,8 +164,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testJoinUDTF() throws Exception {
         // {"ts":1000,"msg":"hello,world"}  {"ts":500,"msg":"hello"}
-        initJsonSource(true);
-        Table orders = getStreamTable(d1, "topic,offset,ts,date,msg");
+        Table orders = kafkaDataTable;
         tableEnv.createTemporarySystemFunction("ts_to_DMH", new TimestampYearHourTableFunc());
         tableEnv.createTemporarySystemFunction("split", new StrSplitTableFunction(","));
         tableEnv.createTemporarySystemFunction("split_multiple_row", new StrSplitToMultipleRowTableFunction(","));
@@ -210,15 +200,14 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
         // 最后输入 {"ts":34,"msg":"1"} 只触发了 16的。因为两个流的 wtm还是19，并不是24.
         // 输入 test2 : {"ts":34,"msg":"1"} ,触发24  此时的wtm = 24
         // 可以得到 11 拿的10的 16拿的15的 21拿的20的
-        initJsonSource(true);
-        Table orders = getStreamTable(d1,
+        Table orders = getStreamTable(kafkaDataSource,
                 $("topic"),
                 $("offset"),
                 $("date"),
                 $("msg").as("o_currency"),
                 $("ts").rowtime().as("o_rowtime"));
 
-        Table ratesHistory = getStreamTable(d2,
+        Table ratesHistory = getStreamTable(getKafkaKeyStream("test2", "localhost:9092", "latest"),
                 $("topic").as("topic2"),
                 $("offset").as("offset2"),
                 $("date").as("date2"),
@@ -254,8 +243,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testSelect() throws Exception {
         // {"ts":10,"msg":"hello"}  {"ts":31,"msg":"hello"}
-        initJsonSource(true);
-        Table orders = getStreamTable(d1, $("topic"),
+        Table orders = getStreamTable(kafkaDataSource, $("topic"),
                 $("offset"),
                 $("date"),
                 $("msg"),
@@ -274,10 +262,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void testStreamTableSink() throws Exception {
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg")
-                .renameColumns("offset as ll");
+        Table a = kafkaDataTable.renameColumns("offset as ll");
         // sink1 : 转 stream后sink
         // tableEnv.toAppendStream(a, Row.class).print();
 
@@ -322,10 +307,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testcustomHbasesink() throws Exception {
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg");
-        tableEnv.createTemporaryView("test", a);
+        tableEnv.createTemporaryView("test", kafkaDataTable);
 //        // 可以转stream之后再转换。pojo可以直接对应上Row
 //        SingleOutputStreamOperator<Tuple2<String, Row>> ds = tableEnv.toAppendStream(a, KafkaTopicOffsetMsgPoJo.class)
 //                .map(new MapFunction<KafkaTopicOffsetMsgPoJo, Tuple2<String, Row>>() {
@@ -357,13 +339,10 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testHbaseJoin() throws Exception {
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg");
         OutputTag<KafkaTopicOffsetMsgPoJo> queryFailed = new OutputTag<KafkaTopicOffsetMsgPoJo>("queryFailed") {
         };
         SingleOutputStreamOperator t = tableEnv
-                .toAppendStream(a, KafkaTopicOffsetMsgPoJo.class)
+                .toAppendStream(kafkaDataTable, KafkaTopicOffsetMsgPoJo.class)
                 .keyBy((KeySelector<KafkaTopicOffsetMsgPoJo, String>) value -> value.msg)
                 .process(new HbaseQueryProcessFunction<KafkaTopicOffsetMsgPoJo, WordCountPoJo>(
                         new AbstractHbaseQueryFunction<KafkaTopicOffsetMsgPoJo, WordCountPoJo>() {
@@ -413,9 +392,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void testRowPoJo() throws Exception {
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg")
+        Table a = kafkaDataTable
                 .renameColumns("offset as offsets");
         tableEnv.createTemporaryView("test", a);
         tableEnv.createTemporarySystemFunction("timestampYearHour", TimestampYearHour.class);
@@ -434,9 +411,7 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
 
 //    @Test
     public void testTableFunction() throws Exception {
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg")
+        Table a = kafkaDataTable
                 .renameColumns("offset as offsets");
         tableEnv.createTemporaryView("test", a);
         tableEnv.createTemporarySystemFunction("TimestampYearHourTableFunc", TimestampYearHourTableFunc.class);
@@ -454,9 +429,13 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testOverWindow() throws Exception {
         // {"ts":10,"msg":"hello"} {"ts":21,"msg":"hello"} {"ts":40,"msg":"hello"}
-        initJsonSource(true);
         // $("user"), $("product"), $("amount"), $("rowtime").rowtime()
-        Table a = getStreamTable(d1, $("topic"), $("offset"), $("msg"), $("date"), $("ts").rowtime());
+        Table a = getStreamTable(kafkaDataSource,
+                $("topic"),
+                $("offset"),
+                $("msg"),
+                $("date"),
+                $("ts").rowtime());
         tableEnv.createTemporaryView("test", a);
         String sql = "select sum(distinct `offset`) over w,max(`offset`) over w " +
                 "from test " +

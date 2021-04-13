@@ -1,9 +1,9 @@
 package com.flink.java.test;
 
-import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
-import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetTimeMsg;
+import com.flink.common.kafka.KafkaManager.KafkaMessge;
+
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -34,9 +34,8 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testWindow() throws Exception {
         // {"ts":10,"msg":"c"} {"ts":11,"msg":"c"} {"ts":12,"msg":"c"}
-        initJsonSource(true);
-        d1
-                .map((MapFunction<KafkaTopicOffsetTimeMsg, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
+        kafkaDataSource
+                .map((MapFunction<KafkaMessge, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
                 // 统计5s一个窗口，有个offset参数，用来调整时间起点，正常是00-05这样，可以调成 01-06
@@ -77,15 +76,8 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void testWindowAll() throws Exception {
-        KafkaSourceManager.getKafkaDataStream(streamEnv,
-                "test",
-                "localhost:9092",
-                "latest", new TopicOffsetTimeStampMsgDeserialize())
-                .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(3))
-                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
-                .returns(KafkaTopicOffsetTimeMsg.class)
-                .map((MapFunction<KafkaTopicOffsetTimeMsg, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
+        kafkaDataSource
+                .map((MapFunction<KafkaMessge, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .windowAll(TumblingEventTimeWindows.of(Time.seconds(10)))
                 .process(new ProcessAllWindowFunction<Tuple2<String, Long>, String, TimeWindow>() {

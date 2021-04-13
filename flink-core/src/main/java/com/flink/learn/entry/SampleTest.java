@@ -1,6 +1,6 @@
 package com.flink.learn.entry;
 
-import com.flink.common.deserialize.TopicOffsetMsgDeserialize;
+import com.flink.common.deserialize.KafkaMessageDeserialize;
 import com.flink.common.kafka.KafkaManager;
 import com.flink.learn.bean.WordCountPoJo;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -93,14 +93,14 @@ public class SampleTest {
         return env.addSource(getKafkaSource(topic, broker, reset));
     }
 
-    public static FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetMsg> getKafkaSource(
+    public static FlinkKafkaConsumer<KafkaManager.KafkaMessge> getKafkaSource(
             String topic,
             String broker,
             String reset) {
-        FlinkKafkaConsumer<KafkaManager.KafkaTopicOffsetMsg> kafkasource = KafkaManager.getKafkaSource(
+        FlinkKafkaConsumer<KafkaManager.KafkaMessge> kafkasource = KafkaManager.getKafkaSource(
                 topic,
                 broker,
-                new TopicOffsetMsgDeserialize());
+                new KafkaMessageDeserialize());
         kafkasource.setCommitOffsetsOnCheckpoints(true);
         if (reset == "earliest") {
             kafkasource.setStartFromEarliest(); //不加这个默认是从上次消费

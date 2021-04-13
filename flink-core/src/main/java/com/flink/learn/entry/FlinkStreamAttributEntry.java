@@ -2,8 +2,8 @@ package com.flink.learn.entry;
 
 import com.flink.common.core.EnvironmentalKey;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.flink.common.deserialize.TopicOffsetJsonEventtimeDeserialize;
 import com.core.FlinkEvnBuilder;
+import com.flink.common.deserialize.KafkaMessageDeserialize;
 import com.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
 import com.flink.learn.bean.ReportLogPojo;
@@ -49,12 +49,12 @@ public class FlinkStreamAttributEntry {
                 KafkaSourceManager.getKafkaDataStream(streamEnv,
                         "test",
                         "localhost:9092",
-                        "latest", new TopicOffsetJsonEventtimeDeserialize())
+                        "latest", new KafkaMessageDeserialize())
                         .assignTimestampsAndWatermarks(
-                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                WatermarkStrategy.<KafkaManager.KafkaMessge>forBoundedOutOfOrderness(Duration.ofSeconds(10))
                                         .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
-                        .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
-                        .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
+                        .keyBy((KeySelector<KafkaManager.KafkaMessge, String>) value -> value.msg())
+                        .process(new KeyedProcessFunction<String, KafkaManager.KafkaMessge, ReportLogPojo>() {
                             ValueState<Boolean> has = null;
 
                             @Override
@@ -63,7 +63,7 @@ public class FlinkStreamAttributEntry {
                             }
 
                             @Override
-                            public void processElement(KafkaManager.KafkaTopicOffsetTimeMsg v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
+                            public void processElement(KafkaManager.KafkaMessge v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
                                 if (!has.value()) {
                                     has.update(true);
                                     collector.collect(new ReportLogPojo(v1.msg(), v1.msg(), v1.ts(), 0L, 0L, 1L, 0L, 0L));
@@ -75,12 +75,12 @@ public class FlinkStreamAttributEntry {
                 KafkaSourceManager.getKafkaDataStream(streamEnv,
                         "test2",
                         "localhost:9092",
-                        "latest", new TopicOffsetJsonEventtimeDeserialize())
+                        "latest", new KafkaMessageDeserialize())
                         .assignTimestampsAndWatermarks(
-                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                WatermarkStrategy.<KafkaManager.KafkaMessge>forBoundedOutOfOrderness(Duration.ofSeconds(10))
                                         .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
-                        .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
-                        .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
+                        .keyBy((KeySelector<KafkaManager.KafkaMessge, String>) value -> value.msg())
+                        .process(new KeyedProcessFunction<String, KafkaManager.KafkaMessge, ReportLogPojo>() {
                             ValueState<Boolean> has = null;
 
                             @Override
@@ -89,7 +89,7 @@ public class FlinkStreamAttributEntry {
                             }
 
                             @Override
-                            public void processElement(KafkaManager.KafkaTopicOffsetTimeMsg v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
+                            public void processElement(KafkaManager.KafkaMessge v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
                                 if (!has.value()) {
                                     has.update(true);
                                     collector.collect(new ReportLogPojo(v1.msg(), v1.msg(), 0L, v1.ts(), 0L, 0L, 0L, 0L));
@@ -102,12 +102,12 @@ public class FlinkStreamAttributEntry {
                 KafkaSourceManager.getKafkaDataStream(streamEnv,
                         "test3",
                         "localhost:9092",
-                        "latest", new TopicOffsetJsonEventtimeDeserialize())
+                        "latest", new KafkaMessageDeserialize())
                         .assignTimestampsAndWatermarks(
-                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                WatermarkStrategy.<KafkaManager.KafkaMessge>forBoundedOutOfOrderness(Duration.ofSeconds(10))
                                         .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
-                        .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
-                        .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
+                        .keyBy((KeySelector<KafkaManager.KafkaMessge, String>) value -> value.msg())
+                        .process(new KeyedProcessFunction<String, KafkaManager.KafkaMessge, ReportLogPojo>() {
                             ValueState<Boolean> has = null;
 
                             @Override
@@ -116,7 +116,7 @@ public class FlinkStreamAttributEntry {
                             }
 
                             @Override
-                            public void processElement(KafkaManager.KafkaTopicOffsetTimeMsg v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
+                            public void processElement(KafkaManager.KafkaMessge v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
                                 if (!has.value()) {
                                     has.update(true);
                                     collector.collect(new ReportLogPojo(v1.msg(), v1.msg(), 0L, 0L, v1.ts(), 0L, 0L, 0L));

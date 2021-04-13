@@ -2,7 +2,7 @@ package com.func.richfunc;
 
 import com.flink.common.core.FlinkLearnPropertiesUtil;
 import com.flink.common.dbutil.FlinkHbaseFactory;
-import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg;
+import com.flink.common.kafka.KafkaManager.KafkaMessge;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -14,8 +14,8 @@ import java.util.Collections;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
-public class AsyncIODatabaseRequest extends RichAsyncFunction<KafkaTopicOffsetMsg,
-        Tuple2<KafkaTopicOffsetMsg, KafkaTopicOffsetMsg>> {
+public class AsyncIODatabaseRequest extends RichAsyncFunction<KafkaMessge,
+        Tuple2<KafkaMessge, KafkaMessge>> {
     Connection conn = null;
 
     @Override
@@ -28,14 +28,14 @@ public class AsyncIODatabaseRequest extends RichAsyncFunction<KafkaTopicOffsetMs
     }
 
     @Override
-    public void asyncInvoke(KafkaTopicOffsetMsg input,
-                            ResultFuture<Tuple2<KafkaTopicOffsetMsg, KafkaTopicOffsetMsg>> resultFuture) throws Exception {
-        final Future<KafkaTopicOffsetMsg> result = queryClient(input);
+    public void asyncInvoke(KafkaMessge input,
+                            ResultFuture<Tuple2<KafkaMessge, KafkaMessge>> resultFuture) throws Exception {
+        final Future<KafkaMessge> result = queryClient(input);
         // 设置客户端完成请求后要执行的回调函数
         // 回调函数只是简单地把结果发给 future
-        CompletableFuture.supplyAsync(new Supplier<KafkaTopicOffsetMsg>() {
+        CompletableFuture.supplyAsync(new Supplier<KafkaMessge>() {
             @Override
-            public KafkaTopicOffsetMsg get() {
+            public KafkaMessge get() {
                 try {
                     return result.get();
                 } catch (InterruptedException | ExecutionException e) {
@@ -43,7 +43,7 @@ public class AsyncIODatabaseRequest extends RichAsyncFunction<KafkaTopicOffsetMs
                     return null;
                 }
             }
-        }).thenAccept((KafkaTopicOffsetMsg dbResult) -> {
+        }).thenAccept((KafkaMessge dbResult) -> {
             resultFuture.complete(Collections.singleton(new Tuple2<>(input, dbResult)));
         });
     }
@@ -56,14 +56,20 @@ public class AsyncIODatabaseRequest extends RichAsyncFunction<KafkaTopicOffsetMs
      * @throws Exception
      */
     @Override
-    public void timeout(KafkaTopicOffsetMsg input,
-                        ResultFuture<Tuple2<KafkaTopicOffsetMsg, KafkaTopicOffsetMsg>> resultFuture) throws Exception {
+    public void timeout(KafkaMessge input,
+                        ResultFuture<Tuple2<KafkaMessge, KafkaMessge>> resultFuture) throws Exception {
         resultFuture.complete(Collections.singleton(new Tuple2<>(input,
-                new KafkaTopicOffsetMsg(input.topic(), input.offset(), "timeout"))));
+                new KafkaMessge(
+                        input.topic(),
+                        input.offset(),
+                        0L,
+                        "timeout",
+                        null,
+                        null))));
     }
 
-    public Future<KafkaTopicOffsetMsg> queryClient(KafkaTopicOffsetMsg input) {
-        return new Future<KafkaTopicOffsetMsg>() {
+    public Future<KafkaMessge> queryClient(KafkaMessge input) {
+        return new Future<KafkaMessge>() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
                 return false;
@@ -80,17 +86,24 @@ public class AsyncIODatabaseRequest extends RichAsyncFunction<KafkaTopicOffsetMs
             }
 
             @Override
-            public KafkaTopicOffsetMsg get() {
+            public KafkaMessge get() {
                 if (input.msg().equals("1")) {
                     // FlinkHbaseFactory.get(conn, "test", input.msg());
-                    return new KafkaTopicOffsetMsg(input.topic(), input.offset(), "hello");
+
+                    return new KafkaMessge(
+                            input.topic(),
+                            input.offset(),
+                            0L,
+                            "hello",
+                            null,
+                            null);
                 } else {
                     return input;
                 }
             }
 
             @Override
-            public KafkaTopicOffsetMsg get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            public KafkaMessge get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
                 return get();
             }
         };

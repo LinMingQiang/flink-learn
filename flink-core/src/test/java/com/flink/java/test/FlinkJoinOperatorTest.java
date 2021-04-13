@@ -28,14 +28,14 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void windowJoinTest() throws Exception {
-        initJsonSource(true);
-        d1.join(d2)
-                .where((KeySelector<KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
-                .equalTo((KeySelector<KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
+        getKafkaKeyStream("test", "localhost:9092", "latest")
+                .join(getKafkaKeyStream("test2", "localhost:9092", "latest"))
+                .where((KeySelector<KafkaMessge, String>) value -> value.msg())
+                .equalTo((KeySelector<KafkaMessge, String>) value -> value.msg())
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(10)))
-                .apply(new FlatJoinFunction<KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg, String>() {
+                .apply(new FlatJoinFunction<KafkaMessge, KafkaMessge, String>() {
                            @Override
-                           public void join(KafkaTopicOffsetTimeMsg first, KafkaTopicOffsetTimeMsg second, Collector<String> out) throws Exception {
+                           public void join(KafkaMessge first, KafkaMessge second, Collector<String> out) throws Exception {
                                out.collect(first.toString() + " <-> " + second.toString());
                            }
                        }
@@ -57,12 +57,12 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
         // d1: {"ts":15,"msg":"1"}
         // d2 {"ts":25,"msg":"1"} {"ts":5,"msg":"1"} // 正常输出
         // d2 : {"ts":26,"msg":"1"} {"ts":4,"msg":"1"}  // join 不到
-        initJsonSource(false);
-        d1.intervalJoin(d2)
+        getKafkaKeyStream("test", "localhost:9092", "latest")
+                .intervalJoin(getKafkaKeyStream("test2", "localhost:9092", "latest"))
                 .between(Time.seconds(-10), Time.seconds(10))
-                .process(new ProcessJoinFunction<KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg, String>() {
+                .process(new ProcessJoinFunction<KafkaMessge, KafkaMessge, String>() {
                     @Override
-                    public void processElement(KafkaTopicOffsetTimeMsg left, KafkaTopicOffsetTimeMsg right, Context ctx, Collector<String> out) throws Exception {
+                    public void processElement(KafkaMessge left, KafkaMessge right, Context ctx, Collector<String> out) throws Exception {
                         out.collect(left + " <-> " + right);
                     }
                 })
@@ -80,17 +80,17 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void connectTest() throws Exception {
         // {"ts":100,"msg":"268"}
-        initJsonSource(true);
-        d1.connect(d2)
+        getKafkaKeyStream("test", "localhost:9092", "latest")
+                .connect(getKafkaKeyStream("test2", "localhost:9092", "latest"))
                 .keyBy("msg", "msg")
-                .process(new CoProcessFunction<KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg, String>() {
+                .process(new CoProcessFunction<KafkaMessge, KafkaMessge, String>() {
                     @Override
-                    public void processElement1(KafkaTopicOffsetTimeMsg value, Context ctx, Collector<String> out) throws Exception {
+                    public void processElement1(KafkaMessge value, Context ctx, Collector<String> out) throws Exception {
                         out.collect(value.toString());
                     }
 
                     @Override
-                    public void processElement2(KafkaTopicOffsetTimeMsg value, Context ctx, Collector<String> out) throws Exception {
+                    public void processElement2(KafkaMessge value, Context ctx, Collector<String> out) throws Exception {
                         out.collect(value.toString());
                     }
                 })
@@ -107,10 +107,8 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testAsyncIo() throws Exception {
-        DataStreamSource<KafkaTopicOffsetMsg> stream = getKafkaDataStream(
-                "test", "localhost:9092", "latest");
         AsyncDataStream.unorderedWait(
-                stream,
+                kafkaDataSource,
                 new AsyncIODatabaseRequest(),
                 4,
                 TimeUnit.SECONDS,
@@ -130,25 +128,22 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
         // {"ts":100,"msg":"1"} join {"ts":100,"msg":"3"} {"ts":111,"msg":"3"}  {"ts":110,"msg":"1"} {"ts":111,"msg":"1"}
         // {"ts":111,"msg":"1"} join {"ts":152,"msg":"1"}
         // {"ts":130,"msg":"4"} join {"ts":130,"msg":"3"}
-
-        initJsonSource(true);
-        MapStateDescriptor<String, KafkaTopicOffsetTimeMsg> bcStateDescriptor =
-                new MapStateDescriptor("d2", Types.STRING, TypeInformation.of(KafkaTopicOffsetTimeMsg.class));
+        MapStateDescriptor<String, KafkaMessge> bcStateDescriptor =
+                new MapStateDescriptor("d2", Types.STRING, TypeInformation.of(KafkaMessge.class));
         // d2必须也要wtm，因为双流的wtm是两个流决定的
-        BroadcastStream<KafkaTopicOffsetTimeMsg> bcedPatterns = getKafkaDataStreamWithJsonEventTime("test2", "localhost:9092", "latest")
-                .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-                                .withTimestampAssigner(((element, recordTimestamp) -> element.ts()))).broadcast(bcStateDescriptor);
+        BroadcastStream<KafkaMessge> bcedPatterns =
+                getKafkaDataStreamSource("test", "localhost:9092", "latest")
+                .broadcast(bcStateDescriptor);
 
-        d1
+        kafkaDataSource
                 .connect(bcedPatterns)
-                .process(new KeyedBroadcastProcessFunction<String, KafkaTopicOffsetTimeMsg, KafkaTopicOffsetTimeMsg, String>() {
-                    MapStateDescriptor<String, KafkaTopicOffsetTimeMsg> patternDesc;
-                    ValueState<KafkaTopicOffsetTimeMsg> tmpMsg;
+                .process(new KeyedBroadcastProcessFunction<String, KafkaMessge, KafkaMessge, String>() {
+                    MapStateDescriptor<String, KafkaMessge> patternDesc;
+                    ValueState<KafkaMessge> tmpMsg;
 
                     @Override
-                    public void processElement(KafkaTopicOffsetTimeMsg value, ReadOnlyContext ctx, Collector<String> out) throws Exception {
-                        KafkaTopicOffsetTimeMsg d2Msg = ctx.getBroadcastState(this.patternDesc).get(value.msg());
+                    public void processElement(KafkaMessge value, ReadOnlyContext ctx, Collector<String> out) throws Exception {
+                        KafkaMessge d2Msg = ctx.getBroadcastState(this.patternDesc).get(value.msg());
                         if (d2Msg != null) {
                             out.collect(value + " <-> " + d2Msg);
                         } else {
@@ -161,7 +156,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
                     @Override
                     public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out) throws Exception {
                         System.out.println("ontime >>>>>" + tmpMsg.value());
-                        KafkaTopicOffsetTimeMsg d2Msg = ctx.getBroadcastState(this.patternDesc).get(tmpMsg.value().msg());
+                        KafkaMessge d2Msg = ctx.getBroadcastState(this.patternDesc).get(tmpMsg.value().msg());
                         if (d2Msg != null) {
                             out.collect(tmpMsg.value() + " <-> " + d2Msg);
                         } else
@@ -169,9 +164,9 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
                     }
 
                     @Override
-                    public void processBroadcastElement(KafkaTopicOffsetTimeMsg value, Context ctx, Collector<String> out) throws Exception {
+                    public void processBroadcastElement(KafkaMessge value, Context ctx, Collector<String> out) throws Exception {
                         // store the new pattern by updating the broadcast state
-                        BroadcastState<String, KafkaTopicOffsetTimeMsg> bcState = ctx.getBroadcastState(patternDesc);
+                        BroadcastState<String, KafkaMessge> bcState = ctx.getBroadcastState(patternDesc);
                         // storing in MapState with null as VOID default value
                         bcState.put(value.msg(), value);
 
@@ -180,9 +175,9 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
                     @Override
                     public void open(Configuration parameters) throws Exception {
                         tmpMsg = getRuntimeContext().getState(
-                                new ValueStateDescriptor<>("tmpMsg", TypeInformation.of(KafkaTopicOffsetTimeMsg.class)));
+                                new ValueStateDescriptor<>("tmpMsg", TypeInformation.of(KafkaMessge.class)));
                         patternDesc =
-                                new MapStateDescriptor("d2", Types.STRING, TypeInformation.of(KafkaTopicOffsetTimeMsg.class));
+                                new MapStateDescriptor("d2", Types.STRING, TypeInformation.of(KafkaMessge.class));
                         super.open(parameters);
                     }
 
