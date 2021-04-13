@@ -10,14 +10,14 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
 
     @Test
     public void testGroupWindow() throws Exception {
-        // {"ts":10,"msg":"hello"}  {"ts":100,"msg":"hello"}
+        // {"rowtime":"2020-01-01 00:00:00","msg":"hello"}
+        // {"rowtime":"2020-01-01 00:02:00","msg":"hello"}
         // 定时触发
 //        tableEnv.getConfig().getConfiguration().setBoolean("table.exec.emit.early-fire.enabled", true);
 //        tableEnv.getConfig().getConfiguration().setLong("table.exec.emit.early-fire.delay", 5000L);
-        initJsonSource(true);
-        Table orders = getStreamTable(d1, $("topic"),
+        Table orders = getStreamTable(kafkaDataSource, $("topic"),
                 $("offset"),
-                $("date"),
+                $("rowtime"),
                 $("msg"),
                 $("ts").rowtime());
         // lit(10) 表示一个常数
@@ -46,7 +46,7 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
                         $("hourlyWindow").end().as("secWindow"),
                         $("msg")
                                 .count().as("cnt"));
-        printlnStringTable(r1.addColumns($("dd").proctime()));
+        printlnStringTable(r1);
         printlnStringTable(r2);
         streamEnv.execute("");
 
@@ -56,8 +56,7 @@ public class FlinkStreamTableApiWindowTest extends FlinkJavaStreamTableTestBase 
     public void testOverWindow() throws Exception {
         // UNBOUNDED_ROW 和 UNBOUNDED_RANGE结果不一样
         // {"ts":13,"msg":"hello"}  {"ts":35,"msg":"hello"} {"ts":35,"msg":"hello"} {"ts":65,"msg":"hello"}
-        initJsonSource(true);
-        Table orders = getStreamTable(d1, $("topic"),
+        Table orders = getStreamTable(kafkaDataSource, $("topic"),
                 $("offset"),
                 $("date"),
                 $("msg"),

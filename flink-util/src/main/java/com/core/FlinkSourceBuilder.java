@@ -40,18 +40,7 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
                 streamEnv,
                 Duration.ofHours(2));
         kafkaDataSource = getKafkaKeyStream("test", "localhost:9092", "latest");
-        kafkaDataTable = getStreamTable(kafkaDataSource,
-                $("topic"),
-                $("offset"),
-                $("ts"),
-                $("msg"),
-                $("rowtime"),
-                $("uid"));
-//        baseEventtimeKafkaSource = getKafkaDataStreamWithEventTime("test", "localhost:9092", "latest");
-//        baseEventtimeJsonSource = getKafkaDataStreamWithJsonEventTime("test", "localhost:9092", "latest");
-//        baseEventtimeJsonUidMsgSource = getKafkaDataStreamWithJsonUidMsg("test", "localhost:9092", "latest");
-//        baseReqImpClickSource = getKafkaDataStreamReqImpclickMsg("test", "localhost:9092", "latest",
-//                new TopicOffsetJsonReqImpClickDeserialize());
+        kafkaDataTable = getStreamTable(kafkaDataSource);
     }
 
 
@@ -109,10 +98,21 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
         return kafkasource;
     }
 
-    public static Table getStreamTable(KeyedStream<KafkaMessge, String> source, Expression... fields) {
+    /**
+     * 获取表
+     * @param source
+     * @param fields
+     * @return
+     */
+    protected static Table getStreamTable(KeyedStream<KafkaMessge, String> source, Expression... fields) {
         return tableEnv.fromDataStream(source, fields);
     }
 
+    public static Table getStreamTable(SingleOutputStreamOperator source, Expression... fields) {
+        return tableEnv.fromDataStream(source, fields);
+    }
+
+    // 获取默认表
     public static Table getStreamTable(String topic,
                                        String broker,
                                        String reset) {
@@ -132,9 +132,6 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
         return getStreamTable(getKafkaKeyStream(topic, broker, reset), fields);
     }
 
-    public static Table getStreamTable(SingleOutputStreamOperator source, Expression... fields) {
-        return tableEnv.fromDataStream(source, fields);
-    }
 
     public static void printlnStringTable(Table b) {
         tableEnv.toRetractStream(b,

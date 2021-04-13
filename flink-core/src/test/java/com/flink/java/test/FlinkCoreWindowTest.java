@@ -15,15 +15,11 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.streaming.api.windowing.evictors.TimeEvictor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.triggers.ContinuousProcessingTimeTrigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.junit.Test;
-
-import java.time.Duration;
-
 public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
 
     /**
@@ -33,7 +29,9 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testWindow() throws Exception {
-        // {"ts":10,"msg":"c"} {"ts":11,"msg":"c"} {"ts":12,"msg":"c"}
+        // {"rowtime":"2020-01-01 00:00:00","msg":"c"} {"rowtime":"2020-01-01 00:00:01","msg":"c"}
+        // {"rowtime":"2020-01-01 00:00:32","msg":"c"}
+        // {"rowtime":"2020-01-01 00:01:40","msg":"c"}
         kafkaDataSource
                 .map((MapFunction<KafkaMessge, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
@@ -42,12 +40,14 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                 .window(TumblingEventTimeWindows.of(Time.seconds(20)))
                 // 固定时间触发, 每10s触发一次(系统时间) .如果没有设置，则是根据eventtime > window end time 来决定触发
                 // 如果定义了trigger，会每次触发sum操作。最好的方法就是定期清理窗口的数据，不然每次触发都是拿窗口的全部数据做计算
+                // 不管有没有数据都会触发，会重复输出之前的结果
                 .trigger(ContinuousProcessingTimeTrigger.of(Time.seconds(5)))
                 // .trigger(EventTimeTrigger.create()) // 以eventtime 时间触发窗口，当wartermark 》 window endtime 触发
-                // 所以 evictor 和 trigger 一起用会导致窗口算的结果不对 （因为evictor把数据清了，trigger是需要窗口数据做计算），
-                // 除非用process把中间算的结果存起来，参考 FlinkStreamDAUTest
 
-                // .evictor(TimeEvictor.of(Time.seconds(0), true)) // 只保留 窗口内最近2s的数据做计算
+                // evictor 和 trigger 一起用会导致窗口算的结果不对 （因为evictor把数据清了，trigger是需要窗口数据做计算），
+                // 除非用process把中间算的结果存起来，参考 FlinkStreamDAUTest,或者用reduce，不能用process
+
+//               .evictor(TimeEvictor.of(Time.seconds(0), true)) // 只保留 窗口内最近2s的数据做计算
                 // 在process才产生 Transformation，上面的定义存在 WindowOperatorBuilder 里面
                 // 如果使用了 evictor，reduce的优势就不存在了，因为数据要全量保存下来然后再reduce。看 ReduceApplyProcessWindowFunction的process
                 // 如果没用用evictor，reduce会变成一个 WindowState:RocksDBReducingState。 WindowState.add(element)调用了reducefunc
