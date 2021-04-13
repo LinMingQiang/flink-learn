@@ -4,6 +4,7 @@ import com.flink.common.kafka.KafkaManager;
 import com.flink.common.kafka.KafkaManager.*;
 import com.func.richfunc.AsyncIODatabaseRequest;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
+import com.func.richfunc.AsyncIORichFunction;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatJoinFunction;
 import org.apache.flink.api.common.state.BroadcastState;
@@ -102,14 +103,18 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
 
 
     /**
-     * 异步io测试
-     * https://liurio.github.io/2020/03/28/Flink%E6%B5%81%E4%B8%8E%E7%BB%B4%E8%A1%A8%E7%9A%84%E5%85%B3%E8%81%94/
+     * 异步io测试：这玩意挺废的？必须客户端连接是异步的。本身 task不是异步方式调用asyncInvoke
+     * 除非 asyncInvoke(...) 方法快速返回并且依赖于（客户端的）回调, 否则无法实现正确的异步 I/O。
+     * 例如，
+     * 以下情况导致阻塞的 asyncInvoke(...) 函数，从而使异步行为无效：
+     * 使用同步数据库客户端，它的查询方法调用在返回结果前一直被阻塞。
+     * 在 asyncInvoke(...) 方法内阻塞等待异步客户端返回的 future 类型对象
      */
     @Test
     public void testAsyncIo() throws Exception {
         AsyncDataStream.unorderedWait(
                 kafkaDataSource,
-                new AsyncIODatabaseRequest(),
+                new AsyncIORichFunction(),
                 4,
                 TimeUnit.SECONDS,
                 3) // 100异步最大个数，超过100个请求将构成反压。
