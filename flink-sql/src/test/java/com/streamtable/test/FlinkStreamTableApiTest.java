@@ -409,12 +409,12 @@ public class FlinkStreamTableApiTest extends FlinkJavaStreamTableTestBase {
     }
 
 
-//    @Test
+    @Test
     public void testTableFunction() throws Exception {
-        Table a = kafkaDataTable
-                .renameColumns("offset as offsets");
-        tableEnv.createTemporaryView("test", a);
+        // {"rowtime":"2021-01-20 01:00:00","msg":"hello"}
+        tableEnv.createTemporaryView("test", kafkaDataTable);
         tableEnv.createTemporarySystemFunction("TimestampYearHourTableFunc", TimestampYearHourTableFunc.class);
+
         Table b = tableEnv.sqlQuery("select tttable.*,tmpTable.*,tmpTable2.* from test as tttable," +
                 " LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable(d, m, h)," +
                 "LATERAL TABLE(TimestampYearHourTableFunc(100000000)) AS tmpTable2(d1, m1, h1)");

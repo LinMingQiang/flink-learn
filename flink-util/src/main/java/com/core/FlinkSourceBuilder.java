@@ -40,7 +40,7 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
                 streamEnv,
                 Duration.ofHours(2));
         kafkaDataSource = getKafkaKeyStream("test", "localhost:9092", "latest");
-        kafkaDataTable = getStreamTable(kafkaDataSource);
+        kafkaDataTable = getStreamTable("test", "localhost:9092", "latest");
     }
 
 
