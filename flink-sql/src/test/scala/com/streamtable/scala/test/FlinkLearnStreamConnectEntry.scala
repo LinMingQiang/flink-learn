@@ -2,13 +2,9 @@ package com.streamtable.scala.test
 
 import com.flink.common.core.CaseClassManager.{Order, WC}
 import com.flink.common.core.FlinkLearnPropertiesUtil.BROKER
-import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
 import com.flink.common.manager.{SchemaManager, TableSourceConnectorManager}
-import com.flink.learn.sql.common.DDLSourceSQLManager
 import com.flink.learn.test.common.FlinkStreamTableCommonSuit
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils
-import org.apache.flink.api.common.time.Time
-import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.table.api.bridge.scala._
 import org.apache.flink.table.api._
 import org.apache.flink.api.scala._

@@ -1,6 +1,8 @@
 package com.flink.java.test;
 
 import com.flink.common.kafka.KafkaManager;
+import com.flink.common.kafka.KafkaManager.KafkaMessge;
+
 import com.flink.learn.bean.ReportLogPojo;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.apache.flink.api.common.state.ValueState;
@@ -31,11 +33,9 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
         // test2:   {"ts":10,"msg":"hello"}
         // 输出 ： 四个 0-20 的都会再输出一遍。
         // v2 是曝光，v1是请求，v3是点击
-        initJsonSource(true);
         SingleOutputStreamOperator<ReportLogPojo> req =
-                d1
-                        .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
-                        .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
+                getKafkaKeyStream("test", "localhost:9092", "latest")
+                        .process(new KeyedProcessFunction<String, KafkaMessge, ReportLogPojo>() {
                             ValueState<Boolean> has = null;
 
                             @Override
@@ -43,7 +43,7 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
                                 has = getRuntimeContext().getState(new ValueStateDescriptor<Boolean>("has", Types.BOOLEAN, false));
                             }
                             @Override
-                            public void processElement(KafkaManager.KafkaTopicOffsetTimeMsg v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
+                            public void processElement(KafkaMessge v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
                                 if (!has.value()) {
                                     has.update(true);
                                     collector.collect(new ReportLogPojo(v1.msg(), v1.msg(), v1.ts(), 0L, 0L, 1L, 0L, 0L));
@@ -53,9 +53,8 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
 
         SingleOutputStreamOperator<ReportLogPojo> imp = req.keyBy((KeySelector<ReportLogPojo, String>) value -> value.req_id)
                 .intervalJoin(
-                        d1
-                                .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
-                                .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
+                        getKafkaKeyStream("test2", "localhost:9092", "latest")
+                                .process(new KeyedProcessFunction<String, KafkaMessge, ReportLogPojo>() {
                                     ValueState<Boolean> has = null;
 
                                     @Override
@@ -64,7 +63,7 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
                                     }
 
                                     @Override
-                                    public void processElement(KafkaManager.KafkaTopicOffsetTimeMsg v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
+                                    public void processElement(KafkaMessge v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
                                         if (!has.value()) {
                                             has.update(true);
                                             collector.collect(new ReportLogPojo(v1.msg(), v1.msg(), 0L, v1.ts(), 0L, 0L, 0L, 0L));
@@ -84,9 +83,8 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
 
         SingleOutputStreamOperator<ReportLogPojo> click = imp.keyBy((KeySelector<ReportLogPojo, String>) v -> v.req_id)
                 .intervalJoin(
-                        d2
-                                .keyBy((KeySelector<KafkaManager.KafkaTopicOffsetTimeMsg, String>) value -> value.msg())
-                                .process(new KeyedProcessFunction<String, KafkaManager.KafkaTopicOffsetTimeMsg, ReportLogPojo>() {
+                        getKafkaKeyStream("test3", "localhost:9092", "latest")
+                                .process(new KeyedProcessFunction<String, KafkaMessge, ReportLogPojo>() {
                                     ValueState<Boolean> has = null;
 
                                     @Override
@@ -95,7 +93,7 @@ public class FlinkStreamAttributTest extends FlinkJavaStreamTableTestBase {
                                     }
 
                                     @Override
-                                    public void processElement(KafkaManager.KafkaTopicOffsetTimeMsg v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
+                                    public void processElement(KafkaMessge v1, Context context, Collector<ReportLogPojo> collector) throws Exception {
                                         if (!has.value()) {
                                             has.update(true);
                                             collector.collect(new ReportLogPojo(v1.msg(), v1.msg(), 0L, 0L, v1.ts(), 0L, 0L, 0L));

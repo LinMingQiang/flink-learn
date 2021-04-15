@@ -2,9 +2,6 @@ package com.flink.learn.test.common
 
 import com.flink.common.core.{EnvironmentalKey, FlinkEvnBuilder, FlinkLearnPropertiesUtil}
 import com.flink.common.core.FlinkLearnPropertiesUtil.{param, CHECKPOINT_PATH}
-import com.flink.common.deserialize.TopicOffsetMsgDeserialize
-import com.flink.common.kafka.KafkaManager
-import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 

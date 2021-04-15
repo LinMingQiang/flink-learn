@@ -69,9 +69,7 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
      */
     @Test
     public void testPrintlneConnect() throws Exception {
-        Table a = getStreamTable(
-                getKafkaDataStream("test", "localhost:9092", "latest"),
-                "topic,offset,msg,pt.proctime")
+        Table a = kafkaDataTable
                 .renameColumns("offset as ll"); // offset是关键字
         tableEnv.createTemporaryView("test", a);
 //        tableEnv.toAppendStream(a, Row.class).print();

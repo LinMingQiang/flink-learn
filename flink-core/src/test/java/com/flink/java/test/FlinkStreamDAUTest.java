@@ -34,17 +34,17 @@ public class FlinkStreamDAUTest extends FlinkJavaStreamTableTestBase {
     public void testWindowDAU() throws Exception {
         // {"ts":5,"uid":"u1","msg":"c1"} {"ts":10,"uid":"u1","msg":"c1"} {"ts":15,"uid":"u1","msg":"c1"}
         // {"ts":20,"uid":"u1","msg":"c2"} {"ts":199,"uid":"u1","msg":"c2"} {"ts":100,"uid":"u1","msg":"c2"}
-        initJsonUidMsgSource();
-        uid1T
+//        initJsonUidMsgSource();
+        getKafkaDataStreamSource("test", "localhost:9092", "latest")
                 // .map() // 方法1： 开始的时候将一条数据变两条，然后keyby的时候统一用key
-                .keyBy((KeySelector<KafkaTopicOffsetTimeUidMsg, String>) value -> value.msg()) // 按key分配
+                .keyBy((KeySelector<KafkaMessge, String>) value -> value.msg()) // 按key分配
                 .window(TumblingEventTimeWindows.of(Time.seconds(100L))) // 统计100s一个窗口
                 // 因为用的是系统时间，所以一个窗口会被多次触发，除非wtm超过了这个窗口的endtime，否则窗口一直保留.用processtime可以多次触发
                 .trigger(ContinuousProcessingTimeTrigger.of(Time.seconds(3))) // 固定时间触发, 每5s触发一次(系统时间)
                 .evictor(TimeEvictor.of(Time.seconds(0), true)) // 要定时清理窗口数据，否则会一直触发，即使没有数据
                 // 如果不加这个， Iterable<KafkaTopicOffsetTimeUidMsg> elements 的数据就一直累积。
                 // 每次计算完都清除 窗口数据。(只是清理原始数据process的数据会保留，也就是说，每次计算的时候，都是计算都是拿着5s中的数据进入process计算)
-                .process(new ProcessWindowFunction<KafkaTopicOffsetTimeUidMsg,
+                .process(new ProcessWindowFunction<KafkaMessge,
                         Tuple2<TimeWindow, Tuple3<String, Long, Long>>,
                         String,
                         TimeWindow>() {
@@ -63,14 +63,14 @@ public class FlinkStreamDAUTest extends FlinkJavaStreamTableTestBase {
                     @Override
                     public void process(String groupKey,
                                         Context context,
-                                        Iterable<KafkaTopicOffsetTimeUidMsg> elements,
+                                        Iterable<KafkaMessge> elements,
                                         Collector<Tuple2<TimeWindow, Tuple3<String, Long, Long>>> out) throws Exception {
                         ValueState<Long> pvState = context.windowState().getState(pvDec);
                         ValueState<Long> uvState = context.windowState().getState(uvDec);
                         MapState<String, String> uidsState = context.windowState().getMapState(uidDec);
                         Long pv = pvState.value();
                         Long uv = uvState.value();
-                        for (KafkaTopicOffsetTimeUidMsg element : elements) {
+                        for (KafkaMessge element : elements) {
                             if (!uidsState.contains(element.uid())) {
                                 uidsState.put(element.uid(), null);
                                 uv++;

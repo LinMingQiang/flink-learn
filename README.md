@@ -2,7 +2,7 @@
 ---
 |   Flink                 | scala version      |Kafka version   |
 |:------------------:|:------------------:|:------------------:|
-| **1.12.1**    | **2.12+**             | **0.10+**             |
+| **1.12.2**    | **2.12+**             | **0.10+**             |
 ---
 ```
 Maven 模板 : https://www.mvnjar.com/org.apache.flink/flink-quickstart-scala/jar.html <br>

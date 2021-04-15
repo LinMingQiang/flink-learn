@@ -1,6 +1,8 @@
 package com.func.processfunc;
 
 import com.flink.common.kafka.KafkaManager;
+import com.flink.common.kafka.KafkaManager.KafkaMessge;
+
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
@@ -14,10 +16,10 @@ import org.apache.flink.util.OutputTag;
 
 import java.io.IOException;
 
-public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, KafkaManager.KafkaTopicOffsetTimeMsg, KafkaManager.KafkaTopicOffsetTimeMsg, String> {
+public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, KafkaMessge, KafkaMessge, String> {
     // 一对多的场景，v2作为维表
-    ListState<KafkaManager.KafkaTopicOffsetTimeMsg> v1 = null;
-    ValueState<KafkaManager.KafkaTopicOffsetTimeMsg> v2 = null;
+    ListState<KafkaManager.KafkaMessge> v1 = null;
+    ValueState<KafkaMessge> v2 = null;
     OutputTag<String> errV1 = null;
 
     public StreamConnectCoProcessFunc(OutputTag<String> errV1) {
@@ -34,10 +36,10 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
         super.open(parameters);
         v1 = getRuntimeContext().getListState(
                 new ListStateDescriptor("test1",
-                        TypeInformation.of(KafkaManager.KafkaTopicOffsetTimeMsg.class)));
+                        TypeInformation.of(KafkaMessge.class)));
         v2 = getRuntimeContext().getState(
                 new ValueStateDescriptor("test2",
-                        TypeInformation.of(KafkaManager.KafkaTopicOffsetTimeMsg.class)));
+                        TypeInformation.of(KafkaMessge.class)));
     }
 
     /**
@@ -75,7 +77,7 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
      * @throws Exception
      */
     @Override
-    public void processElement1(KafkaManager.KafkaTopicOffsetTimeMsg value, Context ctx, Collector<String> out) throws Exception {
+    public void processElement1(KafkaMessge value, Context ctx, Collector<String> out) throws Exception {
         System.out.println(value+ "  v1 wtm : " + DateFormatUtils.format(ctx.timerService().currentWatermark(), "yyyy-mm-dd HH:mm:ss"));
         if (v2.value() == null) {
             v1.add(value);
@@ -102,7 +104,7 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
      * @throws Exception
      */
     @Override
-    public void processElement2(KafkaManager.KafkaTopicOffsetTimeMsg value, Context ctx, Collector<String> out) throws Exception {
+    public void processElement2(KafkaMessge value, Context ctx, Collector<String> out) throws Exception {
         System.out.println(value +  "  v2 wtm : " + DateFormatUtils.format(ctx.timerService().currentWatermark(), "yyyy-mm-dd HH:mm:ss"));
         v2.update(value);
         v1.get().forEach(x -> {

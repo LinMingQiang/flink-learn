@@ -1,11 +1,10 @@
 package com.flink.learn.entry
 
 import com.flink.common.core.{EnvironmentalKey, FlinkEvnBuilder, FlinkLearnPropertiesUtil}
-import com.flink.common.core.FlinkLearnPropertiesUtil.{param, CHECKPOINT_PATH}
+import com.flink.common.core.FlinkLearnPropertiesUtil.{CHECKPOINT_PATH, param}
+import com.flink.common.deserialize.KafkaMessageDeserialize
 import org.apache.flink.streaming.api.scala._
-import com.flink.common.deserialize.TopicOffsetMsgDeserialize
 import com.flink.common.kafka.KafkaManager
-import com.flink.common.kafka.KafkaManager.KafkaTopicOffsetMsg
 import com.flink.learn.richf.WordCountRichFunction
 import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
@@ -28,7 +27,7 @@ object FlinkStreamCustomJoinTest {
 
     // 只输出test2的数据，
     env
-      .addSource(KafkaManager.kafkaSource("test1,test2", FlinkLearnPropertiesUtil.BROKER))
+      .addSource(KafkaManager.getKafkaSource("test1,test2", FlinkLearnPropertiesUtil.BROKER, new KafkaMessageDeserialize))
       .map { x =>
         val arr = x.msg.split(",", -1)
         val uid = arr(0)

@@ -2,11 +2,12 @@ package com.flink.learn.entry;
 
 import com.flink.common.core.EnvironmentalKey;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.flink.common.deserialize.TopicOffsetMsgDeserialize;
-import com.flink.common.deserialize.TopicOffsetTimeStampMsgDeserialize;
 import com.core.FlinkEvnBuilder;
+import com.flink.common.deserialize.KafkaMessageDeserialize;
 import com.manager.KafkaSourceManager;
 import com.flink.common.kafka.KafkaManager;
+import com.flink.common.kafka.KafkaManager.KafkaMessge;
+
 import com.func.processfunc.StreamConnectCoProcessFunc;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -50,11 +51,11 @@ public class FlinkCoreOperatorEntry {
      * wordcount
      */
     public static void runWordCount() {
-        DataStreamSource<KafkaManager.KafkaTopicOffsetMsg> s1 =
-                KafkaSourceManager.getKafkaDataStream(streamEnv, "test", "localhost:9092", "latest", new TopicOffsetMsgDeserialize());
+        DataStreamSource<KafkaMessge> s1 =
+                KafkaSourceManager.getKafkaDataStream(streamEnv, "test", "localhost:9092", "latest", new KafkaMessageDeserialize());
 
         s1
-                .flatMap((FlatMapFunction<KafkaManager.KafkaTopicOffsetMsg, String>) (value, out) -> {
+                .flatMap((FlatMapFunction<KafkaMessge, String>) (value, out) -> {
                     for (String s : value.msg().split(",", -1)) {
                         out.collect(s);
                     }
@@ -72,30 +73,30 @@ public class FlinkCoreOperatorEntry {
         // 10s过期
         OutputTag<String> rejectedWordsTag = new OutputTag<String>("rejected") {
         };
-        SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> a =
+        SingleOutputStreamOperator<KafkaMessge> a =
                 KafkaSourceManager.getKafkaDataStream(streamEnv,
                         "test",
                         "localhost:9092",
-                        "latest", new TopicOffsetTimeStampMsgDeserialize())
+                        "latest", new KafkaMessageDeserialize())
                         .assignTimestampsAndWatermarks(
-                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                WatermarkStrategy.<KafkaMessge>forBoundedOutOfOrderness(Duration.ofSeconds(10))
                                         .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
                         .setParallelism(2);
 
-        SingleOutputStreamOperator<KafkaManager.KafkaTopicOffsetTimeMsg> b =
+        SingleOutputStreamOperator<KafkaMessge> b =
                 KafkaSourceManager.getKafkaDataStream(streamEnv,
                         "test2",
                         "localhost:9092",
-                        "latest", new TopicOffsetTimeStampMsgDeserialize())
+                        "latest", new KafkaMessageDeserialize())
                         .assignTimestampsAndWatermarks(
-                                WatermarkStrategy.<KafkaManager.KafkaTopicOffsetTimeMsg>forBoundedOutOfOrderness(Duration.ofSeconds(10))
+                                WatermarkStrategy.<KafkaMessge>forBoundedOutOfOrderness(Duration.ofSeconds(10))
                                         .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
                         .setParallelism(2);
 
         SingleOutputStreamOperator resultStream =
                 a
                         .connect(b)
-                        .keyBy(KafkaManager.KafkaTopicOffsetTimeMsg::msg, KafkaManager.KafkaTopicOffsetTimeMsg::msg)
+                        .keyBy(KafkaMessge::msg, KafkaMessge::msg)
                         .process(new StreamConnectCoProcessFunc(rejectedWordsTag))
                         .setParallelism(2);
 

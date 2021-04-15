@@ -6,11 +6,13 @@ import com.core.FlinkEvnBuilder;
 import com.core.FlinkSourceBuilder;
 import com.core.FlinkStreamEnvAndSource;
 import com.flink.common.kafka.KafkaManager;
+import com.flink.common.kafka.KafkaManager.KafkaMessge;
 import org.apache.flink.cep.CEP;
 import org.apache.flink.cep.PatternSelectFunction;
 import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.cep.pattern.conditions.SimpleCondition;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 
 import java.util.List;
 import java.util.Map;
@@ -24,20 +26,20 @@ public class CepDemoEntry extends FlinkStreamEnvAndSource {
                 FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
                 FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());
 
-        DataStreamSource<KafkaManager.KafkaTopicOffsetTimeMsg> d1 =
-                FlinkSourceBuilder.getKafkaDataStreamWithJsonEventTime("test", "localhost:9092", "latest");
-        Pattern<KafkaManager.KafkaTopicOffsetTimeMsg, KafkaManager.KafkaTopicOffsetTimeMsg> req_imp =
-                Pattern.<KafkaManager.KafkaTopicOffsetTimeMsg>begin("start")
-                        .where(new SimpleCondition<KafkaManager.KafkaTopicOffsetTimeMsg>() {
+        SingleOutputStreamOperator<KafkaMessge> d1 =
+                FlinkSourceBuilder.getKafkaDataStreamSource("test", "localhost:9092", "latest");
+        Pattern<KafkaMessge, KafkaMessge> req_imp =
+                Pattern.<KafkaMessge>begin("start")
+                        .where(new SimpleCondition<KafkaMessge>() {
                             @Override
-                            public boolean filter(KafkaManager.KafkaTopicOffsetTimeMsg kafkaTopicOffsetTimeMsg) throws Exception {
+                            public boolean filter(KafkaMessge kafkaTopicOffsetTimeMsg) throws Exception {
                                 return kafkaTopicOffsetTimeMsg.msg().equals("start");
                             }
                         })
                         .next("middle") // 接着有imp
-                        .where(new SimpleCondition<KafkaManager.KafkaTopicOffsetTimeMsg>() {
+                        .where(new SimpleCondition<KafkaMessge>() {
                             @Override
-                            public boolean filter(KafkaManager.KafkaTopicOffsetTimeMsg kafkaTopicOffsetTimeMsg) throws Exception {
+                            public boolean filter(KafkaMessge kafkaTopicOffsetTimeMsg) throws Exception {
                                 System.out.println("middle");
                                 return kafkaTopicOffsetTimeMsg.msg().equals("middle");
                             }
@@ -55,9 +57,9 @@ public class CepDemoEntry extends FlinkStreamEnvAndSource {
         CEP
                 .pattern(d1, req_imp)
                 .inProcessingTime()
-                .select(new PatternSelectFunction<KafkaManager.KafkaTopicOffsetTimeMsg, String>() {
+                .select(new PatternSelectFunction<KafkaMessge, String>() {
                     @Override
-                    public String select(Map<String, List<KafkaManager.KafkaTopicOffsetTimeMsg>> map) throws Exception {
+                    public String select(Map<String, List<KafkaMessge>> map) throws Exception {
                         return map.toString();
                     }
                 })
