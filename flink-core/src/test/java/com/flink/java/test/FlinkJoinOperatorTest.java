@@ -48,7 +48,7 @@ public class FlinkJoinOperatorTest extends FlinkJavaStreamTableTestBase {
 
 
     /**
-     * 小于watermark的数据直接跳过，定时器定时清理buffer
+     * 小于watermark的数据直接跳过，定时器定时清理buffer （这部分的缓存数据不受statettl控制，而是oneventtime清理）
      * 底层是connect实现
      *
      * @throws Exception

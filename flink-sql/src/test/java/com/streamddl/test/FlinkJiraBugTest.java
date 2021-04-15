@@ -74,7 +74,7 @@ public class FlinkJiraBugTest extends FlinkJavaStreamTableTestBase {
      * 3：stream转table，同时指定rowtime
      * 注意：只要对表或者stream做了groupby就会导致 wtm不生成导致窗口无法触发。
      * 注意： 简单的表转换是不会丢失时间信息的。只要不变换时间字段
-     * 注意：Datastream里面不能做keyby或者groupby操作(不管用哪个字段)，否则窗口触发不了,调试会发现窗口里面拿wtm是空
+     * 注意：修改并行度，或者Datastream里面不能做keyby或者groupby操作(不管用哪个字段)，否则窗口触发不了,调试会发现窗口里面拿wtm是空
      */
     @Test
     public void stream2TableWatermarkErr() throws Exception {
