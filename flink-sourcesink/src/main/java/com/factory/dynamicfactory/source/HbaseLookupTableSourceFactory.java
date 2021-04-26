@@ -15,6 +15,7 @@ public class HbaseLookupTableSourceFactory implements DynamicTableSourceFactory 
 
     @Override
     public DynamicTableSource createDynamicTableSource(Context context) {
+
         return new HbaseLookupTableSource();
     }
 

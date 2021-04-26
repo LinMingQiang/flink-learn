@@ -8,6 +8,7 @@ import com.flink.common.kafka.KafkaManager;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -44,6 +45,27 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
     }
 
 
+    /**
+     * 对于不是测试类，需要手动init
+     * @throws IOException
+     */
+    public static void init(ParameterTool parameters,
+                            String checkpointPath,
+                            Long checkPointInterval,
+                            String prop_path,
+                            String proName,
+                            Duration stateTTL) throws IOException {
+        FlinkLearnPropertiesUtil.init(prop_path,
+                proName);
+        streamEnv = FlinkEvnBuilder.buildStreamingEnv(parameters,
+                checkpointPath,
+                checkPointInterval);
+        tableEnv = FlinkEvnBuilder.buildStreamTableEnv(
+                streamEnv,
+                stateTTL);
+        kafkaDataSource = getKafkaKeyStream("test", "localhost:9092", "latest");
+        kafkaDataTable = getStreamTable("test", "localhost:9092", "latest");
+    }
     /**
      * 经过keyby
      * @param topic
