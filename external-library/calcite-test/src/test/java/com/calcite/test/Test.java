@@ -11,6 +11,7 @@ import org.apache.calcite.sql.parser.impl.SqlParserImpl;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
+import org.apache.flink.sql.parser.dml.RichSqlInsert;
 import org.apache.flink.sql.parser.dql.SqlShowCatalogs;
 
 public class Test {
@@ -57,8 +58,11 @@ public class Test {
                 "  WITHOUT DELAY AFTER WATERMARK";
         SqlParser parser = SqlParser.create(sql, config.getParserConfig());
         try {
-            SqlNode sqlNode = parser.parseStmt();
-            System.out.println(sqlNode);
+            // RichSqlInsert对象。在源码里面做一个判断，拿出emit。然后设置conf
+
+            RichSqlInsert sqlNode = (RichSqlInsert)parser.parseStmt();
+            CustomSqlSelectEmit emit = (CustomSqlSelectEmit)sqlNode.getSource();
+            System.out.println(emit.getEmit().getBeforeDelay());
 
         } catch (Exception e) {
             e.printStackTrace();
