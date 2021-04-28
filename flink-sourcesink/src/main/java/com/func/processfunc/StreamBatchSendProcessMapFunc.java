@@ -21,7 +21,7 @@ public class StreamBatchSendProcessMapFunc extends ProcessFunction<String, Strin
 
     public Long batchInterval;
     public boolean hasRegisterTimeserver = false;
-    // 这个是tm共享
+    // 这个是task共享，Operator state也是task共享
     public HashMap<String, Long> wcMap = new HashMap<>();
 
     @Override
@@ -40,6 +40,13 @@ public class StreamBatchSendProcessMapFunc extends ProcessFunction<String, Strin
 
     }
 
+    /**
+     * 每个task各自的
+     * @param timestamp
+     * @param ctx
+     * @param out
+     * @throws Exception
+     */
     @Override
     public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out) throws Exception {
         for (String s : wcMap.keySet()) {
