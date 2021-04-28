@@ -59,7 +59,8 @@ public class Test {
         SqlParser parser = SqlParser.create(sql, config.getParserConfig());
         try {
             // RichSqlInsert对象。在源码里面做一个判断，拿出emit。然后设置conf
-
+//            conf.setBoolean(TABLE_EXEC_EMIT_LATE_FIRE_ENABLED, true)
+//            conf.set(TABLE_EXEC_EMIT_LATE_FIRE_DELAY, Duration.ofSeconds(5))
             RichSqlInsert sqlNode = (RichSqlInsert)parser.parseStmt();
             CustomSqlSelectEmit emit = (CustomSqlSelectEmit)sqlNode.getSource();
             System.out.println(emit.getEmit().getBeforeDelay());

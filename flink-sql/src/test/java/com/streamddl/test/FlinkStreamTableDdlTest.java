@@ -59,7 +59,7 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testDDLWindow() throws Exception {
         // {"rowtime":"2021-01-20 00:00:01","msg":"hello"} {"rowtime":"2021-01-20 00:00:02","msg":"hello"}
-        // {"rowtime":"2021-01-20 00:00:50","msg":"hello"}
+        // {"rowtime":"2021-01-20 00:02:50","msg":"hello"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -73,17 +73,17 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "test2",
                         "test",
                         "json"));
-
-
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
         // TUMBLE_ROWTIME 返回的字段做为 rowtime
 //        " TUMBLE_START(rowtime, INTERVAL '3' SECOND) as TUMBLE_START," +
 //                "TUMBLE_END(rowtime, INTERVAL '3' SECOND) as TUMBLE_END," +
 //                "TUMBLE_ROWTIME(rowtime, INTERVAL '3' SECOND) as new_rowtime," +
+
+        // select * from (select * from test) union all (select * from test)
         String sql = "select " +
                 "msg," +
                 "count(1) cnt" +
-                " from (select * from (select * from test) union all (select * from test2))" +
+                " from test" +
                 " where msg = 'hello' " +
                 " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
                 "";

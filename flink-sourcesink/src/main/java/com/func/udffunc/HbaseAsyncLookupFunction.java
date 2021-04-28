@@ -32,10 +32,10 @@ public class HbaseAsyncLookupFunction extends AsyncTableFunction<Row> {
         this.fieldTypes = fieldTypes;
     }
 
-    @Override
-    public TypeInformation<Row> getResultType() {
-        return new RowTypeInfo(fieldTypes, fieldNames);
-    }
+//    @Override
+//    public TypeInformation<Row> getResultType() {
+//        return new RowTypeInfo(fieldTypes, fieldNames);
+//    }
 
     public void eval(CompletableFuture<Collection<Row>> future, Object... params) {
 
