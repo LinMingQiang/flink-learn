@@ -56,7 +56,7 @@ public class FlinkStreamAttributEntry {
                         .keyBy((KeySelector<KafkaManager.KafkaMessge, String>) value -> value.msg())
                         .process(new KeyedProcessFunction<String, KafkaManager.KafkaMessge, ReportLogPojo>() {
                             ValueState<Boolean> has = null;
-
+                            // 这里面的非 key state是 task公用的。这里面的Operator state也是task公用的。
                             @Override
                             public void open(Configuration parameters) throws Exception {
                                 has = getRuntimeContext().getState(new ValueStateDescriptor<Boolean>("has", Types.BOOLEAN, false));
