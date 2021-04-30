@@ -9,6 +9,8 @@ import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
 import org.apache.flink.util.Collector;
@@ -16,9 +18,9 @@ import org.apache.flink.util.OutputTag;
 
 import java.io.IOException;
 
-public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, KafkaMessge, KafkaMessge, String> {
+public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, KafkaMessge, KafkaMessge, Tuple3<Boolean, KafkaMessge, KafkaMessge>> {
     // 一对多的场景，v2作为维表
-    ListState<KafkaManager.KafkaMessge> v1 = null;
+    ListState<KafkaMessge> source = null;
     ValueState<KafkaMessge> v2 = null;
     OutputTag<String> errV1 = null;
 
@@ -34,7 +36,7 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        v1 = getRuntimeContext().getListState(
+        source = getRuntimeContext().getListState(
                 new ListStateDescriptor("test1",
                         TypeInformation.of(KafkaMessge.class)));
         v2 = getRuntimeContext().getState(
@@ -43,30 +45,35 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
     }
 
     /**
-     * register time server 触发时执行
+     * 这里面的watermark是两个共同决定的。
+     * register time server 触发时执行: 清除所有state
      * @param timestamp
      * @param ctx
      * @param out
      * @throws Exception
      */
     @Override
-    public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out) throws Exception {
+    public void onTimer(long timestamp, OnTimerContext ctx, Collector<Tuple3<Boolean, KafkaMessge, KafkaMessge>> out) throws Exception {
+//        System.out.println("#### Ontime ####");
         if (v2.value() != null) {
-            v1.get().forEach(x -> {
+            source.get().forEach(x -> {
                 try {
-                    out.collect("等待后Join ：" + x.msg() + " - " + v2.value().msg());
+                    out.collect(new Tuple3<>(true, x, v2.value()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
         } else {
-            v1.get().forEach(x -> {
-                if(x.ts() <= timestamp){
-                    ctx.output(errV1, "过期未Join : " + x);
-                }
+            source.get().forEach(x -> {
+                    out.collect(new Tuple3<>(false, x, null));
+//                if(x.ts() <= timestamp){
+//                    if(errV1 != null)
+//                    ctx.output(errV1, "过期未Join : " + x);
+//                }
             });
         }
-        v1.clear();
+        source.clear();
+        v2.clear();
     }
 
     /**
@@ -77,22 +84,24 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
      * @throws Exception
      */
     @Override
-    public void processElement1(KafkaMessge value, Context ctx, Collector<String> out) throws Exception {
-        System.out.println(value+ "  v1 wtm : " + DateFormatUtils.format(ctx.timerService().currentWatermark(), "yyyy-mm-dd HH:mm:ss"));
+    public void processElement1(KafkaMessge value, Context ctx, Collector<Tuple3<Boolean, KafkaMessge, KafkaMessge>> out) throws Exception {
+//        System.out.println(value+ "  source wtm : " + ctx.timerService().currentWatermark());
         if (v2.value() == null) {
-            v1.add(value);
-            System.out.println("未Join到等待 : " + ctx.getCurrentKey());
-            ctx.timerService().registerEventTimeTimer(value.ts()); // 当wartermark超过这个时间的时候就触发ontimer
+            source.add(value);
+//            System.out.println("未Join到等待 : " + ctx.getCurrentKey());
+            // 如果维表的更新频率很慢，可能需要使用processtime。不然无法触发
+//            ctx.timerService().registerEventTimeTimer(value.ts()); // 当wartermark超过这个时间的时候就触发ontimer
+            ctx.timerService().registerProcessingTimeTimer(System.currentTimeMillis() + 60000L); // 1分钟后触发
         } else {
-            out.collect("join到 ：" + value.msg() + " - " + v2.value().msg());
-            v1.get().forEach(x -> {
+            out.collect(new Tuple3<>(true, value, v2.value()));
+            source.get().forEach(x -> {
                 try {
-                    out.collect("历史的也跟着一起触发Join ：" + x.msg() + " - " + v2.value().msg());
+                    out.collect(new Tuple3<>(true, value, v2.value()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
-            v1.clear();
+            source.clear();
         }
     }
 
@@ -104,16 +113,16 @@ public class StreamConnectCoProcessFunc extends KeyedCoProcessFunction<Object, K
      * @throws Exception
      */
     @Override
-    public void processElement2(KafkaMessge value, Context ctx, Collector<String> out) throws Exception {
-        System.out.println(value +  "  v2 wtm : " + DateFormatUtils.format(ctx.timerService().currentWatermark(), "yyyy-mm-dd HH:mm:ss"));
+    public void processElement2(KafkaMessge value, Context ctx, Collector<Tuple3<Boolean, KafkaMessge, KafkaMessge>> out) throws Exception {
+//        System.out.println(value +  "  v2 wtm : " + ctx.timerService().currentWatermark());
         v2.update(value);
-        v1.get().forEach(x -> {
+        source.get().forEach(x -> {
             try {
-                out.collect("历史的也跟着一起触发Join ：" + x.msg() + " - " + v2.value().msg());
+                out.collect(new Tuple3(true, x, v2.value()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-        v1.clear();
+        source.clear();
     }
 }
