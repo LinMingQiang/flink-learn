@@ -68,6 +68,7 @@ val simp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
 
   def sendLocal(): Unit ={
+//    val kafkabroker = "10.21.33.28:29092,10.21.33.29:29092,10.21.131.11:29092"
     val kafkabroker = "localhost:9092"
     val map = new java.util.HashMap[String, Object]
     map.put("bootstrap.servers", kafkabroker)
@@ -84,17 +85,30 @@ val simp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
     val producer = new KafkaProducer[String, String](map)
 
-    for(i <- 1 to 100) {
+    // 1.1 1609513200000
+    // 1.2 1609599600000
+    // 1.3 1609686000000
+    // 1.4 1609772400000
+    // 1.5 1609858800000
+    // 1.8 1610118000000
+    // 1.9 1610204400000
+    // 1.15 1610722800000
+    // pv_test
+    for(i <- 1 to 1) {
       val adx = new ProducerRecord[String, String](
         "test",
-        s"""{"serdatetime":"${System.currentTimeMillis()}",
-           |"duid":"duid${i}",
+        null.asInstanceOf[Integer],
+        1L,
+        null,
+        s"""{"serdatetime":"1610204400000",
+           |"duid":"duidsdd",
            |"sdks":[{"k":"30007"}],
            |"appkey":"appkey",
-           |"deviceid":"123456d890111111111111111111111111111124",
+           |"deviceid":"123456d890121111111111111111111111111124",
            |"plat":"2"}""".stripMargin
       )
       println(adx)
+
       producer.send(adx)
     }
     producer.close()

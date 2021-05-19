@@ -9,6 +9,11 @@
     <artifactId>flink-sql</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>com.alibaba.ververica</groupId>
+            <artifactId>flink-connector-mysql-cdc</artifactId>
+            <version>1.4.0</version>
+        </dependency>
         <!--HyperLog-->
         <dependency>
             <groupId>com.clearspring.analytics</groupId>
