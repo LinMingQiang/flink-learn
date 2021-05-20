@@ -21,6 +21,7 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.triggers.ContinuousProcessingTimeTrigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.table.api.TableResult;
+import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.functions.TemporalTableFunction;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
@@ -248,4 +249,35 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
     }
 
 
+    /**
+     * 定义一个Row(xx Long, yy Int) 的类型，用来将指标统一在一个字段里面，方便 写出的时候用
+     * {"rowtime":"2020-06-18 16:59:30","msg":"1"}
+     */
+    @Test
+    public void sqlRowTypeTest() throws Exception {
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        String sql = "select msg as id,msg,Row(count(1), sum(`offset`)) as inc from test group by msg";
+//        tableEnv.sqlQuery(sql).printSchema();
+//        for (Column column : tableEnv.sqlQuery(sql).getResolvedSchema().getColumns()) {
+//            System.out.println(column.getName() + ":" +column.getDataType());
+//        }
+//        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class)
+//                .map(new MapFunction<Tuple2<Boolean, Row>, String>() {
+//                    @Override
+//                    public String map(Tuple2<Boolean, Row> booleanRowTuple2) throws Exception {
+//                        return booleanRowTuple2.toString();
+//                    }
+//                })
+//                .print();
+
+        tableEnv.executeSql(DDLSourceSQLManager.createCustomRowMongoSink("mongotest"));
+        TableResult re = tableEnv.sqlQuery(sql).executeInsert("mongotest");
+        re.print();
+//        streamEnv.execute();
+    }
 }
