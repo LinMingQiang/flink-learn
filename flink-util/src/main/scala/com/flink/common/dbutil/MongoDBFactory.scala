@@ -33,20 +33,15 @@ object MongoDBFactory {
    *
    * @param docs
    */
-   def bulkWrite(collection: MongoCollection[Document], docs: Seq[Document]): Unit = {
+   def bulkWrite(collection: MongoCollection[Document], insertAndSet: Seq[Document]): Unit = {
     val updateOptions = new UpdateOptions().upsert(true)
     val requests =
-      docs.map { doc =>
-        val o = new Document()
-        val _id = doc.get("id")
-        val uv = doc.get("uv")
-        doc.remove("id")
-        doc.remove("uv")
-        o.append("$setOnInsert", doc)
-        o.append("$set", new Document("uv", uv))
+      insertAndSet.map { insertDoc =>
+        val _id = insertDoc.get("id")
+        insertDoc.remove("id")
         new UpdateOneModel[Document](
           new Document("_id", _id),
-          o,
+          insertDoc,
           updateOptions
         )
       }

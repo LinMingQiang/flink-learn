@@ -11,9 +11,12 @@ import org.apache.flink.table.connector.sink.DynamicTableSink
 import org.apache.flink.table.data.RowData
 import org.apache.flink.table.types.DataType
 import org.apache.flink.table.types.logical.{BigIntType, RowType, VarCharType}
+import org.apache.flink.table.types.logical.RowType.RowField
 import org.apache.flink.types.RowKind
 import org.bson.Document
 
+import java.util
+import java.util.List
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
@@ -65,16 +68,37 @@ class MongoTableRichSinkFunction extends RichSinkFunction[RowData] {
   }
 
   private def row2document(row: RowData): Document = {
-    val doc = new Document()
+    val insertdoc = new Document()
+    val resetDoc = new Document()
+    val reDoc = new Document()
     for (i <- 0 to shcema.size - 1) {
       shcema(i).getType match {
+          // varchar的统一用insert
         case v: VarCharType =>
-          doc.append(shcema(i).getName, row.getString(i).toString)
-        case b: BigIntType => doc.append(shcema(i).getName, row.getLong(i))
+          if(shcema(i).getName.equals("id")){
+            reDoc.append(shcema(i).getName, row.getString(i).toString)
+          } else {
+            insertdoc.append(shcema(i).getName, row.getString(i).toString)
+          }
+          // int类型的统一用 set
+        case b: BigIntType =>
+          resetDoc.append(shcema(i).getName, row.getLong(i))
+        case c: RowType =>
+          val filesd = c.getFields
+          val rd = row.getRow(i, filesd.size())
+         for(i <- 0 until filesd.size()) {
+           filesd.get(i).getType match{
+             case c: BigIntType =>
+               resetDoc.append(filesd.get(i).getName, rd.getLong(i))
+             case _ =>
+           }
+         }
         case _ =>
       }
     }
-    doc
+    reDoc.append("$setOnInsert", insertdoc)
+    reDoc.append("$set", resetDoc)
+    reDoc
   }
 
 }

@@ -209,6 +209,22 @@ object DDLSourceSQLManager {
        |'collection'='runoob'
        |)""".stripMargin
   }
+
+  def createCustomRowMongoSink(tblName: String): String = {
+    s"""CREATE TABLE ${tblName} (
+       |id VARCHAR,
+       |msg VARCHAR,
+       |inc ROW<uv BIGINT, ss BIGINT>
+       |) WITH (
+       |'connector' = 'custom-mongo',
+       |'mongourl'='localhost:27017',
+       |'mongouser'='admin',
+       |'mongopassw'='123456',
+       |'mongodb'='test',
+       |'collection'='runoob'
+       |)""".stripMargin
+  }
+
   def createHbaseLookupSource(tblName: String): String = {
     s"""CREATE TABLE ${tblName} (
        |word VARCHAR
