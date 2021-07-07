@@ -167,7 +167,8 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
         String sql = " SELECT o.msg,s.msg " +
                 "FROM test o join test2 s " +
-                "on o.msg = s.msg ";
+                "on o.msg = s.msg where s.msg='aa' and o.msg='aa'";
+        System.out.println(tableEnv.explainSql(sql));;
         tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
 
         streamEnv.execute();
@@ -312,9 +313,15 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "json"));
         tableEnv.createTemporarySystemFunction("hyperCountDistinct", new HyperLogCountDistinctAgg());
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+//        String sql = "select " +
+//                "msg," +
+//                "hyperCountDistinct(msg) cnt" +
+//                " from test " +
+//                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
+//                "";
         String sql = "select " +
                 "msg," +
-                "hyperCountDistinct(msg) cnt" +
+                "count(distinct msg) cnt" +
                 " from test " +
                 " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
                 "";
@@ -422,6 +429,45 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
         re.print();
 
+    }
+
+
+
+    @Test
+    public void windowTVF(){
+        // {"rowtime":"2021-01-20 01:00:02","msg":"hello","uid":"2"}
+        // {"rowtime":"2021-01-20 01:00:41","msg":"hello","uid":"1"}
+        // {"rowtime":"2021-01-20 01:01:21","msg":"hello","uid":"3"}
+        // {"rowtime":"2021-01-20 02:03:01","msg":"hello","uid":"4"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+
+//        String sql = "select * " +
+//                " from TABLE(TUMBLE(TABLE test,DESCRIPTOR(rowtime), INTERVAL '30' SECOND))";
+//        tableEnv.sqlQuery(sql).printSchema();
+        // window_start,window_end这个是必须的
+                String sql = "select " +
+                "msg," +
+                "count(1) cnt" +
+                " from TABLE(TUMBLE(TABLE test,DESCRIPTOR(rowtime), INTERVAL '30' SECOND))" +
+                " group by window_start,window_end,msg " +
+                "";
+
+        // CUMULATE 函数，每隔 30s计算一次 当天的count, 每个30s窗口都会输出一次
+//        String sql = "select " +
+//                "msg," +
+//                "count(distinct uid) cnt" +
+//                " from TABLE(CUMULATE(TABLE test,DESCRIPTOR(rowtime), INTERVAL '30' SECOND, INTERVAL '1' DAY))" +
+//                " group by window_start,window_end,msg " +
+//                "";
+
+        TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
+        re.print();
     }
 
 

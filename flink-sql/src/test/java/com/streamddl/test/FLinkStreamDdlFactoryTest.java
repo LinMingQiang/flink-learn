@@ -46,6 +46,8 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         System.out.println(DDLSourceSQLManager.createFromMysql("mysqltest"));
         tableEnv.executeSql(DDLSourceSQLManager.createFromMysql("mysqltest"));
 
+
+        System.out.println(tableEnv.explainSql("insert into mysqltest select msg,count(1) cnt from test group by msg"));
         TableResult re = tableEnv.executeSql("insert into mysqltest select msg,count(1) cnt from test group by msg");
         re.print();
     }
@@ -196,6 +198,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
     // 时态表-lookup表
     @Test
     public void lookupTableTest() throws Exception {
+        // {"rowtime":"2020-06-18 16:59:30","msg":"1"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -203,7 +206,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
                         "test",
                         "json"));
         tableEnv.executeSql(DDLSourceSQLManager.createHbaseLookupSource("hbaselookup"));
-        tableEnv.toAppendStream(tableEnv.sqlQuery("select * from test t1 JOIN" +
+        tableEnv.toAppendStream(tableEnv.sqlQuery("select * from test t1 left JOIN" +
                 " hbaselookup FOR SYSTEM_TIME AS OF t1.proctime as t2 ON t1.msg = t2.word" +
                 ""), Row.class).print();
         streamEnv.execute();
@@ -214,6 +217,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
     // {"rowtime":"2020-06-18 16:59:30","msg":"1"}
     // 需要两边的wtm才能触发
     // 时态表分： 版本表和普通表
+    // FlinkCDCTest
     // 版本表: 如果时态表中的记录可以追踪和并访问它的历史版本，这种表我们称之为版本表，来自数据库的 changelog 可以定义成版本表。1：使用cdc，或者debezium-json格式的kafka数据。
     // 普通表: 如果时态表中的记录仅仅可以追踪并和它的最新版本，这种表我们称之为普通表，来自数据库 或 HBase 的表可以定义成普通表。2：使用LookupableTableSource自己实现
     // 普通表的建表d：dl和正常表是一样的，理论上讲任意都能用作时态表并在基于处理时间的时态表 Join 中使用，
@@ -221,6 +225,8 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
     // 接口 LookupableTableSource 的实例只能作为时态表用于基于处理时间的时态 Join 。
     // 版本表的建表：1：需要主键 PRIMARY KEY(product_id) NOT ENFORCED,
     //            2：需要事件事件：WATERMARK FOR update_time AS update_time
+
+    // 这里是普通版的lookuptable
     @Test
     public void temporalTableJoinTest() throws Exception {
         tableEnv.executeSql(
@@ -230,18 +236,20 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
                         "test",
                         "json"));
 
+        // 版本表 kafka： 需要定义主键，需要时间，这些格式必须是 debezium-json ，json格式不支持主键的定义
+        // 另一个版本表的定义是通过cdc。看 FlinkCDCTest::cdctemporalTableJoinTest
         tableEnv.executeSql(
                 DDLSourceSQLManager.createTemporalTable("localhost:9092",
                         "test2",
                         "test2",
                         "test",
                         "debezium-json")); // json格式不支持 主键的定义,只能用 debezium-json，这个是cdc里面的
-        // lookup table
-//        tableEnv.executeSql(DDLSourceSQLManager.createHbaseLookupSource("hbaselookup"));
+        // 普通表：lookup table .只支持proctime，
+        tableEnv.executeSql(DDLSourceSQLManager.createHbaseLookupSource("hbaselookup"));
         tableEnv.toRetractStream(tableEnv.sqlQuery("" +
                 "select * from test as o JOIN " +
-                " test2 FOR SYSTEM_TIME AS OF o.rowtime r" +
-                " on o.msg = r.msg" +
+                " hbaselookup FOR SYSTEM_TIME AS OF o.proctime r" +
+                " on o.msg = r.word" +
                 ""), Row.class)
                 .print();
         streamEnv.execute();

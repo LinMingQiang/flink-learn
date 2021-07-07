@@ -21,8 +21,11 @@ SqlNode query;
 SqlEmit emit = null;
 }
 {
+(
+<EMIT> <INTO>
+)
 query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)
-<#--必须是  [] 否则报错-->
+<#--必须是  [] 可选-->
 [
 emit = EmitSpecification()
 ]

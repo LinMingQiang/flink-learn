@@ -99,6 +99,7 @@ object DDLSourceSQLManager {
        |    `offset` bigint METADATA,
        |    rowtime TIMESTAMP(3),
        |    msg VARCHAR,
+       |    uid VARCHAR,
        |    proctime AS PROCTIME(),
        |    WATERMARK FOR rowtime AS rowtime - INTERVAL '10' SECOND
        |) WITH (
@@ -247,6 +248,13 @@ object DDLSourceSQLManager {
        |)""".stripMargin
   }
 
+  def createPrint(printlnSinkTbl: String): String = {
+    s"""CREATE TABLE ${printlnSinkTbl} (
+       |rowtime TIMESTAMP(3)
+       |) WITH (
+       |'connector' = 'printRetract'
+       |)""".stripMargin
+  }
 
   def createCustomPrintlnRetractSinkTbl(printlnSinkTbl: String): String = {
     s"""CREATE TABLE ${printlnSinkTbl} (

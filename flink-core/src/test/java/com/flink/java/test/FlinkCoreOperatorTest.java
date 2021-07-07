@@ -32,6 +32,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testWordCount() throws Exception {
+
         // {"msg":"hello"}
         kafkaDataSource
                 .flatMap((FlatMapFunction<KafkaMessge, String>) (value, out) -> {
@@ -40,8 +41,9 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                     }
                 })
                 .returns(Types.STRING)
-                .map(x -> new Tuple2(x, 1L))
-                .setParallelism(1)
+                .map(x -> new Tuple2<String, Long>(x, 1L))
+                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+                .filter(x -> x.f1 > 1L)
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy(x -> x.f0)
                  .sum(1)

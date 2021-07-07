@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction.Context
 import org.apache.flink.table.connector.sink.DynamicTableSink
 import org.apache.flink.table.data.RowData
 import org.apache.flink.table.types.DataType
-import org.apache.flink.table.types.logical.{BigIntType, RowType, VarCharType}
+import org.apache.flink.table.types.logical.{BigIntType, DoubleType, RowType, VarCharType}
 import org.apache.flink.table.types.logical.RowType.RowField
 import org.apache.flink.types.RowKind
 import org.bson.Document
@@ -90,6 +90,8 @@ class MongoTableRichSinkFunction extends RichSinkFunction[RowData] {
            filesd.get(i).getType match{
              case c: BigIntType =>
                resetDoc.append(filesd.get(i).getName, rd.getLong(i))
+             case d: DoubleType =>
+               resetDoc.append(filesd.get(i).getName, rd.getDouble(i))
              case _ =>
            }
          }

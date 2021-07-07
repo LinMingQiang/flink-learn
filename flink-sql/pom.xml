@@ -4,11 +4,17 @@
     <parent>
         <artifactId>flink-learn</artifactId>
         <groupId>com.flink.learn</groupId>
-        <version>1.0.0</version>
+        <version>1.13.0</version>
     </parent>
     <artifactId>flink-sql</artifactId>
 
     <dependencies>
+
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.8</version>
+        </dependency>
         <dependency>
             <groupId>com.alibaba.ververica</groupId>
             <artifactId>flink-connector-mysql-cdc</artifactId>

@@ -100,11 +100,11 @@ val simp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         null.asInstanceOf[Integer],
         1L,
         null,
-        s"""{"serdatetime":"1610204400000",
-           |"duid":"duidsdd",
+        s"""{"serdatetime":"1623206516000",
+           |"duid":"duidsd2d",
            |"sdks":[{"k":"30007"}],
-           |"appkey":"appkey",
-           |"deviceid":"123456d890121111111111111111111111111124",
+           |"appkey":"appkey2",
+           |"deviceid":"123356d890121111111111111111111111111124",
            |"plat":"2"}""".stripMargin
       )
       println(adx)

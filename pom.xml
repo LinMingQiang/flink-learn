@@ -4,7 +4,7 @@
     <groupId>com.flink.learn</groupId>
     <artifactId>flink-learn</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>1.13.0</version>
     <modules>
         <module>flink-util</module>
         <module>flink-testutil</module>

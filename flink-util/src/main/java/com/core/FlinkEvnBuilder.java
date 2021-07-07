@@ -24,6 +24,8 @@ public class FlinkEvnBuilder {
             String checkpointPath,
             Long checkPointInterval) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(2);
+        env.setMaxParallelism(2);
         env.getConfig().setGlobalJobParameters(parameters); // 广播配置
         if (checkPointInterval > 0L) {
             env.enableCheckpointing(checkPointInterval); //更新offsets。每60s提交一次
