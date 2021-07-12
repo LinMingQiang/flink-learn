@@ -8,13 +8,14 @@ import java.io.*;
 
 public class GuavaBloomFilterTest {
     public static void main(String[] args) throws Exception {
+        // 1亿 = 120m
         BloomFilter<CharSequence> bloomFilter = BloomFilter.create(
                 Funnels.stringFunnel(Charsets.UTF_8),
                 100000000,0.01);
         for(int i =0; i<=1000000; i++){
-            bloomFilter.put("" + i);
+//            bloomFilter.put("" + i);
         }
-//        SerializableBloomFilter(bloomFilter);
+        SerializableBloomFilter(bloomFilter);
 //        BloomFilter<CharSequence> bloomFilter2 = DeserializableBloomFilter();
 
 //        byte[] b = objectToByteArray(bloomFilter);

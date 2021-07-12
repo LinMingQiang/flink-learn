@@ -31,7 +31,7 @@ public class HyperLogLogSerializeTest {
             hll.offer("abaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+i);
             h.put("abaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+i, "");
         }
-//        SerializableObjToFile(hll);
+        SerializableObjToFile(hll);
 //        SerializableObjToFile(h);
 //        byte[] bys = objectToByteArray(hll);
 //        HyperLogLog hll2 = (HyperLogLog) byteArrayToObject(bys);
