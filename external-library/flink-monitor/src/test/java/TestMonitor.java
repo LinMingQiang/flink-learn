@@ -1,12 +1,12 @@
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.flink.common.java.bean.ApplicationInfo;
-import com.flink.common.java.bean.FLinkJobsCheckpointInfo;
-import com.flink.common.java.bean.FlinkJobsExceptionInfo;
-import com.flink.common.java.bean.FlinkJobsInfo;
-import com.flink.common.rest.httputil.OkHttp3Client;
-import com.flink.common.yarn.api.YarnClientHandler;
-import com.flink.common.yarn.api.YarnRestFulClient;
+import common.java.bean.ApplicationInfo;
+import common.java.bean.FLinkJobsCheckpointInfo;
+import common.java.bean.FlinkJobsExceptionInfo;
+import common.java.bean.FlinkJobsInfo;
+import common.rest.httputil.OkHttp3Client;
+import common.yarn.api.YarnClientHandler;
+import common.yarn.api.YarnRestFulClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class TestMonitor {
 
     @Test
     public void testHttp() throws IOException {
-        JSONObject json = JSON.parseObject(OkHttp3Client.get("http://localhost:10880/ws/v1/cluster/apps?state=RUNNING"));
+        JSONObject json = JSON.parseObject(OkHttp3Client.get("http://10-21-129-142-jhdxyjd.mob.local:10880/ws/v1/cluster/apps?state=RUNNING"));
 
         json.getJSONObject("apps").getJSONArray("app").forEach(x -> {
             System.out.println(JSON.parseObject(x.toString()).getString("id"));
@@ -99,7 +99,7 @@ public class TestMonitor {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
         List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
         String appid = r.get(0).id;
-        List<FlinkJobsInfo> flinkJobs = yarnclient.getFlinkJobs(appid);
+        List<FlinkJobsInfo> flinkJobs = yarnclient.getFlinkJobsOverview(appid);
         String jobId = flinkJobs.get(0).jid;
         FlinkJobsExceptionInfo exceptionInfo = yarnclient.getFlinkJobExceptions(appid, jobId);
         System.out.println(exceptionInfo);
@@ -110,7 +110,7 @@ public class TestMonitor {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
         List<ApplicationInfo> r = yarnclient.getApplications("RUNNING", "flink");
         String appid = r.get(0).id;
-        List<FlinkJobsInfo> flinkJobs = yarnclient.getFlinkJobs(appid);
+        List<FlinkJobsInfo> flinkJobs = yarnclient.getFlinkJobsOverview(appid);
         String jobId = flinkJobs.get(0).jid;
         FLinkJobsCheckpointInfo ckpinfo = yarnclient.getFlinkJobCheckpoint(appid, jobId);
         System.out.println(ckpinfo.history.size());
@@ -119,6 +119,11 @@ public class TestMonitor {
     }
 
 
+    /**
+     * 获取tm的信息
+     * @throws IOException
+     * @throws YarnException
+     */
     @Test
     public void testFlinkTaskmanager() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
@@ -130,6 +135,38 @@ public class TestMonitor {
     }
 
 
+    /**
+     * 获取JID的具体信息，包括plan，source，sink等的输入输出（testFLINK_JOBS_JID_VERTICES_INFO），并发度，包含
+     * @throws IOException
+     * @throws YarnException
+     */
+    @Test
+    public void testFLINK_JOBS_JID_INFO() throws IOException, YarnException {
+        YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+        List<FlinkJobsInfo> flinkJobs = yarnclient.getFlinkJobsOverview("application_1622709261031_0177");
+        FlinkJobsInfo jobinfo = flinkJobs.get(0);
+        System.out.println(yarnclient.getFlinkJobJidInfo("application_1622709261031_0177", jobinfo.jid));
 
+    }
+
+
+    /**
+     * 某个顶点（Operator）的信息，可以拿到某个顶点的输入和输出
+     * @throws IOException
+     * @throws YarnException
+     */
+    @Test
+    public void testFLINK_JOBS_JID_VERTICES_INFO() throws IOException, YarnException {
+        YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+        List<FlinkJobsInfo> flinkJobs = yarnclient.getFlinkJobsOverview("application_1622709261031_0177");
+        FlinkJobsInfo jobinfo = flinkJobs.get(0);
+        System.out.println(yarnclient.getFlinkJobJidVerticesInfo("application_1622709261031_0177",
+                jobinfo.jid,
+                "d618a97df21bbd4bb61c79cdeca965b4"));
+
+    }
+
+    // tm的内存分配和使用信息，监控内存如果快超了预警
+    // http://10-21-129-141-jhdxyjd.mob.local:10880/proxy/application_1622709261031_0177/taskmanagers/container_e2671_1622709261031_0177_01_000011
 
 }

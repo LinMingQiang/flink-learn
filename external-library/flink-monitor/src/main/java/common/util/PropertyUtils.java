@@ -1,4 +1,4 @@
-package com.flink.common.util;
+package common.util;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

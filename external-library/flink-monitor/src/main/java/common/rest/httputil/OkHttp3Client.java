@@ -1,4 +1,4 @@
-package com.flink.common.rest.httputil;
+package common.rest.httputil;
 
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;

@@ -1,4 +1,4 @@
-package com.flink.common.java.bean;
+package common.java.bean;
 
 public class FlinkJobsInfo {
     public long duration;
