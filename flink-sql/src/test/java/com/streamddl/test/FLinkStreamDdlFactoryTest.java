@@ -288,4 +288,21 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         re.print();
 //        streamEnv.execute();
     }
+
+    /**
+     * 日志时间戳转TIMESTAMP
+     * @throws Exception
+     */
+    @Test
+    public void testBigintToTimeStamp3() throws Exception {
+// {"rowtime":1626646800739,"msg":"hello,world"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafkaRowtime("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.toAppendStream(tableEnv.sqlQuery("select * from test"), Row.class).print();
+        streamEnv.execute();
+    }
 }

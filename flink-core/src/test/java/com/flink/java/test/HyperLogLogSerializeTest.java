@@ -23,15 +23,28 @@ public class HyperLogLogSerializeTest {
 //        for (int i = 0; i < 10000; i++) {
 //            hll.offer(""+i);
 //        }
-        HashMap<String, String> h = new HashMap<>();
+        HashMap<String, String> h = new HashMap<>();  // 10w - 4290k
         HyperLogLog hll = new HyperLogLog(0.0075); // 11k
         // hll的大小只和精度有关
         for(int i = 0; i< 10000; i++){
-            // 10w - 4290k
-            hll.offer("abaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+i);
-            h.put("abaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"+i, "");
+            hll.offer(""+i);
         }
-        SerializableObjToFile(hll);
+        System.out.println(hll.cardinality());
+        System.out.println(hll.offer("11111") + ":" + hll.cardinality()); // true
+        System.out.println(hll.offer("1") + ":" + hll.cardinality()); // true
+        System.out.println(hll.offer("2") + ":" + hll.cardinality()); // false
+        System.out.println(hll.offer("r") + ":" + hll.cardinality()); // false
+        System.out.println(hll.offer("44444444") + ":" + hll.cardinality()); // true
+        System.out.println(hll.offer("11111111") + ":" + hll.cardinality()); // false
+        System.out.println(hll.offer("aa") + ":" + hll.cardinality()); // false
+//        System.out.println(hll.offerHashed("11111".hashCode()) + ":" + hll.cardinality()); // true
+//        System.out.println(hll.offerHashed("1".hashCode()) + ":" + hll.cardinality()); // true
+//        System.out.println(hll.offerHashed("2".hashCode()) + ":" + hll.cardinality()); // false
+//        System.out.println(hll.offerHashed("r".hashCode()) + ":" + hll.cardinality()); // false
+//        System.out.println(hll.offerHashed("44444444".hashCode()) + ":" + hll.cardinality()); // true
+//        System.out.println(hll.offerHashed("11111111".hashCode()) + ":" + hll.cardinality()); // false
+//        System.out.println(hll.offerHashed("aa".hashCode()) + ":" + hll.cardinality()); // false
+//        SerializableObjToFile(hll);
 //        SerializableObjToFile(h);
 //        byte[] bys = objectToByteArray(hll);
 //        HyperLogLog hll2 = (HyperLogLog) byteArrayToObject(bys);

@@ -2,15 +2,7 @@ package com.flink.scala.test
 
 import java.util.Date
 
-import com.flink.learn.bean.CaseClassUtil.Wordcount
 import com.flink.learn.test.common.FlinkStreamCommonSuit
-import com.flink.learn.time.MyTimestampsAndWatermarks
-import org.apache.flink.api.common.functions.FlatJoinFunction
-import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction
-import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows
-import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.util.Collector
 
 class FlinkStreamJoinTest extends FlinkStreamCommonSuit {
 

@@ -112,7 +112,37 @@ object DDLSourceSQLManager {
        |    'json.ignore-parse-errors' = 'true'
        |)""".stripMargin
   }
+  /**
+   *
+   * @param topic
+   * @param tableName
+   * @return
+   */
 
+  def createStreamFromKafkaRowtime(broker: String,
+                            topic: String,
+                            tableName: String,
+                            groupID: String,
+                            format : String = "json"): String = {
+    s"""CREATE TABLE $tableName (
+       |    topic VARCHAR METADATA FROM 'topic',
+       |    `offset` bigint METADATA,
+       |    rowtime BIGINT,
+       |    ts AS TO_TIMESTAMP(FROM_UNIXTIME(rowtime / 1000, 'yyyy-MM-dd HH:mm:ss')),
+       |    msg VARCHAR,
+       |    uid VARCHAR,
+       |    proctime AS PROCTIME(),
+       |    WATERMARK FOR ts AS ts - INTERVAL '10' SECOND
+       |) WITH (
+       |    'connector' = 'kafka',
+       |    'topic' = '$topic',
+       |    'scan.startup.mode' = 'latest-offset',
+       |    'properties.bootstrap.servers' = '$broker',
+       |    'properties.group.id' = '$groupID',
+       |    'format' = '$format',
+       |    'json.ignore-parse-errors' = 'true'
+       |)""".stripMargin
+  }
 
   /**
    * 创建 时态表，必须要有主见

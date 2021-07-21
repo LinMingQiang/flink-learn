@@ -7,13 +7,15 @@ import com.google.common.hash.Funnels;
 import java.io.*;
 
 public class GuavaBloomFilterTest {
+    // 布隆过滤器序列化测试
     public static void main(String[] args) throws Exception {
-        // 1亿 = 120m
+        //
+        // 1亿 = 120m， fpp为误差， 0.01 120m， 0.001 180m，序列化时间也比较久
         BloomFilter<CharSequence> bloomFilter = BloomFilter.create(
                 Funnels.stringFunnel(Charsets.UTF_8),
-                100000000,0.01);
-        for(int i =0; i<=1000000; i++){
-//            bloomFilter.put("" + i);
+                10000000,0.01);
+        for(int i =0; i<=100000; i++){
+            bloomFilter.put("" + i);
         }
         SerializableBloomFilter(bloomFilter);
 //        BloomFilter<CharSequence> bloomFilter2 = DeserializableBloomFilter();
@@ -22,7 +24,7 @@ public class GuavaBloomFilterTest {
 //        BloomFilter<CharSequence> bloomFilter2 = (BloomFilter<CharSequence>) byteArrayToObject(b);
 
         System.out.println(bloomFilter.mightContain("1"));
-        System.out.println(bloomFilter.mightContain("22444"));
+        System.out.println(bloomFilter.mightContain("999s1"));
     }
 
     public static  void SerializableBloomFilter(BloomFilter<CharSequence> bloomFilter) throws IOException {
