@@ -12,7 +12,7 @@ public class GuavaBloomFilterTest {
         //
         // 1亿 = 120m， fpp为误差， 0.01 120m， 0.001 180m，序列化时间也比较久
         BloomFilter<CharSequence> bloomFilter = BloomFilter.create(
-                Funnels.stringFunnel(Charsets.UTF_8),
+                Funnels.stringFunnel(),
                 10000000,0.01);
         for(int i =0; i<=100000; i++){
             bloomFilter.put("" + i);
