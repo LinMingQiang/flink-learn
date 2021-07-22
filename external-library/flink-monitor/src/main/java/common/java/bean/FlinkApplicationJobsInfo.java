@@ -1,6 +1,6 @@
 package common.java.bean;
 
-public class FlinkJobsInfo {
+public class FlinkApplicationJobsInfo {
     public long duration;
     public long start_time;
     public String jid;
@@ -24,7 +24,7 @@ public class FlinkJobsInfo {
                 '}';
     }
 
-    public FlinkJobsInfo(long duration, long start_time, String jid, String name, String state, long end_time, long last_modification, FlinkJobsTaskInfo tasks) {
+    public FlinkApplicationJobsInfo(long duration, long start_time, String jid, String name, String state, long end_time, long last_modification, FlinkJobsTaskInfo tasks) {
         this.duration = duration;
         this.start_time = start_time;
         this.jid = jid;

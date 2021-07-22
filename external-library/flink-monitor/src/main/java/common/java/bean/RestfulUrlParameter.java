@@ -29,14 +29,21 @@ public class RestfulUrlParameter {
                 + "/checkpoints";
     }
 
-    public static String FLINK_TASK_MANAGER(String yarnPre, String appid) {
+    public static String FLINK_ALL_TASK_MANAGER(String yarnPre, String appid) {
         return yarnPre
                 + "/"
                 + appid
                 + FLINK_TASKMANAGER;
     }
 
-
+    public static String FLINK_TASK_MANAGER(String yarnPre, String appid, String tmid) {
+        return yarnPre
+                + "/"
+                + appid
+                + FLINK_TASKMANAGER
+                +"/"
+                +tmid;
+    }
     /**
      *  获取JID的具体信息，包括plan，source，sink等的输入输出，并发度，包含
      * @param yarnPre
