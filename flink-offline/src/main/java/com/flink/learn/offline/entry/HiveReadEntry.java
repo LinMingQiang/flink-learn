@@ -28,11 +28,11 @@ public class HiveReadEntry {
         // 必须转hive才能找到hive的表
         tableEnv.useCatalog(name);
         Table r = tableEnv.sqlQuery(sql);
-        tableEnv.createTemporaryView("hive_result", r);
 
         // 必须转回 default_catalog，否则找不到sink表。
         tableEnv.useCatalog("default_catalog");
-        tableEnv.from("hive_result").executeInsert("print_table");
+//        tableEnv.createTemporaryView("hive_result", r);
+        r.executeInsert("print_table");
     }
 
 
