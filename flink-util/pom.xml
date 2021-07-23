@@ -15,6 +15,11 @@
           <version>14.0.1</version>
       </dependency>
       <dependency>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+          <version>5.1.30</version>
+      </dependency>
+      <dependency>
           <artifactId>elasticsearch-shade</artifactId>
           <groupId>com.flink.learn</groupId>
           <version>${project.version}</version>
