@@ -33,6 +33,7 @@ public class HiveReadEntry {
         tableEnv.useCatalog("default_catalog");
 //        tableEnv.createTemporaryView("hive_result", r);
         r.executeInsert("print_table");
+
     }
 
 

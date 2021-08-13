@@ -49,8 +49,8 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                  .sum(1)
                  .setParallelism(1)
                 .print();
-
-        streamEnv.execute("lmq-flink-demo"); //程序名
+        System.out.println(streamEnv.getExecutionPlan());
+        streamEnv.execute("lmq-flink-demo"); //程序名, 一个execute是一个job
     }
 
     /**

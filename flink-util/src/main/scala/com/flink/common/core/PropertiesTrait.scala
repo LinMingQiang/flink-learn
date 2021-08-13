@@ -6,10 +6,13 @@ import org.apache.flink.api.java.utils.ParameterTool
 import java.util
 import java.util.Properties
 import scala.collection.JavaConverters._
+
 trait PropertiesTrait {
   var proName = ""
   var param: ParameterTool = ParameterTool.fromMap(Map("" -> "").asJava)
+
   def getProperties(key: String): String = param.get(key)
+
   def getProperties(key: String, defualt: String): String = param.get(key, defualt)
 
   /**
@@ -18,15 +21,18 @@ trait PropertiesTrait {
   def init(path: String, proName: String): Unit = {
     this.proName = proName
     val file = new File(path)
-    if(file.exists())
-    param = ParameterTool.fromPropertiesFile(path)
-    else {
-      val in = classOf[PropertiesTrait].getResourceAsStream(path)
-      val props = new Properties
-      val inputStreamReader = new InputStreamReader(in, "UTF-8")
-      props.load(inputStreamReader)
-      param = ParameterTool.fromMap(props.asScala.toMap.asJava)
+    if (file.exists()) {
+      param = ParameterTool.fromPropertiesFile(path)
+    } else {
+      if (path.endsWith("properties")) {
+        val in = this.getClass.getClassLoader.getResourceAsStream("application.properties")
+        val props = new Properties
+        val inputStreamReader = new InputStreamReader(in, "UTF-8")
+        props.load(inputStreamReader)
+        param = ParameterTool.fromMap(props.asScala.toMap.asJava)
+      }
     }
+    param.toMap.asScala.foreach(println)
   }
 
   /**
@@ -43,8 +49,10 @@ trait PropertiesTrait {
     })
     param = ParameterTool.fromMap(map)
   }
+
   /**
    * 用于在operate func初始化
+   *
    * @param param
    */
   def init(param: ParameterTool): Unit = {

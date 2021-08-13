@@ -5,7 +5,6 @@ import common.java.bean.FLinkJobsCheckpointInfo;
 import common.java.bean.FlinkApplicationJobsInfo;
 import common.java.bean.FlinkJobsExceptionInfo;
 import common.rest.httputil.OkHttp3Client;
-import common.yarn.api.YarnClientHandler;
 import common.yarn.api.YarnRestFulClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
