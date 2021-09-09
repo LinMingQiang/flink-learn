@@ -15,13 +15,10 @@ import java.util.Map;
 import static common.java.bean.RestfulUrlParameter.*;
 
 public class YarnRestFulClient {
-    private String yarnRestPrefix = null;
+    // yarn的rest前缀
+    public  String YARN_REST_PREFIX = "/ws/v1/cluster";
+    // flink的rest前缀
     private String FLINK_REST_PREFIX = null;
-
-
-    public String YARN_CLUSTER_URL() {
-        return yarnRestPrefix + YARN_REST_PREFIX;
-    }
 
     private YarnRestFulClient() {
     }
@@ -32,8 +29,8 @@ public class YarnRestFulClient {
      * @return
      */
     private void init(String yarnUrl) {
-        yarnRestPrefix = yarnUrl;
-        FLINK_REST_PREFIX = yarnRestPrefix + "/proxy";
+        YARN_REST_PREFIX = yarnUrl + "/ws/v1/cluster";
+        FLINK_REST_PREFIX = yarnUrl + "/proxy";
     }
 
     private static class YarnRestFulClientInstans {
@@ -58,12 +55,12 @@ public class YarnRestFulClient {
         List<ApplicationInfo> apps = new ArrayList<>();
         JSONObject json = null;
         if (states == null || states.isEmpty()) {
-            json = JSON.parseObject(OkHttp3Client.get(YARN_CLUSTER_URL() + YARN_APPS));
+            json = JSON.parseObject(OkHttp3Client.get(YARN_REST_PREFIX + YARN_APPS));
         } else {
             if ("RUNNING".equals(states.toUpperCase())) {
-                json = JSON.parseObject(OkHttp3Client.get(YARN_CLUSTER_URL() + YARN_APPS_STATE + states));
+                json = JSON.parseObject(OkHttp3Client.get(YARN_REST_PREFIX + YARN_APPS_STATE + states));
             } else
-                json = JSON.parseObject(OkHttp3Client.get(YARN_CLUSTER_URL() + YARN_APPS));
+                json = JSON.parseObject(OkHttp3Client.get(YARN_REST_PREFIX + YARN_APPS));
         }
         json.getJSONObject("apps").getJSONArray("app").forEach(x -> {
             ApplicationInfo tmp = JSON.parseObject(x.toString(), ApplicationInfo.class);
@@ -86,7 +83,7 @@ public class YarnRestFulClient {
      * @throws IOException
      */
     public List<FlinkApplicationJobsInfo> getFlinkJobsOverview(String appid) throws IOException {
-        System.out.println(FLINK_REST_PREFIX + "/" + appid + FLINK_STREAM_JOBS_OVERVIEW);
+//        System.out.println(FLINK_REST_PREFIX + "/" + appid + FLINK_STREAM_JOBS_OVERVIEW);
         List<FlinkApplicationJobsInfo> re = new ArrayList<>();
         JSON.parseObject(OkHttp3Client.get(FLINK_REST_PREFIX + "/" + appid + FLINK_STREAM_JOBS_OVERVIEW))
                 .getJSONArray("jobs").forEach(x -> {
@@ -123,7 +120,7 @@ public class YarnRestFulClient {
 
 
     public List<FlinkTaskManagerInfo> getFlinkJobAllTasksManagersInfo(String appid) throws IOException {
-        System.out.println(FLINK_ALL_TASK_MANAGER(FLINK_REST_PREFIX, appid));
+//        System.out.println(FLINK_ALL_TASK_MANAGER(FLINK_REST_PREFIX, appid));
         JSONObject json = JSON.parseObject(OkHttp3Client.get(FLINK_ALL_TASK_MANAGER(FLINK_REST_PREFIX, appid)));
         List<FlinkTaskManagerInfo> re = new ArrayList<>();
         for (Object taskmanagersInfo : json.getJSONArray("taskmanagers")) {
@@ -135,7 +132,7 @@ public class YarnRestFulClient {
 
 
     public FlinkJobJidInfo getFlinkJobJidInfo(String appid, String jid) throws IOException {
-        System.out.println(FLINK_JOBS_JID_INFO(FLINK_REST_PREFIX, appid, jid));
+//        System.out.println(FLINK_JOBS_JID_INFO(FLINK_REST_PREFIX, appid, jid));
         JSONObject json = JSON.parseObject(OkHttp3Client.get(FLINK_JOBS_JID_INFO(FLINK_REST_PREFIX, appid, jid)));
         return JSON.parseObject(json.toString(), FlinkJobJidInfo.class);
     }

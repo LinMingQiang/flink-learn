@@ -1,9 +1,6 @@
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import common.java.bean.ApplicationInfo;
-import common.java.bean.FLinkJobsCheckpointInfo;
-import common.java.bean.FlinkApplicationJobsInfo;
-import common.java.bean.FlinkJobsExceptionInfo;
+import common.java.bean.*;
 import common.rest.httputil.OkHttp3Client;
 import common.yarn.api.YarnRestFulClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
@@ -14,9 +11,42 @@ import java.util.Map;
 
 import org.junit.*;
 public class TestMonitor {
+    public static YarnRestFulClient yarnclient;
+    static {
+        yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
+    }
+
+    @Test
+    public void testHandler() throws Exception {
+        List<ApplicationInfo> r = yarnclient.getApplications("running", "flink");
+        r.forEach(x -> {
+            try {
+                List<FlinkApplicationJobsInfo> jobInfos = yarnclient.getFlinkJobsOverview(x.id);
+                FlinkApplicationJobsInfo jobInfo = jobInfos.get(0);
+                FlinkJobsExceptionInfo jobsExcepInfo = yarnclient.getFlinkJobExceptions(x.id, jobInfo.jid);
+                System.out.println(jobsExcepInfo);
+                FLinkJobsCheckpointInfo ckpInfo= yarnclient.getFlinkJobCheckpoint(x.id, yarnclient.getFlinkJobsOverview(x.id).get(0).jid);
+                System.out.println(ckpInfo.latest);
+
+                // tm的内存信息
+//                List<FlinkTaskManagerInfo> flinkAllTmInfos = yarnclient.getFlinkJobAllTasksManagersInfo(x.id);
+//                flinkAllTmInfos.forEach(tminfo -> {
+//                    try {
+//                        FlinkJobTaskManagerInfo tmin = yarnclient.getFLinkTaskManagerInfo(x.id, tminfo.id);
+////                        System.out.println(tmin);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                });
 
 
 
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
     @Test
     public void testHttp() throws IOException {
@@ -55,7 +85,7 @@ public class TestMonitor {
     @Test
     public void testYarnAllappInfo() throws IOException, YarnException {
         YarnRestFulClient yarnclient = YarnRestFulClient.getInstance("http://10-21-129-141-jhdxyjd.mob.local:10880");
-        List<ApplicationInfo> r = yarnclient.getApplications(null, null);
+        List<ApplicationInfo> r = yarnclient.getApplications("running", null);
         System.out.println(r.size());
 
        // r.forEach(x -> System.out.println(x));

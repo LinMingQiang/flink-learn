@@ -2,7 +2,6 @@ package common.java.bean;
 
 public class RestfulUrlParameter {
     // yarn
-    public static String YARN_REST_PREFIX = "/ws/v1/cluster";
     public static String YARN_APPS_STATE = "/apps?state=";
     public static String YARN_APPS = "/apps";
     public static String FLINK_TASKMANAGER = "/taskmanagers";

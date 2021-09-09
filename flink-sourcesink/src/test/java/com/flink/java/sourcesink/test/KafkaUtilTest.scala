@@ -13,7 +13,7 @@ object KafkaUtilTest {
    * @param args
    */
   def main(args: Array[String]): Unit = {
-    kafkaAdmin()
+    sendTest()
   }
 
   val simp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -59,7 +59,7 @@ object KafkaUtilTest {
 
   def sendTest(): Unit = {
 
-    val kafkabroker = "10.90.45.16:9092,10.90.45.17:9092,10.90.45.18:9092,10.90.45.19:9092,10.90.45.20:9092,10.90.45.21:9092,10.90.45.22:9092"
+    val kafkabroker = "10.89.120.11:29092,10.89.120.12:29092,10.89.120.16:29092"
     val map = new java.util.HashMap[String, Object]
     map.put("bootstrap.servers", kafkabroker)
     map.put("key.serializer",
@@ -72,14 +72,17 @@ object KafkaUtilTest {
       "org.apache.kafka.common.serialization.StringDeserializer")
     map.put("group.id", "test");
     map.put("enable.auto.commit", "false")
+
+    val topic = "dsp_ad_push_deliver_test"
+
     val producer = new KafkaProducer[String, String](map)
     import org.apache.kafka.clients.producer.ProducerRecord
     // 1626537303000
     // 1626623703000
     for (i <- 1 to 2) {
       producer.send(new ProducerRecord[String, String](
-        "test",
-        s"""{"plat":1,"duid":"ddd${i}","appkey":"test","serdatetime":1626793409045}"""
+        topic,
+        s"""{"appkey":"2d7ce93a26944","price":0,"ipv4":"172.25.64.179","ipv6":"__IPV6__","make":"__MAKE__","model":"__MODEL__","os":"__OS__","osv":"__OSV__","carrier":"__CARRIER__","duid":"8b0131e2b541cde85ed009b110e809e47379d079","sys_time":1628847081958,"req_time":1628847081406,"log_type":101,"req_id":"589507252164120576","adv_id":"202108061014","ad_plan_id":"202108061019","ad_activity_id":"202108131112","work_id":"4bplv5qsth9qiyh6gw","ad_creativity_id":"202108091031","ga_code":-1}"""
       ))
       // Thread.sleep(500)
     }
