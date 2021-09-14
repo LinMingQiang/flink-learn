@@ -40,7 +40,8 @@ public class JavaLamdaTest {
         l.add("1"); l.add("2");
         List<String> a = l.stream()
                 .filter(x ->  x.equals("1"))
-                .map(x -> x+": hello").collect(Collectors.toList());
+                .map(x -> x+": hello")
+                .collect(Collectors.toList());
         a.forEach(System.out::println);
     }
 

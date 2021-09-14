@@ -1,4 +1,4 @@
-package com.flink.common.yarn.api;
+package common.yarn.api;
 
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;

@@ -2,72 +2,28 @@ package com.flink.java.sourcesink.test
 
 import org.apache.commons.lang.time.DateFormatUtils
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.kafka.common.Cluster
 
 import java.text.SimpleDateFormat
 
 object KafkaUtilTest {
 
   /**
-    *
-    * @param args
-    */
+   *
+   * @param args
+   */
   def main(args: Array[String]): Unit = {
-    sendLocal()
+    sendTest()
   }
 
-val simp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+  val simp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
   //scalastyle:off
+
   /**
-    *
-    * @param properties
-    */
+   *
+   * @param properties
+   */
   def sendRecord(): Unit = {
-    val kafkabroker = "10.21.33.28:29092,10.21.33.29:29092,10.21.33.11:29092"
-    val map = new java.util.HashMap[String, Object]
-    map.put("bootstrap.servers", kafkabroker)
-    map.put("key.serializer",
-      "org.apache.kafka.common.serialization.StringSerializer")
-    map.put("value.serializer",
-      "org.apache.kafka.common.serialization.StringSerializer")
-    map.put("key.deserializer",
-      "org.apache.kafka.common.serialization.StringDeserializer")
-    map.put("value.deserializer",
-      "org.apache.kafka.common.serialization.StringDeserializer")
-    map.put("group.id", "test");
-    map.put("enable.auto.commit", "false")
-
-//    while (true) {
-      val producer = new KafkaProducer[String, String](map)
-      import org.apache.kafka.clients.producer.ProducerRecord
-       val s = simp.parse("2021-04-03 13:17:20")
-       println(s.getTime, DateFormatUtils.format(s, "yyyy-MM-dd HH:mm:ss"))
-      // "2021-04-01 11:11:11"
-      // 1614670811000
-      val adx = new ProducerRecord[String, String](
-        "ad_adx_response_log",
-        s"""{"os":2,"carrier":-922637440,"appkey":"over123456","log_type":8,"sys_time":"${DateFormatUtils.format(s, "yyyy-MM-dd HH:mm:ss")}","sys_interval":0,"req_id":"tuomintest","seller_id":0,"bidfloor":200000,"app_id":"1296713728361689090","adslot_id":"1296713748993470465","ua":"Mozilla/5.0 (Linux; Android 6.0; HUAWEI MLA-AL10 Build/HUAWEIMLA-AL10; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/55.0.2883.91 Mobile Safari/537.36","ipv4":"172.25.48.69","gacode":1000000000,"device_type":0,"make":"HUAWEI","osv":"6.0","language":"zh","connectiontype":"1","didmd5":"dd895e6923098fbc0254fa3167b406af","lat":"31.178812","lon":"121.412102","isfill":2,"buyerid":105,"advid":1286183056149241858,"response_price":148,"creative_type":2,"template_id":81,"policy_id":1296713749228351490,"adx_req_id":"499215771900497920","ssp_err_code":200,"all_adx_id":"105","all_adx_bid_status":"2","all_adx_err_code":"200","all_buyer_type":"2","all_buyer_adv_id":"1286183056149241858","all_buyer_creative_id":"1315942824011030530","is_test":"0","platform_type":"1","ieid":"dd895e6923098fbc0254fa3167b406af","appver":"1.0.0","sysverint":"23","apppkg":"com.over","mcid":"7d39c297a2fe00f3aaa3a75bd4b4af4f","snid":"1d403e2e81b9a73eea2fbc4704633a58","sdkver":"2.1.4","all_adx_slot_id":"null","all_adx_bid_price":"150","all_adx_app_id":"null"}"""
-      )
-      //    val imp = new ProducerRecord[String, String](
-      //      "ad_ssp_impression_log",
-      //      s"""{"ipv4":"172.25.62.63","make":"HUAWEI","model":"HUAWEIMLA-AL10","os":"2","appkey":"over123456","appver":"1.0.0","apppkg":"com.over","sdkver":"2.1.4","sys_time":${System.currentTimeMillis()},"req_time":1616468756636,"log_type":10,"req_id":"537277250801119232","selling_price":50,"buyerid":105,"app_id":"1296713728361689090","adslot_id":"1296713755490447361","gacode":"1000000000","device_type":0,"policy_id":1296713755649830914,"buyer_type":"2","ad_type":"8","is_test":"0","ieid":"9e97a4fdab68153b77395ed228a1483d","mcid":"7d39c297a2fe00f3aaa3a75bd4b4af4f","snid":"1d403e2e81b9a73eea2fbc4704633a58"}"""
-      //    )
-
-      //    val click = new ProducerRecord[String, String](
-      //      "ad_ssp_click_log",
-      //      s"11|${new Date().getTime}|0|0||09154bebf9677d2b1642912e62ad826dad606f96|1|100|0|11|0|1239408847917228033|1239409112732999682|183.185.59.82|1156140100|0||vivo-Y85|2|4b0fcdc6b4cc7616d9ee4fdf98ba0c7c529fd206|2a11d9ca5accb4e6e5f833dffa12ba01|15dad567c25a6fce3c9fbca74ae74ccbdf86fa96|33c5644d77d47218b41f63f412f35755|376ac9ee30bf218a|1242040821670199298|1|8|0||868740038822336|||2.1.5||com.youhessp.zhangyu|4C:C0:0A:10:29:0D|||12497|oaid"
-      //    )
-      //   producer.send(imp)
-      // producer.send(click)
-      //    producer.send(adx)
-      producer.send(adx)
-      producer.close()
-//      Thread.sleep(500)
-//    }
-  }
-
-
-
-  def sendLocal(): Unit ={
     val kafkabroker = "localhost:9092"
     val map = new java.util.HashMap[String, Object]
     map.put("bootstrap.servers", kafkabroker)
@@ -81,22 +37,77 @@ val simp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
       "org.apache.kafka.common.serialization.StringDeserializer")
     map.put("group.id", "test");
     map.put("enable.auto.commit", "false")
+    val producer = new KafkaProducer[String, String](map)
+    import org.apache.kafka.clients.producer.ProducerRecord
+    // 1626537303000
+    // 1626623703000
+    for (i <- 1 to 10000) {
+      producer.send(new ProducerRecord[String, String](
+        "test",
+        s"""{"plat":1,"duid":"ddd${i}","appkey":"a","serdatetime":1626623703000}"""
+      ))
+      producer.send(new ProducerRecord[String, String](
+        "test",
+        s"""{"plat":1,"duid":"ddd${i}","appkey":"b","serdatetime":1626623703000}"""
+      ))
+      // Thread.sleep(500)
+    }
+    println(">>>>>>>>>. end ")
+    producer.close()
+
+  }
+
+  def sendTest(): Unit = {
+
+    val kafkabroker = "10.89.120.11:29092,10.89.120.12:29092,10.89.120.16:29092"
+    val map = new java.util.HashMap[String, Object]
+    map.put("bootstrap.servers", kafkabroker)
+    map.put("key.serializer",
+      "org.apache.kafka.common.serialization.StringSerializer")
+    map.put("value.serializer",
+      "org.apache.kafka.common.serialization.StringSerializer")
+    map.put("key.deserializer",
+      "org.apache.kafka.common.serialization.StringDeserializer")
+    map.put("value.deserializer",
+      "org.apache.kafka.common.serialization.StringDeserializer")
+    map.put("group.id", "test");
+    map.put("enable.auto.commit", "false")
+
+    val topic = "dsp_ad_push_deliver_test"
 
     val producer = new KafkaProducer[String, String](map)
-
-    for(i <- 1 to 100) {
-      val adx = new ProducerRecord[String, String](
-        "test",
-        s"""{"serdatetime":"${System.currentTimeMillis()}",
-           |"duid":"duid${i}",
-           |"sdks":[{"k":"30007"}],
-           |"appkey":"appkey",
-           |"deviceid":"123456d890111111111111111111111111111124",
-           |"plat":"2"}""".stripMargin
-      )
-      println(adx)
-      producer.send(adx)
+    import org.apache.kafka.clients.producer.ProducerRecord
+    // 1626537303000
+    // 1626623703000
+    for (i <- 1 to 2) {
+      producer.send(new ProducerRecord[String, String](
+        topic,
+        s"""{"appkey":"2d7ce93a26944","price":0,"ipv4":"172.25.64.179","ipv6":"__IPV6__","make":"__MAKE__","model":"__MODEL__","os":"__OS__","osv":"__OSV__","carrier":"__CARRIER__","duid":"8b0131e2b541cde85ed009b110e809e47379d079","sys_time":1628847081958,"req_time":1628847081406,"log_type":101,"req_id":"589507252164120576","adv_id":"202108061014","ad_plan_id":"202108061019","ad_activity_id":"202108131112","work_id":"4bplv5qsth9qiyh6gw","ad_creativity_id":"202108091031","ga_code":-1}"""
+      ))
+      // Thread.sleep(500)
     }
+    println(">>>>>>>>>. end ")
     producer.close()
+
+  }
+
+
+  def kafkaAdmin(): Unit ={
+    val kafkabroker = "10.90.45.16:9092,10.90.45.17:9092,10.90.45.18:9092,10.90.45.19:9092,10.90.45.20:9092,10.90.45.21:9092,10.90.45.22:9092"
+    val map = new java.util.HashMap[String, Object]
+    map.put("bootstrap.servers", kafkabroker)
+    map.put("key.serializer",
+      "org.apache.kafka.common.serialization.StringSerializer")
+    map.put("value.serializer",
+      "org.apache.kafka.common.serialization.StringSerializer")
+    map.put("key.deserializer",
+      "org.apache.kafka.common.serialization.StringDeserializer")
+    map.put("value.deserializer",
+      "org.apache.kafka.common.serialization.StringDeserializer")
+    map.put("group.id", "test");
+    map.put("enable.auto.commit", "false")
+//    import org.apache.kafka.clients.admin.KafkaAdminClient
+//    val adminClient = new KafkaAdminClient(map)
+//    adminClient.listTopics().names().get().forEach(x => {println(x)})
   }
 }

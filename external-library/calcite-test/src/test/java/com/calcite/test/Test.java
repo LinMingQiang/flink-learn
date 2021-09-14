@@ -52,19 +52,22 @@ public class Test {
                 "          'properties.group.id' = '$groupID',\n" +
                 "          'format' = '$format'\n" +
                 "       )";
-        String sql = "insert into xxx select * from test " +
-                "EMIT \n" +
-                "  WITH DELAY '1'MINUTE BEFORE WATERMARK,\n" +
-                "  WITHOUT DELAY AFTER WATERMARK";
+//        String sql = "select * from test " +
+//                " EMIT \n" +
+//                "  WITH DELAY '1'MINUTE BEFORE WATERMARK,\n" +
+//                "  WITHOUT DELAY AFTER WATERMARK";
+
+        String sql = "EMIT INTO select * from test";
         SqlParser parser = SqlParser.create(sql, config.getParserConfig());
         try {
             // RichSqlInsert对象。在源码里面做一个判断，拿出emit。然后设置conf
 //            conf.setBoolean(TABLE_EXEC_EMIT_LATE_FIRE_ENABLED, true)
 //            conf.set(TABLE_EXEC_EMIT_LATE_FIRE_DELAY, Duration.ofSeconds(5))
-            RichSqlInsert sqlNode = (RichSqlInsert)parser.parseStmt();
-            CustomSqlSelectEmit emit = (CustomSqlSelectEmit)sqlNode.getSource();
-            System.out.println(emit.getEmit().getBeforeDelay());
+//            RichSqlInsert sqlNode = (RichSqlInsert)parser.parseStmt();
+//            CustomSqlSelectEmit emit = (CustomSqlSelectEmit)sqlNode.getSource();
+//            System.out.println(emit.getEmit().getBeforeDelay());
 
+            System.out.println( (CustomSqlSelectEmit)parser.parseStmt());
         } catch (Exception e) {
             e.printStackTrace();
         }

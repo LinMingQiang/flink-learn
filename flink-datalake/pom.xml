@@ -3,7 +3,7 @@
   <parent>
     <artifactId>flink-learn</artifactId>
     <groupId>com.flink.learn</groupId>
-    <version>1.0.0</version>
+    <version>1.13.0</version>
   </parent>
   <artifactId>flink-datalake</artifactId>
 
@@ -14,7 +14,16 @@
       <artifactId>avatica</artifactId>
       <version>1.17.0</version>
     </dependency>
-
+    <dependency>
+      <groupId>com.alibaba.ververica</groupId>
+      <artifactId>flink-connector-mysql-cdc</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-clients_${scala.binary.version}</artifactId>
+      <scope>${scope.value}</scope>
+    </dependency>
     <dependency>
       <groupId>org.apache.calcite.avatica</groupId>
       <artifactId>avatica-core</artifactId>
@@ -24,7 +33,7 @@
     <dependency>
       <groupId>com.flink.learn</groupId>
       <artifactId>flink-util</artifactId>
-      <version>1.0.0</version>
+      <version>1.13.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.flink</groupId>

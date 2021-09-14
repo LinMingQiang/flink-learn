@@ -13,6 +13,7 @@ import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.types.Row;
@@ -166,7 +167,8 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 
         String sql = " SELECT o.msg,s.msg " +
                 "FROM test o join test2 s " +
-                "on o.msg = s.msg ";
+                "on o.msg = s.msg where s.msg='aa' and o.msg='aa'";
+        System.out.println(tableEnv.explainSql(sql));;
         tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
 
         streamEnv.execute();
@@ -311,9 +313,15 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "json"));
         tableEnv.createTemporarySystemFunction("hyperCountDistinct", new HyperLogCountDistinctAgg());
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+//        String sql = "select " +
+//                "msg," +
+//                "hyperCountDistinct(msg) cnt" +
+//                " from test " +
+//                " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
+//                "";
         String sql = "select " +
                 "msg," +
-                "hyperCountDistinct(msg) cnt" +
+                "count(distinct msg) cnt" +
                 " from test " +
                 " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
                 "";
@@ -323,11 +331,14 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
     }
 
 
-
+    /**
+     * datastream转table的event time问题
+     * @throws Exception
+     */
     @Test
     public void streamToTableTimeAttributesTest() throws Exception {
         // {"rowtime":"2021-01-20 01:00:00","msg":"hello"}
-        // {"rowtime":"2021-01-20 01:01:40","msg":"hello"}
+        // {"rowtime":"2021-01-20 01:00:20","msg":"hello"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -337,8 +348,8 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
 
         // 正常触发
-        //      tableEnv.createTemporaryView("test2", tableEnv.sqlQuery("select CONCAT(msg , '-hai') as msg,rowtime from test where msg is not null"));
-              tableEnv.createTemporaryView("test2", tableEnv.sqlQuery("select msg,rowtime from (select msg,rowtime from test) union all (select msg,rowtime from test)"));
+              tableEnv.createTemporaryView("test2", tableEnv.sqlQuery("select CONCAT(msg , '-hai') as msg,rowtime from test where msg is not null"));
+//              tableEnv.createTemporaryView("test2", tableEnv.sqlQuery("select msg,rowtime from (select msg,rowtime from test) union all (select msg,rowtime from test)"));
         // 无法触发
 //            tableEnv.createTemporaryView("test2", tableEnv.sqlQuery("select msg,rowtime from test group by msg,rowtime"));
         // 1: table转stream。同时指定 wtm的时间抽取
@@ -346,25 +357,32 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                 .filter(x -> x.f0)
                 // 加了keyby就无法触发
 //                .keyBy((KeySelector<Tuple2<Boolean, Row>, String>) value -> value.f1.getField(0).toString())
-                .map(new MapFunction<Tuple2<Boolean, Row>, Tuple2<String, Long>>() {
+                .map(new MapFunction<Tuple2<Boolean, Row>, Tuple2<String, String>>() {
                     SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                     @Override
-                    public Tuple2<String, Long> map(Tuple2<Boolean, Row> value) throws Exception {
+                    public Tuple2<String, String> map(Tuple2<Boolean, Row> value) throws Exception {
                         String formatstr = value.f1.getField(1).toString();
                         if (formatstr.length() < 19) formatstr += ":00";
                         return new Tuple2<>(value.f1.getField(0).toString(),
-                                s.parse(formatstr).getTime()
+                                formatstr
                         );
                     }
                 })
-                .assignTimestampsAndWatermarks(
-                        WatermarkStrategy.<Tuple2<String, Long>>forBoundedOutOfOrderness(Duration.ofSeconds(1))
-                                .withTimestampAssigner(((element, recordTimestamp) -> element.f1))
-                )
-                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+                // 这个wtm的定义可以在.watermark("rowtime", "rowtime - INTERVAL '10' SECOND") 定义了，1.13版本
+//                .assignTimestampsAndWatermarks(
+//                        WatermarkStrategy.<Tuple2<String, String>>forBoundedOutOfOrderness(Duration.ofSeconds(1))
+//                                .withTimestampAssigner(((element, recordTimestamp) -> element.f1))
+//                )
+                .returns(Types.TUPLE(Types.STRING, Types.STRING))
                 ;
-
-        tableEnv.createTemporaryView("test3", r, $("msg"), $("rowtime").rowtime());
+// 1.13的方式定义 wtm和rowtime
+        tableEnv.createTemporaryView("test3", tableEnv.fromDataStream(r, Schema.newBuilder()
+                .columnByMetadata("rowtime", "TIMESTAMP(3)")
+                .column("f0", "VARCHAR")
+                .watermark("rowtime", "rowtime - INTERVAL '10' SECOND")
+                .build())
+                .renameColumns($("f0").as("msg")));
+//        tableEnv.createTemporaryView("test3", r, $("msg"), $("rowtime").rowtime());
 
         String sql = "select " +
                 "msg," +
@@ -411,6 +429,59 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
         re.print();
 
+    }
+
+
+
+    @Test
+    public void windowTVF(){
+        // {"rowtime":"2021-01-20 01:00:02","msg":"hello","uid":"2"}
+       /// {"rowtime":"2021-01-20 01:00:02","msg":"hello","uid":"2"}
+        // {"rowtime":"2021-01-20 01:00:02","msg":"hello","uid":"2"}
+        // {"rowtime":"2021-01-20 01:00:41","msg":"hello","uid":"1"}
+        // {"rowtime":"2021-01-20 01:00:41","msg":"hello","uid":"1"}
+        // {"rowtime":"2021-01-20 01:00:41","msg":"hello","uid":"1"}
+        // {"rowtime":"2021-01-20 01:01:21","msg":"hello","uid":"3"}
+        // {"rowtime":"2021-01-20 02:03:01","msg":"hello","uid":"4"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
+
+//        String sql = "select * " +
+//                " from TABLE(TUMBLE(TABLE test,DESCRIPTOR(rowtime), INTERVAL '30' SECOND))";
+//        tableEnv.sqlQuery(sql).printSchema();
+        // window_start,window_end这个是必须的
+
+
+//        String sql = "select " +
+//                "msg," +
+//                "count(1) cnt" +
+//                " from TABLE(HOP(TABLE test, DESCRIPTOR(rowtime), INTERVAL '5' SECOND, INTERVAL '10' SECOND))" +
+//                " group by window_start,window_end,msg " +
+//                "";
+
+                String sql = "select " +
+                "msg," +
+                "count(1) cnt" +
+                " from TABLE(TUMBLE(TABLE test,DESCRIPTOR(rowtime), INTERVAL '30' SECOND))" +
+                " group by window_start,window_end,msg " +
+                "";
+
+        // CUMULATE 函数，每隔 30s计算一次 当天的count, 每个30s窗口都会输出一次
+        // 滑动窗口实现的，可以解决数据跳变问题
+//        String sql = "select " +
+//                "msg," +
+//                "count(uid) cnt" +
+//                " from TABLE(CUMULATE(TABLE test,DESCRIPTOR(rowtime), INTERVAL '30' SECOND, INTERVAL '1' DAY))" +
+//                " group by window_start,window_end,msg " +
+//                "";
+
+        TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
+        re.print();
     }
 
 

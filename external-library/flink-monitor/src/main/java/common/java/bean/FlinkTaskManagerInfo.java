@@ -1,4 +1,4 @@
-package com.flink.common.java.bean;
+package common.java.bean;
 
 import com.alibaba.fastjson.JSONObject;
 

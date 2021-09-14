@@ -5,7 +5,7 @@
     <parent>
         <artifactId>flink-learn</artifactId>
         <groupId>com.flink.learn</groupId>
-        <version>1.0.0</version>
+        <version>1.13.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -75,6 +75,13 @@
                                         <include>**/*.p12</include>
                                     </includes>
                                     <filtering>false</filtering>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/conf</directory>
+                                    <includes>
+                                        <include>**/*.sh</include>
+                                    </includes>
+                                    <filtering>true</filtering>
                                 </resource>
                             </resources>
                             <nonFilteredFileExtensions>

@@ -14,12 +14,14 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.triggers.ContinuousProcessingTimeTrigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.junit.Test;
+
 public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
 
     /**
@@ -37,7 +39,7 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
                 // 统计5s一个窗口，有个offset参数，用来调整时间起点，正常是00-05这样，可以调成 01-06
-                .window(TumblingEventTimeWindows.of(Time.seconds(20)))
+                .window(TumblingEventTimeWindows.of(Time.seconds(200)))
                 // 固定时间触发, 每10s触发一次(系统时间) .如果没有设置，则是根据eventtime > window end time 来决定触发
                 // 如果定义了trigger，会每次触发sum操作。最好的方法就是定期清理窗口的数据，不然每次触发都是拿窗口的全部数据做计算
                 // 不管有没有数据都会触发，会重复输出之前的结果
@@ -51,6 +53,7 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                 // 在process才产生 Transformation，上面的定义存在 WindowOperatorBuilder 里面
                 // 如果使用了 evictor，reduce的优势就不存在了，因为数据要全量保存下来然后再reduce。看 ReduceApplyProcessWindowFunction的process
                 // 如果没用用evictor，reduce会变成一个 WindowState:RocksDBReducingState。 WindowState.add(element)调用了reducefunc
+                // 数据先进ReduceFunction 一条一条计算，等窗口触发的时候在执行ProcessWindowFunction
                 .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) -> new Tuple2<String, Long>(value1.f0, value2.f1 + value1.f1)
                         , new ProcessWindowFunction<Tuple2<String, Long>,
                                 Tuple3<TimeWindow, String, Long>,
@@ -63,6 +66,7 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                                                 Collector<Tuple3<TimeWindow, String, Long>> out) throws Exception {
                                 Long count = 0L;
                                 for (Tuple2<String, Long> element : elements) {
+                                    System.out.println("process ： " + element);
                                     count += element.f1;
                                 }
                                 out.collect(new Tuple3(context.window(), s, count));
@@ -74,6 +78,7 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
     }
 
 
+    //{"rowtime":"2020-01-01 00:00:32","msg":"c"}
     @Test
     public void testWindowAll() throws Exception {
         kafkaDataSource
@@ -91,6 +96,41 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                     }
                 })
                 // .setParallelism(4) // 不可设置，并行度必须为1
+                .print();
+        streamEnv.execute();
+    }
+
+
+    // {"rowtime":"2020-01-01 00:00:00","msg":"c"}
+    // {"rowtime":"2020-01-01 00:00:01","msg":"c"}
+    // {"rowtime":"2020-01-01 00:00:32","msg":"c"}
+    // {"rowtime":"2020-01-01 00:01:40","msg":"c"}
+    @Test
+    public void testTumblingWindow() throws Exception {
+        kafkaDataSource
+                .map((MapFunction<KafkaMessge, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
+                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+                .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
+                .window(TumblingEventTimeWindows.of(Time.seconds(10)))
+                .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) ->
+                        new Tuple2<>(value1.f0, value1.f1 + value2.f1))
+                .print();
+        streamEnv.execute();
+    }
+    // {"rowtime":"2020-01-01 00:00:00","msg":"c"} 0-10
+    // {"rowtime":"2020-01-01 00:00:03","msg":"c"} 0-10 4-14
+    // {"rowtime":"2020-01-01 00:00:05","msg":"c"} 0-10 4-14
+    // {"rowtime":"2020-01-01 00:00:32","msg":"c"}     wtm 22
+    // {"rowtime":"2020-01-01 00:01:40","msg":"c"}
+    @Test
+    public void testSlidingWindow() throws Exception {
+        kafkaDataSource
+                .map((MapFunction<KafkaMessge, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
+                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+                .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
+                .window(SlidingEventTimeWindows.of(Time.seconds(10), Time.seconds(4)))
+                .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) ->
+                        new Tuple2<>(value1.f0, value1.f1 + value2.f1))
                 .print();
         streamEnv.execute();
     }
