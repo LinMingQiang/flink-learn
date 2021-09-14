@@ -14,12 +14,14 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.triggers.ContinuousProcessingTimeTrigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.junit.Test;
+
 public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
 
     /**
@@ -64,7 +66,7 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                                                 Collector<Tuple3<TimeWindow, String, Long>> out) throws Exception {
                                 Long count = 0L;
                                 for (Tuple2<String, Long> element : elements) {
-                                    System.out.println("process ： " + element );
+                                    System.out.println("process ： " + element);
                                     count += element.f1;
                                 }
                                 out.collect(new Tuple3(context.window(), s, count));
@@ -76,6 +78,7 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
     }
 
 
+    //{"rowtime":"2020-01-01 00:00:32","msg":"c"}
     @Test
     public void testWindowAll() throws Exception {
         kafkaDataSource
@@ -93,6 +96,41 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                     }
                 })
                 // .setParallelism(4) // 不可设置，并行度必须为1
+                .print();
+        streamEnv.execute();
+    }
+
+
+    // {"rowtime":"2020-01-01 00:00:00","msg":"c"}
+    // {"rowtime":"2020-01-01 00:00:01","msg":"c"}
+    // {"rowtime":"2020-01-01 00:00:32","msg":"c"}
+    // {"rowtime":"2020-01-01 00:01:40","msg":"c"}
+    @Test
+    public void testTumblingWindow() throws Exception {
+        kafkaDataSource
+                .map((MapFunction<KafkaMessge, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
+                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+                .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
+                .window(TumblingEventTimeWindows.of(Time.seconds(10)))
+                .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) ->
+                        new Tuple2<>(value1.f0, value1.f1 + value2.f1))
+                .print();
+        streamEnv.execute();
+    }
+    // {"rowtime":"2020-01-01 00:00:00","msg":"c"} 0-10
+    // {"rowtime":"2020-01-01 00:00:03","msg":"c"} 0-10 4-14
+    // {"rowtime":"2020-01-01 00:00:05","msg":"c"} 0-10 4-14
+    // {"rowtime":"2020-01-01 00:00:32","msg":"c"}     wtm 22
+    // {"rowtime":"2020-01-01 00:01:40","msg":"c"}
+    @Test
+    public void testSlidingWindow() throws Exception {
+        kafkaDataSource
+                .map((MapFunction<KafkaMessge, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
+                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+                .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
+                .window(SlidingEventTimeWindows.of(Time.seconds(10), Time.seconds(4)))
+                .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) ->
+                        new Tuple2<>(value1.f0, value1.f1 + value2.f1))
                 .print();
         streamEnv.execute();
     }

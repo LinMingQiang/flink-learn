@@ -436,6 +436,10 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void windowTVF(){
         // {"rowtime":"2021-01-20 01:00:02","msg":"hello","uid":"2"}
+       /// {"rowtime":"2021-01-20 01:00:02","msg":"hello","uid":"2"}
+        // {"rowtime":"2021-01-20 01:00:02","msg":"hello","uid":"2"}
+        // {"rowtime":"2021-01-20 01:00:41","msg":"hello","uid":"1"}
+        // {"rowtime":"2021-01-20 01:00:41","msg":"hello","uid":"1"}
         // {"rowtime":"2021-01-20 01:00:41","msg":"hello","uid":"1"}
         // {"rowtime":"2021-01-20 01:01:21","msg":"hello","uid":"3"}
         // {"rowtime":"2021-01-20 02:03:01","msg":"hello","uid":"4"}
@@ -451,6 +455,15 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
 //                " from TABLE(TUMBLE(TABLE test,DESCRIPTOR(rowtime), INTERVAL '30' SECOND))";
 //        tableEnv.sqlQuery(sql).printSchema();
         // window_start,window_end这个是必须的
+
+
+//        String sql = "select " +
+//                "msg," +
+//                "count(1) cnt" +
+//                " from TABLE(HOP(TABLE test, DESCRIPTOR(rowtime), INTERVAL '5' SECOND, INTERVAL '10' SECOND))" +
+//                " group by window_start,window_end,msg " +
+//                "";
+
                 String sql = "select " +
                 "msg," +
                 "count(1) cnt" +
@@ -459,9 +472,10 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                 "";
 
         // CUMULATE 函数，每隔 30s计算一次 当天的count, 每个30s窗口都会输出一次
+        // 滑动窗口实现的，可以解决数据跳变问题
 //        String sql = "select " +
 //                "msg," +
-//                "count(distinct uid) cnt" +
+//                "count(uid) cnt" +
 //                " from TABLE(CUMULATE(TABLE test,DESCRIPTOR(rowtime), INTERVAL '30' SECOND, INTERVAL '1' DAY))" +
 //                " group by window_start,window_end,msg " +
 //                "";
