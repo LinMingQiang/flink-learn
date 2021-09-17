@@ -39,7 +39,7 @@ public class FlinkSourceBuilder extends FlinkStreamEnvAndSource {
                 FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());
         tableEnv = FlinkEvnBuilder.buildStreamTableEnv(
                 streamEnv,
-                Duration.ofHours(2));
+                Duration.ofMinutes(1));
         kafkaDataSource = getKafkaKeyStream("test", "localhost:9092", "latest");
         kafkaDataTable = getStreamTable("test", "localhost:9092", "latest");
     }

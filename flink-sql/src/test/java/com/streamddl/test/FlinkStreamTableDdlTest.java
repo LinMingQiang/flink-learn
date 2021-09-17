@@ -45,11 +45,10 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "test",
                         "json"));
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
-        tableEnv.toRetractStream(tableEnv.sqlQuery("select concat(msg, topic) as ss,count(*) as cnt from test group by msg,topic"), Row.class)
-                .print();
-
-        // 要在 executeSql 之前
-        streamEnv.executeAsync();
+//        tableEnv.toRetractStream(tableEnv.sqlQuery("select concat(msg, topic) as ss,max(*) as cnt from test group by msg,topic"), Row.class)
+//                .print();
+//        // 要在 executeSql 之前
+//        streamEnv.executeAsync();
         TableResult re = tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg");
         re.print();
     }
