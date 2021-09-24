@@ -39,6 +39,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testWordCount() throws Exception {
 
+        streamEnv.setParallelism(1);
         // {"msg":"hello"}
         kafkaDataSource
                 .flatMap((FlatMapFunction<KafkaMessge, String>) (value, out) -> {
@@ -46,14 +47,19 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                         out.collect(s);
                     }
                 })
+                .setParallelism(1)
                 .returns(Types.STRING)
                 .map(x -> new Tuple2<String, Long>(x, 1L))
+                .setParallelism(1)
+                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+                .filter(x -> x.f1 >=0 )
+                .setParallelism(1)
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy(x -> x.f0)
-                 .sum(1)
-                 .setParallelism(1)
+                .sum(1)
+                .setParallelism(1)
                 .print();
-        System.out.println(streamEnv.getExecutionPlan());
+//        System.out.println(streamEnv.getExecutionPlan());
         streamEnv.execute("lmq-flink-demo"); //程序名, 一个execute是一个job
     }
 
@@ -142,7 +148,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
      */
     @Test
     public void testTtl() throws Exception {
-
+        streamEnv.setParallelism(1);
         // {"msg":"hello"}
         kafkaDataSource
                 .flatMap((FlatMapFunction<KafkaMessge, String>) (value, out) -> {
@@ -165,6 +171,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                     }
                     @Override
                     public void processElement(Tuple2<String, Long> value, Context ctx, Collector<String> out) throws Exception {
+                        ctx.timerService().registerProcessingTimeTimer(System.currentTimeMillis() + 10000);
                         Long v = inc.value();
                         if(v !=null) {
                             v = value.f1 + v;
@@ -173,6 +180,11 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                         }
                         inc.update(v);
                         out.collect("" + v);
+                    }
+
+                    @Override
+                    public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out) throws Exception {
+                        super.onTimer(timestamp, ctx, out);
                     }
                 })
                 .setParallelism(1)
