@@ -7,6 +7,7 @@ import com.flink.common.kafka.KafkaManager.KafkaMessge;
 import com.func.processfunc.StreamConnectCoProcessFunc;
 import com.func.richfunc.AsyncIODatabaseRequest;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
+import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
@@ -39,7 +40,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
     @Test
     public void testWordCount() throws Exception {
 
-        streamEnv.setParallelism(1);
+        streamEnv.setParallelism(3);
         // {"msg":"hello"}
         kafkaDataSource
                 .flatMap((FlatMapFunction<KafkaMessge, String>) (value, out) -> {
@@ -47,19 +48,19 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                         out.collect(s);
                     }
                 })
-                .setParallelism(1)
+                .setParallelism(3)
                 .returns(Types.STRING)
                 .map(x -> new Tuple2<String, Long>(x, 1L))
-                .setParallelism(1)
+                .setParallelism(3)
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .filter(x -> x.f1 >=0 )
-                .setParallelism(1)
+                .setParallelism(2)
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy(x -> x.f0)
                 .sum(1)
-                .setParallelism(1)
+                .setParallelism(2)
                 .print();
-//        System.out.println(streamEnv.getExecutionPlan());
+        System.out.println(streamEnv.getExecutionPlan());
         streamEnv.execute("lmq-flink-demo"); //程序名, 一个execute是一个job
     }
 

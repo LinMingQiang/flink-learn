@@ -65,7 +65,7 @@ public class FlinkEvnBuilder {
     public static StreamTableEnvironment buildStreamTableEnv(StreamExecutionEnvironment streamEnv,
                                                              Duration stateTTL) throws IOException {
         EnvironmentSettings sett =
-                EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
+                EnvironmentSettings.newInstance().useBlinkPlanner().build();
         StreamTableEnvironment streamTableEnv = StreamTableEnvironment.create(streamEnv, sett);
         streamTableEnv.getConfig().setIdleStateRetention(stateTTL);
         return streamTableEnv;
