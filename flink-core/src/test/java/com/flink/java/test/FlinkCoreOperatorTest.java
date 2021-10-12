@@ -12,6 +12,7 @@ import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
@@ -43,21 +44,40 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
         streamEnv.setParallelism(3);
         // {"msg":"hello"}
         kafkaDataSource
-                .flatMap((FlatMapFunction<KafkaMessge, String>) (value, out) -> {
+                .flatMap((FlatMapFunction<KafkaMessge, Tuple2<String, Long>>) (value, out) -> {
                     for (String s : value.msg().split(",", -1)) {
-                        out.collect(s);
+                        out.collect(new Tuple2<String, Long>(s, 1L));
                     }
                 })
-                .setParallelism(3)
-                .returns(Types.STRING)
-                .map(x -> new Tuple2<String, Long>(x, 1L))
-                .setParallelism(3)
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
-                .filter(x -> x.f1 >=0 )
-                .setParallelism(2)
-                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+//                .setParallelism(3)
+//                .returns(Types.STRING)
+//                .map(x -> new Tuple2<String, Long>(x, 1L))
+                .setParallelism(3)
+//                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+//                .filter(x -> x.f1 >= 0)
+//                .setParallelism(2)
                 .keyBy(x -> x.f0)
-                .sum(1)
+                .process(new KeyedProcessFunction<String, Tuple2<String, Long>, Tuple2<String, Long>>() {
+                    ValueState<Long> v;
+                    @Override
+                    public void open(Configuration parameters) throws Exception {
+                        v = getRuntimeContext().getState(
+                                new ValueStateDescriptor("test2",
+                                        TypeInformation.of(Long.class)));
+                    }
+                    @Override
+                    public void processElement(Tuple2<String, Long> value, Context ctx, Collector<Tuple2<String, Long>> out) throws Exception {
+                        ctx.getCurrentKey();
+                        Long re = v.value();
+                        if (re != null) {
+                            re += value.f1;
+                        } else re = value.f1;
+                        v.update(re);
+                        out.collect(new Tuple2<>(value.f0, re));
+                    }
+                })
+//                .sum(1)
                 .setParallelism(2)
                 .print();
         System.out.println(streamEnv.getExecutionPlan());
@@ -163,6 +183,7 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                 .keyBy(x -> x.f0)
                 .process(new KeyedProcessFunction<String, Tuple2<String, Long>, String>() {
                     ValueState<Long> inc = null;
+
                     // 这里面的非 key state是 task公用的。这里面的Operator state也是task公用的。
                     @Override
                     public void open(Configuration parameters) throws Exception {
@@ -170,13 +191,14 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
                         desc.enableTimeToLive(FlinkEvnBuilder.getStateTTLConf(1)); // 1分钟过期
                         inc = getRuntimeContext().getState(desc);
                     }
+
                     @Override
                     public void processElement(Tuple2<String, Long> value, Context ctx, Collector<String> out) throws Exception {
                         ctx.timerService().registerProcessingTimeTimer(System.currentTimeMillis() + 10000);
                         Long v = inc.value();
-                        if(v !=null) {
+                        if (v != null) {
                             v = value.f1 + v;
-                        }else{
+                        } else {
                             v = value.f1;
                         }
                         inc.update(v);

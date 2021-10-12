@@ -30,6 +30,8 @@ public class ProxyTest {
                         new Class<?>[implementedRpcGateways.size()]),
                 new AkkaInvocationHandler());
         System.out.println(server);
+        // 执行的是AkkaInvocationHandler的invoke方法
+        // 只能使用 DispatcherGateway里面的方法
         server.submitJob(null, null);
     }
 }
