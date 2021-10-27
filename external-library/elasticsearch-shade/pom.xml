@@ -64,10 +64,10 @@
                                     <pattern>io.netty</pattern>
                                     <shadedPattern>my.io.netty</shadedPattern>
                                 </relocation>
-                                                <relocation>
-                                                  <pattern>com.fasterxml.jackson.core</pattern>
-                                                  <shadedPattern>my.elasticsearch.jackson.core</shadedPattern>
-                                                </relocation>
+<!--                                                <relocation>-->
+<!--                                                  <pattern>com.fasterxml.jackson.core</pattern>-->
+<!--                                                  <shadedPattern>my.elasticsearch.jackson.core</shadedPattern>-->
+<!--                                                </relocation>-->
 
                             </relocations>
                             <transformers>

@@ -1,8 +1,6 @@
 package com.flink.common.dbutil
-import com.flink.common.dbutil.MysqlJdbcHandler.{conn, initMysql}
 
 import java.sql.{Connection, DriverManager}
-import com.google.common.escape.Escapers
 object ClickhouseFactory {
 
   var conn: Connection = null
