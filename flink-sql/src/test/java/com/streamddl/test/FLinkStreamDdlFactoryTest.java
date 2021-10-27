@@ -31,6 +31,7 @@ import java.time.Duration;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
+import com.google.common.escape.Escapers;
 
 public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
@@ -99,6 +100,21 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         re.print();
     }
 
+    /**
+     *     {"rowtime":1634638723583,"msg":"msg","uid":"uid"}
+     */
+    @Test
+    public void clickhouseSinkTest(){
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test2",
+                        "test",
+                        "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createCustomClickhouseSink("test"));
+        TableResult re = tableEnv.executeSql("insert into test select count(1) as id,msg as name from test2 group by msg");
+        re.print();
+    }
     // 时态表
     @Test
     public void temporalTableTest() throws Exception {

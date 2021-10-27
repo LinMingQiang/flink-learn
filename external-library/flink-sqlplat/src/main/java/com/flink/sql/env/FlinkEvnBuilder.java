@@ -1,9 +1,7 @@
-package com.core;
+package com.flink.sql.env;
 
-import com.flink.common.core.FlinkLearnPropertiesUtil;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
-import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
@@ -15,17 +13,6 @@ import java.time.Duration;
 public class FlinkEvnBuilder {
     public static StreamExecutionEnvironment streamEnv = null;
     public static StreamTableEnvironment tableEnv = null;
-
-    public static void initEnv(String confPath) throws IOException {
-        FlinkLearnPropertiesUtil.init(confPath, "FlinkEvnBuilder");
-        streamEnv = FlinkEvnBuilder.buildStreamingEnv(
-                FlinkLearnPropertiesUtil.param(),
-                FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
-                0L);
-        tableEnv = FlinkEvnBuilder.buildStreamTableEnv(
-                streamEnv,
-                Duration.ofDays(1));
-    }
 
     public static void initEnv(ParameterTool parameters,
                                String checkpointPath,

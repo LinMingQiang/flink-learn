@@ -225,6 +225,20 @@ object DDLSourceSQLManager {
        |'es.rowkey'='id'
        |)""".stripMargin
   }
+  def createCustomClickhouseSink(tblName: String): String = {
+    s"""CREATE TABLE ${tblName} (
+       |id BIGINT,
+       |name VARCHAR
+       |) WITH (
+       |'connector' = 'clickhouse',
+       |'url'='jdbc:clickhouse://localhost:8123/test',
+       |'username'='admin',
+       |'password'='admin',
+       |'table-name'='${tblName}',
+       |'sink.buffer-flush.max-rows'='10',
+       |'sink.buffer-flush.interval'='3'
+       |)""".stripMargin
+  }
 
   def createCustomMongoSink(tblName: String): String = {
     s"""CREATE TABLE ${tblName} (

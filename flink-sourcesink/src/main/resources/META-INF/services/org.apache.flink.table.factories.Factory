@@ -3,3 +3,5 @@ com.factory.dynamicfactory.sink.ElasticsearchFactory
 com.factory.dynamicfactory.sink.MongoDynamicTableSinkFactory
 com.factory.dynamicfactory.source.HbaseLookupTableSourceFactory
 com.format.jsonformat.CustomJsonRowDataFormatFactory
+com.factory.dynamicfactory.sink.MysqlDynamicTableSinkFactory
+com.factory.dynamicfactory.sink.ClickHouseDynamicTableSinkFactory

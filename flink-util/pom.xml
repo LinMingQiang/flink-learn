@@ -10,6 +10,16 @@
 
   <dependencies>
       <dependency>
+          <groupId>ru.yandex.clickhouse</groupId>
+          <artifactId>clickhouse-jdbc</artifactId>
+          <version>0.2.4</version>
+      </dependency>
+      <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+          <version>29.0-jre</version>
+      </dependency>
+      <dependency>
           <groupId>com.squareup.okhttp3</groupId>
           <artifactId>okhttp</artifactId>
           <version>4.2.2</version>
@@ -55,6 +65,7 @@
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
           <scope>provided</scope>
+
       </dependency>
       <dependency>
           <groupId>org.apache.flink</groupId>
@@ -76,12 +87,10 @@
           <artifactId>flink-table-common</artifactId>
           <scope>provided</scope>
       </dependency>
-<!--      <dependency>-->
-<!--          <groupId>org.apache.flink</groupId>-->
-<!--          <artifactId>flink-jdbc_${scala.binary.version}</artifactId>-->
-<!--          <version>${flink.version}</version>-->
-<!--          <scope>provided</scope>-->
-<!--      </dependency>-->
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-connector-jdbc_${scala.binary.version}</artifactId>
+      </dependency>
       <dependency>
           <groupId>org.mongodb</groupId>
           <artifactId>mongodb-driver</artifactId>
