@@ -1,5 +1,9 @@
 package com.flink.sql.parse;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -14,13 +18,14 @@ public final class SqlCommandParser {
     }
 
     /**
-     * @param lines 文件内容
      * @return
      */
-    public static List<SqlCommandCall> parse(List<String> lines) {
+    public static List<SqlCommandCall> parse(String file) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(file));
         List<SqlCommandCall> calls = new ArrayList<>();
         StringBuilder stmt = new StringBuilder();
-        for (String line : lines) {
+        String line;
+        while ((line = br.readLine()) != null) {
             // 跳过注释
             if (line.trim().isEmpty() || line.startsWith("--")) {
                 // skip empty line and comment line
@@ -29,7 +34,7 @@ public final class SqlCommandParser {
             // 把注释内容去掉；以 ； 为一个sql结束
             stmt.append("\n").append(line.replaceAll("--.*", ""));
             if (line.trim().endsWith(";")) {
-                Optional<SqlCommandCall> optionalCall = parse(stmt.toString());
+                Optional<SqlCommandCall> optionalCall = parseSQL(stmt.toString());
                 if (optionalCall.isPresent()) {
                     calls.add(optionalCall.get());
                 } else {
@@ -39,44 +44,40 @@ public final class SqlCommandParser {
                 stmt.setLength(0);
             }
         }
+        br.close();
         return calls;
     }
 
     /**
      * 匹配sql语句，看看是哪个类型，是insert，create等
+     *
      * @param stmt
      * @return
      */
-    public static Optional<SqlCommandCall> parse(String stmt) {
+    public static Optional<SqlCommandCall> parseSQL(String stmt) {
         // normalize
         stmt = stmt.trim();
         // remove ';' at the end
         if (stmt.endsWith(";")) {
             stmt = stmt.substring(0, stmt.length() - 1).trim();
         }
-
         // parse
         for (SqlCommand cmd : SqlCommand.values()) {
             final Matcher matcher = cmd.pattern.matcher(stmt);
             if (matcher.matches()) {
-                final String[] groups = new String[matcher.groupCount()];
-                for (int i = 0; i < groups.length; i++) {
-                    groups[i] = matcher.group(i + 1);
-                }
-                return cmd.operandConverter.apply(groups)
-                        .map((operands) -> new SqlCommandCall(cmd, operands));
+                return Optional.of(new SqlCommandCall(SqlCommand.INSERT_INTO, stmt));
             }
         }
-        return Optional.empty();
+        return Optional.of(new SqlCommandCall(SqlCommand.DEFAULT, stmt));
     }
 
     // --------------------------------------------------------------------------------------------
 
-    private static final Function<String[], Optional<String[]>> NO_OPERANDS =
-            (operands) -> Optional.of(new String[0]);
+    private static final Function<String, Optional<String>> NO_OPERANDS =
+            (operands) -> Optional.of("");
 
-    private static final Function<String[], Optional<String[]>> SINGLE_OPERAND =
-            (operands) -> Optional.of(new String[]{operands[0]});
+    private static final Function<String, Optional<String>> SINGLE_OPERAND =
+            (operands) -> Optional.of(operands);
 
     private static final int DEFAULT_PATTERN_FLAGS = Pattern.CASE_INSENSITIVE | Pattern.DOTALL;
 
@@ -88,33 +89,43 @@ public final class SqlCommandParser {
                 "(INSERT\\s+INTO.*)",
                 SINGLE_OPERAND),
 
-        CREATE_TABLE(
-                "(CREATE\\s+TABLE.*)",
-                SINGLE_OPERAND),
-        SET(
-                "SET(\\s+(\\S+)\\s*=(.*))?", // whitespace is only ignored on the left side of '='
-                (operands) -> {
-                    if (operands.length < 3) {
-                        return Optional.empty();
-                    } else if (operands[0] == null) {
-                        return Optional.of(new String[0]);
-                    }
-                    return Optional.of(new String[]{operands[1], operands[2]});
-                }),
+        // CREATE [TEMPORARY] VIEW [IF NOT EXISTS] [catalog_name.][db_name.]view_name
+        //  [{columnName [, columnName ]* }] [COMMENT view_comment]
+        //  AS query_expression
+        // flink sql 支持 这个，不需要单独例外处理
+//        CREATE_TABLE(
+//                "(CREATE\\s+TABLE.*)",
+//                SINGLE_OPERAND),
+//        SET(
+//                "SET(\\s+(\\S+)\\s*=(.*))?", // whitespace is only ignored on the left side of '='
+//                (operands) -> {
+//                    if (operands.length < 3) {
+//                        return Optional.empty();
+//                    } else if (operands[0] == null) {
+//                        return Optional.of(new String[0]);
+//                    }
+//                    return Optional.of(new String[]{operands[1], operands[2]});
+//                }),
 
-        ASSIGNMENT(
-                "CREATE\\s+VIEW\\s+(\\S+)\\s+AS\\s+(SELECT.*)", // whitespace is only ignored on the left side of '='
-                (operands) -> {
-                    if (operands.length < 2) {
-                        return Optional.empty();
-                    }
-                    return Optional.of(new String[]{operands[1], operands[0]});
-                });
+        DEFAULT("DEFAULT", SINGLE_OPERAND),
+        // CREATE [TEMPORARY] VIEW [IF NOT EXISTS] [catalog_name.][db_name.]view_name
+        //  [{columnName [, columnName ]* }] [COMMENT view_comment]
+        //  AS query_expression
+        // flink 支持这个语句建表
+//        ASSIGNMENT(
+//                "CREATE\\s+VIEW\\s+(\\S+)\\s+AS\\s+(SELECT.*)", // whitespace is only ignored on the left side of '='
+//                        (operands) -> {
+//            if (operands.length < 2) {
+//                return Optional.empty();
+//            }
+//            return Optional.of(new String[]{operands[1], operands[0]});
+//        })
+        ;
 
         public final Pattern pattern;
-        public final Function<String[], Optional<String[]>> operandConverter;
+        public final Function<String, Optional<String>> operandConverter;
 
-        SqlCommand(String matchingRegex, Function<String[], Optional<String[]>> operandConverter) {
+        SqlCommand(String matchingRegex, Function<String, Optional<String>> operandConverter) {
             this.pattern = Pattern.compile(matchingRegex, DEFAULT_PATTERN_FLAGS);
             this.operandConverter = operandConverter;
         }
@@ -134,15 +145,15 @@ public final class SqlCommandParser {
      */
     public static class SqlCommandCall {
         public final SqlCommand command;
-        public final String[] operands;
+        public final String sql;
 
-        public SqlCommandCall(SqlCommand command, String[] operands) {
+        public SqlCommandCall(SqlCommand command, String sql) {
             this.command = command;
-            this.operands = operands;
+            this.sql = sql;
         }
 
         public SqlCommandCall(SqlCommand command) {
-            this(command, new String[0]);
+            this(command, "");
         }
 
         @Override
@@ -154,19 +165,19 @@ public final class SqlCommandParser {
                 return false;
             }
             SqlCommandCall that = (SqlCommandCall) o;
-            return command == that.command && Arrays.equals(operands, that.operands);
+            return command == that.command && sql == that.sql;
         }
 
         @Override
         public int hashCode() {
             int result = Objects.hash(command);
-            result = 31 * result + Arrays.hashCode(operands);
+            result = 31 * result + sql.hashCode();
             return result;
         }
 
         @Override
         public String toString() {
-            return command + "(" + Arrays.toString(operands) + ")";
+            return command + " : (" + sql + ")";
         }
     }
 }
