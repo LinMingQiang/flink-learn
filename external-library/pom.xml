@@ -13,6 +13,7 @@
     <module>flink-monitor</module>
       <module>flink-rpc</module>
       <module>flink-sqlplat</module>
+      <module>java-learn</module>
       <!--    <module>calcite-test</module>-->
   </modules>
 

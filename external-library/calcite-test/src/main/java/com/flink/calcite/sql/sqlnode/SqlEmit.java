@@ -69,7 +69,6 @@ public class SqlEmit extends SqlCall {
             this.unparse(this.beforeDelay, writer);
             writer.keyword("BEFORE WATERMARK");
         }
-
         if (this.afterDelay != null) {
             if (this.beforeDelay != null) {
                 writer.print(",");
