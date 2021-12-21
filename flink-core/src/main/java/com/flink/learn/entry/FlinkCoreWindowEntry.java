@@ -41,7 +41,7 @@ public class FlinkCoreWindowEntry {
 
     /**
      * 并发情况下，所有的并行slot上的watermark都是同步的？所以同一个时间段的window都是同时触发的，
-     * 例如keyby之后 并行度为3， slot的wtm分别为1，3，3。 windowMaxtime = 2 。
+     * 例如keyby之后 并行度为3， slot的wtm分别为1，3，3。 windowMaxtime = 2 。 (这里的原理是wtm是广播出去的，都是3)
      * 那window还是会触发，从webiu上看，他的watermark是3
      * @throws Exception
      */

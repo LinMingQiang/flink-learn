@@ -122,15 +122,23 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
     // {"rowtime":"2020-01-01 00:00:05","msg":"c"} 0-10 4-14
     // {"rowtime":"2020-01-01 00:00:32","msg":"c"}     wtm 22
     // {"rowtime":"2020-01-01 00:01:40","msg":"c"}
+
+    /**
+     * 数据会在多个窗口重叠， windowstate是keystate。
+     * -- 如果用的rudec，重叠其实也还好，都是聚合后的数据
+     * @throws Exception
+     */
     @Test
     public void testSlidingWindow() throws Exception {
         kafkaDataSource
                 .map((MapFunction<KafkaMessge, Tuple2<String, Long>>) value -> new Tuple2<>(value.msg(), 1L))
+                .setParallelism(2)
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
                 .window(SlidingEventTimeWindows.of(Time.seconds(10), Time.seconds(4)))
                 .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) ->
                         new Tuple2<>(value1.f0, value1.f1 + value2.f1))
+                .setParallelism(2)
                 .print();
         streamEnv.execute();
     }
