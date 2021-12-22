@@ -57,9 +57,8 @@ public class EmitTest {
 
         SqlParser parser = SqlParser.create(sql, config.getParserConfig());
         try {
+
             System.out.println((CustomSqlSelectEmit) parser.parseStmt());
-
-
             // 阿里源码emit。是
 //            RichSqlInsert sqlNode = (RichSqlInsert)parser.parseStmt();
 //            CustomSqlSelectEmit emit = (CustomSqlSelectEmit)sqlNode.getSource();
