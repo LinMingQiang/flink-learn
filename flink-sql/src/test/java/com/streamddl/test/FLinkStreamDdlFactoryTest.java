@@ -15,11 +15,14 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.triggers.ContinuousProcessingTimeTrigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.functions.TemporalTableFunction;
@@ -31,6 +34,7 @@ import java.time.Duration;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
+
 import com.google.common.escape.Escapers;
 
 public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
@@ -38,19 +42,27 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void writetoJdbcTest() {
+        StatementSet set = tableEnv.createStatementSet();
+        tableEnv.getConfig().getConfiguration().set(ConfigOptions.key("table.dynamic-table-options.enabled")
+                .booleanType().defaultValue(true), true);
+
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
                         "test",
                         "test",
                         "json"));
-        System.out.println(DDLSourceSQLManager.createFromMysql("mysqltest"));
         tableEnv.executeSql(DDLSourceSQLManager.createFromMysql("mysqltest"));
 
-
-        System.out.println(tableEnv.explainSql("insert into mysqltest select msg,count(1) cnt from test group by msg"));
-        TableResult re = tableEnv.executeSql("insert into mysqltest select msg,count(1) cnt from test group by msg");
-        re.print();
+        System.out.println(tableEnv.explainSql("insert into" +
+                " mysqltest /*+ OPTIONS('sink.buffer-flush.max-rows'='1596282223') */" +
+                "  select msg,count(1) cnt from test" +
+                " group by msg"));
+        set.addInsertSql("insert into mysqltest select msg,count(1) cnt from test group by msg");
+        set.addInsertSql("insert into mysqltest select msg,count(1) cnt from test group by msg");
+        set.execute();
+//        TableResult re = tableEnv.executeSql("insert into mysqltest select msg,count(1) cnt from test group by msg");
+//        re.print();
     }
 
     @Test
@@ -101,10 +113,10 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
     }
 
     /**
-     *     {"rowtime":1634638723583,"msg":"msg","uid":"uid"}
+     * {"rowtime":1634638723583,"msg":"msg","uid":"uid"}
      */
     @Test
-    public void clickhouseSinkTest(){
+    public void clickhouseSinkTest() {
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -115,6 +127,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         TableResult re = tableEnv.executeSql("insert into test select count(1) as id,msg as name from test2 group by msg");
         re.print();
     }
+
     // 时态表
     @Test
     public void temporalTableTest() throws Exception {
@@ -226,6 +239,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
                 " hbaselookup FOR SYSTEM_TIME AS OF t1.proctime as t2 ON t1.msg = t2.word" +
                 ""), Row.class).print();
         streamEnv.execute();
+
     }
 
     // 以cdc做为维表进行join。cdc第一次会把所有数据都load一遍
@@ -307,6 +321,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
     /**
      * 日志时间戳转TIMESTAMP
+     *
      * @throws Exception
      */
     @Test
