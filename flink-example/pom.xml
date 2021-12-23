@@ -5,7 +5,8 @@
     <parent>
         <artifactId>flink-learn</artifactId>
         <groupId>com.flink.learn</groupId>
-        <version>1.13.0</version>
+        <version>1.14.2</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -50,11 +51,10 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-runtime_${scala.binary.version}</artifactId>
+            <artifactId>flink-runtime</artifactId>
             <version>${flink.version}</version>
             <scope>${scope.value}</scope>
         </dependency>
-
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>

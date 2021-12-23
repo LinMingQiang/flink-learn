@@ -28,6 +28,7 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
      * window 有两种 Windowfunction ：
      * AggregateFunction(一条一条聚合)
      * ProcessindowFunction 触发的时候一次性聚合， Iterator给你数据
+     * 注意： 当我们设置了 trigger。我们就没办法使用eventtime去触发了，即使wtm到了也触发不了，只能等processtime触发
      */
     @Test
     public void testWindow() throws Exception {
@@ -39,7 +40,7 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
                 // 统计5s一个窗口，有个offset参数，用来调整时间起点，正常是00-05这样，可以调成 01-06
-                .window(TumblingEventTimeWindows.of(Time.seconds(200)))
+                .window(TumblingEventTimeWindows.of(Time.seconds(10)))
                 // 固定时间触发, 每10s触发一次(系统时间) .如果没有设置，则是根据eventtime > window end time 来决定触发
                 // 如果定义了trigger，会每次触发sum操作。最好的方法就是定期清理窗口的数据，不然每次触发都是拿窗口的全部数据做计算
                 // 不管有没有数据都会触发，会重复输出之前的结果

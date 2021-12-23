@@ -5,7 +5,7 @@
     <parent>
         <artifactId>flink-learn</artifactId>
         <groupId>com.flink.learn</groupId>
-        <version>1.13.0</version>
+        <version>1.14.2</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -19,11 +19,11 @@
         <!--            <artifactId>slf4j-simple</artifactId>-->
         <!--            <version>1.7.25</version>-->
         <!--        </dependency>-->
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
-            <scope>${scope.value}</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>-->
+<!--            <scope>${scope.value}</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-common</artifactId>
@@ -62,21 +62,21 @@
             <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
             <scope>${scope.value}</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
-            <scope>${scope.value}</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>janino</artifactId>
-                    <groupId>org.codehaus.janino</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-compiler</artifactId>
-                    <groupId>org.codehaus.janino</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>-->
+<!--            <scope>${scope.value}</scope>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>janino</artifactId>-->
+<!--                    <groupId>org.codehaus.janino</groupId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>commons-compiler</artifactId>-->
+<!--                    <groupId>org.codehaus.janino</groupId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.apache.flink</groupId>

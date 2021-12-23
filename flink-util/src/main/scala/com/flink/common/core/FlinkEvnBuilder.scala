@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}
-import org.apache.flink.table.api.bridge.scala.{BatchTableEnvironment, StreamTableEnvironment}
+import org.apache.flink.table.api.bridge.scala.{StreamTableEnvironment}
 
 object FlinkEvnBuilder {
 
@@ -82,9 +82,6 @@ object FlinkEvnBuilder {
     ExecutionEnvironment.getExecutionEnvironment
   }
 
-  def buildBatchEnv(e: ExecutionEnvironment): BatchTableEnvironment ={
-    BatchTableEnvironment.create(e)
-  }
   /**
     *
     * @return

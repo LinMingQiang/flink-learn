@@ -3,7 +3,7 @@
   <parent>
     <artifactId>flink-learn</artifactId>
     <groupId>com.flink.learn</groupId>
-    <version>1.13.0</version>
+    <version>1.14.2</version>
   </parent>
   <artifactId>flink-sourcesink</artifactId>
 
@@ -85,11 +85,11 @@
       <version>${flink.version}</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
-      <scope>provided</scope>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.apache.flink</groupId>-->
+<!--      <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>-->
+<!--      <scope>provided</scope>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-table-common</artifactId>

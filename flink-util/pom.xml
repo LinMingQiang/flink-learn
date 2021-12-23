@@ -2,7 +2,7 @@
     <parent>
         <artifactId>flink-learn</artifactId>
         <groupId>com.flink.learn</groupId>
-        <version>1.13.0</version>
+        <version>1.14.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -65,7 +65,6 @@
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
           <scope>provided</scope>
-
       </dependency>
       <dependency>
           <groupId>org.apache.flink</groupId>
@@ -77,11 +76,11 @@
           <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
           <scope>provided</scope>
       </dependency>
-      <dependency>
-          <groupId>org.apache.flink</groupId>
-          <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
-          <scope>provided</scope>
-      </dependency>
+<!--      <dependency>-->
+<!--          <groupId>org.apache.flink</groupId>-->
+<!--          <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>-->
+<!--          <scope>provided</scope>-->
+<!--      </dependency>-->
       <dependency>
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-table-common</artifactId>
@@ -100,6 +99,14 @@
           <groupId>org.apache.flink</groupId>
           <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
           <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-table-api-java-bridge_${scala.binary.version}</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
       </dependency>
 <!--      <dependency>-->
 <!--          <groupId>org.slf4j</groupId>-->

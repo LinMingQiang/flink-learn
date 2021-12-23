@@ -27,7 +27,7 @@ public class RestClusterClientTest {
                 config,
                 StandaloneClusterId.getInstance());
 
-        String jar = "/Users/eminem/workspace/flink/flink-learn/dist/lib/flink-core-1.13.0.jar";
+        String jar = "/Users/eminem/workspace/flink/flink-learn/dist/lib/flink-core-1.14.2.jar";
         PackagedProgram program = PackagedProgram.newBuilder()
                 .setJarFile(new File(jar))
                 .setEntryPointClassName("com.flink.learn.entry.FlinkCoreOperatorEntry")

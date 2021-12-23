@@ -1,23 +1,10 @@
 package com.datalake.hive.entry;
 
-
-import com.core.FlinkEvnBuilder;
 import com.flink.common.core.FlinkLearnPropertiesUtil;
-import org.apache.flink.api.common.RuntimeExecutionMode;
-import org.apache.flink.api.java.DataSet;
-import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.bridge.java.BatchTableEnvironment;
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
-
-import java.time.Duration;
-
-import org.apache.flink.table.api.*;
-import org.apache.flink.types.Row;
 
 /**
  * 'sink.partition-commit.trigger'='process-time',

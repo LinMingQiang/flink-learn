@@ -22,7 +22,7 @@ under the License.
     <parent>
         <artifactId>flink-learn</artifactId>
         <groupId>com.flink.learn</groupId>
-        <version>1.13.0</version>
+        <version>1.14.2</version>
     </parent>
     <artifactId>flink-sql</artifactId>
 
@@ -91,11 +91,11 @@ under the License.
             <version>2.9.5</version>
         </dependency>
         <!-- 不能打包进去 -->
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
-            <scope>${scope.value}</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>-->
+<!--            <scope>${scope.value}</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_${scala.binary.version}</artifactId>
