@@ -13,6 +13,7 @@ import java.util.Map;
  * metrics.reporter.my-report.class: com.flink.learn.report.ConsumerReport
  * metrics.reporter.my-report.interval: 60000
  */
+// cp /Users/eminem/workspace/flink/flink-learn/external-library/metric-report/target/metric-report-1.13.0.jar /Users/eminem/programe/flink-1.13.2/lib
 public class ConsumerReport extends AbstractReporter implements Scheduled {
     public static Logger LOG = LoggerFactory.getLogger(ConsumerReport.class);
     @Override
@@ -37,10 +38,10 @@ public class ConsumerReport extends AbstractReporter implements Scheduled {
     public void notifyOfAddedMetric(Metric metric, String metricName, MetricGroup group) {
         Map<String, String> allVariables = group.getAllVariables();
         allVariables.entrySet().stream().forEach(ele -> {
-            if ("<job_name>".equalsIgnoreCase(ele.getKey())) {
-                System.out.printf(ele.getValue());
-            }
-            LOG.info("[notifyOfAddedMetric] metric={}; key={}; value={}", metricName, ele.getKey(), ele.getValue());
+//            if ("<job_name>".equalsIgnoreCase(ele.getKey())) {
+//                System.out.printf(ele.getValue());
+//            }
+//            LOG.info("[notifyOfAddedMetric] metric={}; key={}; value={}", metricName, ele.getKey(), ele.getValue());
         });
         super.notifyOfAddedMetric(metric, metricName, group);
     }
@@ -50,6 +51,7 @@ public class ConsumerReport extends AbstractReporter implements Scheduled {
         for (Map.Entry<Counter, String> metric : counters.entrySet()) {
             LOG.info("[Origin Counters] " + metric.getValue() + ": " + metric.getKey().getCount());
         }
+        // localhost.jobmanager.Status.JVM.Memory.Direct.Count  : 11
         for (Map.Entry<Gauge<?>, String> metric : gauges.entrySet()) {
             LOG.info("[Origin Guages] " + metric.getValue() + ":" + metric.getKey().getValue());
         }
