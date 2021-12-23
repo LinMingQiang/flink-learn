@@ -13,7 +13,7 @@ import java.util.Map;
  * metrics.reporter.my-report.class: com.flink.learn.report.ConsumerReport
  * metrics.reporter.my-report.interval: 60000
  */
-// cp /Users/eminem/workspace/flink/flink-learn/external-library/metric-report/target/metric-report-1.13.0.jar /Users/eminem/programe/flink-1.13.2/lib
+// cp /Users/eminem/workspace/flink/flink-learn/external-library/metric-report/target/metric-report-1.14.2.jar /Users/eminem/programe/flink-1.13.2/lib
 public class ConsumerReport extends AbstractReporter implements Scheduled {
     public static Logger LOG = LoggerFactory.getLogger(ConsumerReport.class);
     @Override
@@ -51,9 +51,15 @@ public class ConsumerReport extends AbstractReporter implements Scheduled {
         for (Map.Entry<Counter, String> metric : counters.entrySet()) {
             LOG.info("[Origin Counters] " + metric.getValue() + ": " + metric.getKey().getCount());
         }
-        // localhost.jobmanager.Status.JVM.Memory.Direct.Count  : 11
+        // 系统自带： localhost.jobmanager.Status.JVM.Memory.Direct.Count  : 11
+        // 自定义 ： localhost.taskmanager.localhost:52930-e9b055.WordCountJobName.Flat Map.0
+        //          .wordCountMetric.totalWordNums:2
+        // wordCountMetric : 自定义的 addgroup ， totalWordNums 自定义的 gauge name
+        // metric.getKey() 就是你的 值了。
         for (Map.Entry<Gauge<?>, String> metric : gauges.entrySet()) {
-            LOG.info("[Origin Guages] " + metric.getValue() + ":" + metric.getKey().getValue());
+            if(metric.getValue().contains("Metric")) {
+                LOG.info("[Origin Guages] " + metric.getValue() + ":" + metric.getKey().getValue());
+            }
         }
         for (Map.Entry<Meter, String> metric : meters.entrySet()) {
             LOG.info("[Origin Meters] " + metric.getValue() + ": count=" + metric.getKey().getCount() + ",rate=" + metric.getKey().getRate());

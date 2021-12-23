@@ -1,5 +1,6 @@
 package com.flink.learn.example.entry;
 
+import com.flink.learn.example.func.WordcountFlatMap;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
@@ -12,36 +13,12 @@ import org.apache.flink.util.Collector;
 
 public class WordCount {
     // nc -l 9877
-    // flink run -c com.flink.learn.example.entry.WordCount /Users/eminem/workspace/flink/flink-learn/flink-example/target/flink-example-1.13.0.jar
+    // flink run -c com.flink.learn.example.entry.WordCount /Users/eminem/workspace/flink/flink-learn/flink-example/target/flink-example-1.14.2.jar
     public static void main(String[] args) throws Exception {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         DataStream<String> text = env.socketTextStream("localhost", 9877, "\n");
         DataStream<WordWithCount> windowCounts =
-                text.flatMap(new RichFlatMapFunction<String, WordWithCount>() {
-                            long inputcount = 0L;
-                            long outcount=0L;
-                            @Override
-                            public void flatMap(String s, Collector<WordWithCount> collector) throws Exception {
-                                inputcount+=1;
-                                for (String word : s.split("\\s")) {
-                                    outcount+=1;
-                                    collector.collect(new WordWithCount(word, 1L));
-                                }
-                            }
-
-                            @Override
-                            public void open(Configuration parameters) throws Exception {
-                                getRuntimeContext().getMetricGroup().gauge("noGroupGauge-stmp", () -> System.currentTimeMillis());
-                                getRuntimeContext().getMetricGroup().gauge("noGroupGauge-inputcount", () -> inputcount );
-                                getRuntimeContext().getMetricGroup().gauge("noGroupGauge-outcount", () -> outcount);
-
-                                getRuntimeContext().getMetricGroup().addGroup("group-key","group-value").gauge("GroupGauge-stmp", () -> System.currentTimeMillis());
-                                getRuntimeContext().getMetricGroup().addGroup("group-key","group-value").gauge("GroupGauge-inputcount", () -> inputcount );
-                                getRuntimeContext().getMetricGroup().addGroup("group-key","group-value").gauge("GroupGauge-outcount", () -> outcount);
-
-                            }
-
-                        })
+                text.flatMap(new WordcountFlatMap())
                         .returns(WordWithCount.class)
                         .keyBy(value -> value.word)
                         .sum("count");
