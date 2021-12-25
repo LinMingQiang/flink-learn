@@ -19,7 +19,7 @@ public class PrintlnRetractDynamicTableSink implements DynamicTableSink {
 
     @Override
     public ChangelogMode getChangelogMode(ChangelogMode changelogMode) {
-        return changelogMode;
+        return ChangelogMode.upsert();
     }
 
     @Override
