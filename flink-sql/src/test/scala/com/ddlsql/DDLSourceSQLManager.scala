@@ -112,6 +112,72 @@ object DDLSourceSQLManager {
        |    'json.ignore-parse-errors' = 'true'
        |)""".stripMargin
   }
+
+  // 这个不支持 changelog的结果输出
+  def createAppendKafkaSink(broker: String,
+                            topic: String,
+                            tableName: String,
+                            groupID: String,
+                            format : String = "json"): String = {
+    s"""CREATE TABLE $tableName (
+       |        msg VARCHAR,
+       |    cnt bigint
+       |) WITH (
+       |    'connector' = 'kafka',
+       |    'topic' = '$topic',
+       |    'properties.bootstrap.servers' = '$broker',
+       |    'properties.group.id' = '$groupID',
+       |    'format' = '$format',
+       |    'json.ignore-parse-errors' = 'true'
+       |)""".stripMargin
+  }
+  def createUpsertKafkaTable(broker: String,
+                            topic: String,
+                            tableName: String,
+                            groupID: String,
+                            format : String = "json"): String = {
+    s"""CREATE TABLE $tableName (
+       |    topic VARCHAR METADATA FROM 'topic',
+       |    `offset` bigint METADATA,
+       |    rowtime TIMESTAMP(3),
+       |    msg VARCHAR,
+       |    uid VARCHAR,
+       |    proctime AS PROCTIME(),
+       |    PRIMARY KEY (msg) NOT ENFORCED,
+       |    WATERMARK FOR rowtime AS rowtime - INTERVAL '10' SECOND
+       |) WITH (
+       |    'connector' = 'upsert-kafka',
+       |    'topic' = '$topic',
+       |    'scan.startup.mode' = 'latest-offset',
+       |    'properties.bootstrap.servers' = '$broker',
+       |    'properties.group.id' = '$groupID',
+       |    'value.format' = '$format',
+       |    'value.json.fail-on-missing-field' = 'false',
+       |    'key.json.ignore-parse-errors' = 'true',
+       |    'key.format' = '$format'
+       |)""".stripMargin
+  }
+
+  def createUpsertKafkaSinkTable(broker: String,
+                             topic: String,
+                             tableName: String,
+                             groupID: String,
+                             format : String = "json"): String = {
+    s"""CREATE TABLE $tableName (
+       |    msg VARCHAR,
+       |    cnt bigint,
+       |    PRIMARY KEY (msg) NOT ENFORCED
+       |) WITH (
+       |    'connector' = 'upsert-kafka',
+       |    'topic' = '$topic',
+       |    'properties.bootstrap.servers' = '$broker',
+       |    'properties.group.id' = '$groupID',
+       |    'value.format' = '$format',
+       |    'value.json.fail-on-missing-field' = 'false',
+       |    'key.json.ignore-parse-errors' = 'true',
+       |    'key.format' = '$format'
+       |)""".stripMargin
+  }
   /**
    *
    * @param topic

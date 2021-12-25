@@ -7,9 +7,7 @@ import com.flink.common.kafka.KafkaManager.KafkaMessge;
 import com.func.processfunc.StreamConnectCoProcessFunc;
 import com.func.richfunc.AsyncIODatabaseRequest;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
-import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -17,10 +15,8 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
-import org.apache.flink.table.runtime.functions.KeyedProcessFunctionWithCleanupState;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.junit.Test;
@@ -44,41 +40,42 @@ public class FlinkCoreOperatorTest extends FlinkJavaStreamTableTestBase {
         streamEnv.setParallelism(3);
         // {"msg":"hello"}
         kafkaDataSource
-                .flatMap((FlatMapFunction<KafkaMessge, Tuple2<String, Long>>) (value, out) -> {
-                    for (String s : value.msg().split(",", -1)) {
-                        out.collect(new Tuple2<String, Long>(s, 1L));
-                    }
-                })
-                .returns(Types.TUPLE(Types.STRING, Types.LONG))
+//                .flatMap((FlatMapFunction<KafkaMessge, Tuple2<String, Long>>) (value, out) -> {
+//                    for (String s : value.msg().split(",", -1)) {
+//                        out.collect(new Tuple2<String, Long>(s, 1L));
+//                    }
+//                })
+//                .returns(Types.TUPLE(Types.STRING, Types.LONG))
 //                .setParallelism(3)
 //                .returns(Types.STRING)
 //                .map(x -> new Tuple2<String, Long>(x, 1L))
-                .setParallelism(3)
+//                .setParallelism(3)
 //                .returns(Types.TUPLE(Types.STRING, Types.LONG))
 //                .filter(x -> x.f1 >= 0)
 //                .setParallelism(2)
-                .keyBy(x -> x.f0)
-                .process(new KeyedProcessFunction<String, Tuple2<String, Long>, Tuple2<String, Long>>() {
-                    ValueState<Long> v;
-                    @Override
-                    public void open(Configuration parameters) throws Exception {
-                        v = getRuntimeContext().getState(
-                                new ValueStateDescriptor("test2",
-                                        TypeInformation.of(Long.class)));
-                    }
-                    @Override
-                    public void processElement(Tuple2<String, Long> value, Context ctx, Collector<Tuple2<String, Long>> out) throws Exception {
-                        ctx.getCurrentKey();
-                        Long re = v.value();
-                        if (re != null) {
-                            re += value.f1;
-                        } else re = value.f1;
-                        v.update(re);
-                        out.collect(new Tuple2<>(value.f0, re));
-                    }
-                })
-//                .sum(1)
-                .setParallelism(2)
+                .keyBy(x-> x.msg())
+                .sum(1)
+//                .process(new KeyedProcessFunction<String, Tuple2<String, Long>, Tuple2<String, Long>>() {
+//                    ValueState<Long> v;
+//                    @Override
+//                    public void open(Configuration parameters) throws Exception {
+//                        v = getRuntimeContext().getState(
+//                                new ValueStateDescriptor("test2",
+//                                        TypeInformation.of(Long.class)));
+//                    }
+//                    @Override
+//                    public void processElement(Tuple2<String, Long> value, Context ctx, Collector<Tuple2<String, Long>> out) throws Exception {
+//                        ctx.getCurrentKey();
+//                        Long re = v.value();
+//                        if (re != null) {
+//                            re += value.f1;
+//                        } else re = value.f1;
+//                        v.update(re);
+//                        out.collect(new Tuple2<>(value.f0, re));
+//                    }
+//                })
+////                .sum(1)
+//                .setParallelism(2)
                 .print();
         streamEnv.execute("lmq-flink-demo"); //程序名, 一个execute是一个job
     }

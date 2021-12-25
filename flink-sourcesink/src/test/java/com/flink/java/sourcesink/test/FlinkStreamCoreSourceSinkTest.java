@@ -1,6 +1,5 @@
 package com.flink.java.sourcesink.test;
 
-import com.connect.PrintlnConnect;
 import com.flink.common.manager.SchemaManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import com.flink.sql.common.format.ConnectorFormatDescriptorUtils;
@@ -67,46 +66,46 @@ public class FlinkStreamCoreSourceSinkTest extends FlinkJavaStreamTableTestBase 
      *
      * @throws Exception
      */
-    @Test
-    public void testPrintlneConnect() throws Exception {
-        Table a = kafkaDataTable
-                .renameColumns("offset as ll"); // offset是关键字
-        tableEnv.createTemporaryView("test", a);
-//        tableEnv.toAppendStream(a, Row.class).print();
-// append
-        tableEnv
-                .connect(new PrintlnConnect().property("println.prefix", "connect sink : "))
-                .inAppendMode()
-                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
-                .withSchema(SchemaManager.PRINTLN_SCHEMA())
-                .createTemporaryTable("printlnSinkTbl");
-        // 只能select ，不能 用聚合类的，会报 doesn't support consuming update changes
-        tableEnv.insertInto("printlnSinkTbl", a.select("topic,msg,ll"));
-
-        // retract
+//    @Test
+//    public void testPrintlneConnect() throws Exception {
+//        Table a = kafkaDataTable
+//                .renameColumns("offset as ll"); // offset是关键字
+//        tableEnv.createTemporaryView("test", a);
+////        tableEnv.toAppendStream(a, Row.class).print();
+//// append
 //        tableEnv
-//                .connect(new PrintlnConnect("printsink_retract", 1, true))
-//                .inRetractMode()
+//                .connect(new PrintlnConnect().property("println.prefix", "connect sink : "))
+//                .inAppendMode()
 //                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
 //                .withSchema(SchemaManager.PRINTLN_SCHEMA())
 //                .createTemporaryTable("printlnSinkTbl");
+//        // 只能select ，不能 用聚合类的，会报 doesn't support consuming update changes
+//        tableEnv.insertInto("printlnSinkTbl", a.select("topic,msg,ll"));
 //
-//        tableEnv.insertInto("printlnSinkTbl",
-//                tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
-
-// upsert
-//        tableEnv
-//                .connect(new PrintlnConnect("printsink_upsert", 1, true))
-//                .inRetractMode()
-//                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
-//                .withSchema(SchemaManager.PRINTLN_SCHEMA())
-//                .createTemporaryTable("printsink_upsert");
+//        // retract
+////        tableEnv
+////                .connect(new PrintlnConnect("printsink_retract", 1, true))
+////                .inRetractMode()
+////                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
+////                .withSchema(SchemaManager.PRINTLN_SCHEMA())
+////                .createTemporaryTable("printlnSinkTbl");
+////
+////        tableEnv.insertInto("printlnSinkTbl",
+////                tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
 //
-//        tableEnv.insertInto("printsink_upsert",
-//                tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
-//
-        tableEnv.execute("");
-    }
+//// upsert
+////        tableEnv
+////                .connect(new PrintlnConnect("printsink_upsert", 1, true))
+////                .inRetractMode()
+////                .withFormat(ConnectorFormatDescriptorUtils.kafkaConnJsonFormat())
+////                .withSchema(SchemaManager.PRINTLN_SCHEMA())
+////                .createTemporaryTable("printsink_upsert");
+////
+////        tableEnv.insertInto("printsink_upsert",
+////                tableEnv.sqlQuery("select topic,msg,count(ll) as ll from test group by topic,msg"));
+////
+//        tableEnv.execute("");
+//    }
 
     /**
      * hbase

@@ -22,17 +22,17 @@ class KafkaMessageDeserialize extends KafkaDeserializationSchema[KafkaMessge] {
       val json = JSON.parseObject(new String(record.value()))
       val rowtime = {
         if (json.containsKey("rowtime")) json.getString("rowtime")
-        else "1970-01-01 00:00:00"
+        else "2020-01-01 00:00:00"
       }
-      out.collect(
-        KafkaMessge(
-          new String(record.topic()),
-          record.offset(),
-          smp.parse(rowtime).getTime,
-          if (json.containsKey("msg")) json.getString("msg") else null,
-          rowtime,
-          if (json.containsKey("uid")) json.getString("uid") else null
-        ))
+      val msg = KafkaMessge(
+        new String(record.topic()),
+        record.offset(),
+        smp.parse(rowtime).getTime,
+        if (json.containsKey("msg")) json.getString("msg") else null,
+        rowtime,
+        if (json.containsKey("uid")) json.getString("uid") else null
+      )
+      out.collect(msg)
     } else {
       if (new String(record.value()).nonEmpty) {
         val tim = System.currentTimeMillis()

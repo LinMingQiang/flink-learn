@@ -13,6 +13,21 @@ import org.junit.Test;
  */
 public class FlinkSQLExplainSrcRead extends FlinkJavaStreamTableTestBase {
     @Test
+    public void wordCount() throws Exception {
+        // {"rowtime":"2020-01-01 00:00:01","msg":"c"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        String selectSQL = "SELECT msg,count(1) from test group by msg";
+        System.out.println(tableEnv.explainSql(selectSQL));
+        tableEnv.toRetractStream(tableEnv.sqlQuery(selectSQL), Row.class);
+        streamEnv.execute("");
+    }
+
+    @Test
     public void sqlExplainTest() {
         StatementSet set = tableEnv.createStatementSet();
         // 设置 动态 option设置
@@ -102,6 +117,7 @@ public class FlinkSQLExplainSrcRead extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void windowTest() throws Exception {
+// {"rowtime":"2020-01-01 00:00:01","msg":"c"}
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -112,9 +128,9 @@ public class FlinkSQLExplainSrcRead extends FlinkJavaStreamTableTestBase {
                 "FROM TABLE( TUMBLE(TABLE test, DESCRIPTOR(proctime), INTERVAL '10' SECONDS) )\n" +
                 "GROUP BY window_start,window_end,msg";
         System.out.println(tableEnv.explainSql(selectSQL));
-//        tableEnv.toAppendStream(tableEnv.executeSql(selectSQL), Row.class);
+        tableEnv.toDataStream(tableEnv.sqlQuery(selectSQL), Row.class);
 
-        tableEnv.execute("");
+        streamEnv.execute("");
 //        Calc(select=[window_start, window_end, msg, sellCount])
 //        +- WindowAggregate(groupBy=[msg], window=[TUMBLE(time_col=[proctime], size=[10 s])], select=[msg, COUNT(*) AS sellCount, start('w$) AS window_start, end('w$) AS window_end])
 //        +- Exchange(distribution=[hash[msg]])
