@@ -84,51 +84,51 @@ class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
 //    tableEnv.execute("")
 //  }
   // {"id":"1","name":"211","age":5}
-//  /**
-//    *
-//    */
-//  test("createTestTbl") {
-//    // kafka source
-//    val kafkaConnector =
-//      TableSourceConnectorManager.kafkaConnector(BROKER,
-//                                                 "test",
-//                                                 "test",
-//                                                 "latest")
-//    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat()
-//    // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
-//    tableEnv
-//      .connect(kafkaConnector)
-//      .withFormat(jsonFormat)
-//      .withSchema(SchemaManager.ID_NAME_AGE_SCHEMA)
-//      .inAppendMode()
-//      .createTemporaryTable("test")
-//
-//    tableEnv
-//      .sqlQuery("select * from test")
-//      .toRetractStream[Row]
-//      .print()
-//    tableEnv.execute("")
-//  }
+  /**
+    *
+    */
+  test("createTestTbl") {
+    // kafka source
+    val kafkaConnector =
+      TableSourceConnectorManager.kafkaConnector(BROKER,
+                                                 "test",
+                                                 "test",
+                                                 "latest")
+    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat()
+    // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
+    tableEnv
+      .connect(kafkaConnector)
+      .withFormat(jsonFormat)
+      .withSchema(SchemaManager.ID_NAME_AGE_SCHEMA)
+      .inAppendMode()
+      .createTemporaryTable("test")
 
-//  /**
-//    *
-//    */
-//  test("createTest2Tbl") {
-//    // kafka source
-//    val kafkaConnector =
-//      TableSourceConnectorManager.kafkaConnector(BROKER,
-//                                                 "test2",
-//                                                 "test",
-//                                                 "latest")
-//    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat()
-//    // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
-//    tableEnv
-//      .connect(kafkaConnector)
-//      .withFormat(jsonFormat)
-//      .withSchema(SchemaManager.ID_NAME_AGE_SCHEMA)
-//      .inAppendMode()
-//      .createTemporaryTable("test2")
-//  }
+    tableEnv
+      .sqlQuery("select * from test")
+      .toRetractStream[Row]
+      .print()
+    tableEnv.execute("")
+  }
+
+  /**
+    *
+    */
+  test("createTest2Tbl") {
+    // kafka source
+    val kafkaConnector =
+      TableSourceConnectorManager.kafkaConnector(BROKER,
+                                                 "test2",
+                                                 "test",
+                                                 "latest")
+    val jsonFormat = ConnectorFormatDescriptorUtils.kafkaConnJsonFormat()
+    // lazy val csvFormat = DataFormatUril.kafkaConnCsvFormat(kafkaConnector)
+    tableEnv
+      .connect(kafkaConnector)
+      .withFormat(jsonFormat)
+      .withSchema(SchemaManager.ID_NAME_AGE_SCHEMA)
+      .inAppendMode()
+      .createTemporaryTable("test2")
+  }
 
   /**
     *
@@ -157,17 +157,17 @@ class FlinkLearnStreamConnectEntry extends FlinkStreamTableCommonSuit {
     tableEnv.execute("FlinkLearnStreamConnectEntry")
   }
 
-//  test("wordCountTest") {
-//    // val input = env.fromElements(WC("hello", 1), WC("hello", 1), WC("ciao", 1))
-//    val input =
-//      bEnv.fromCollection(Array(WC("hello", 1), WC("hello", 1), WC("ciao", 1)))
-//    // register the DataSet as table "WordCount"
-//    batchEnv.createTemporaryView("WordCount", input, 'word, 'frequency)
-//    // run a SQL query on the Table and retrieve the result as a new Table
-//    val table =
-//      batchEnv.sqlQuery(
-//        "SELECT word, SUM(frequency) FROM WordCount GROUP BY word")
-//    // table.toDataSet[WC].print()
-//    table.toDataSet[Row].print()
-//  }
+  test("wordCountTest") {
+    // val input = env.fromElements(WC("hello", 1), WC("hello", 1), WC("ciao", 1))
+    val input =
+      bEnv.fromCollection(Array(WC("hello", 1), WC("hello", 1), WC("ciao", 1)))
+    // register the DataSet as table "WordCount"
+    batchEnv.createTemporaryView("WordCount", input, 'word, 'frequency)
+    // run a SQL query on the Table and retrieve the result as a new Table
+    val table =
+      batchEnv.sqlQuery(
+        "SELECT word, SUM(frequency) FROM WordCount GROUP BY word")
+    // table.toDataSet[WC].print()
+    table.toDataSet[Row].print()
+  }
 }

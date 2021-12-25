@@ -178,6 +178,21 @@ object DDLSourceSQLManager {
        |    'key.format' = '$format'
        |)""".stripMargin
   }
+  def createUpsertMysqlSinkTable(tableName: String): String = {
+    s"""CREATE TABLE $tableName (
+       |    msg VARCHAR,
+       |    cnt bigint,
+       |    PRIMARY KEY (msg) NOT ENFORCED
+       |) WITH (
+       |'connector' = 'jdbc',
+       |'url' = 'jdbc:mysql://127.0.0.1:3306/flink',
+       |'table-name' = '$tableName',
+       |'username'='root',
+       |'password'='123456',
+       |'sink.buffer-flush.max-rows'='10', -- 这个是数据进入mysqlsink的条数
+       |'sink.buffer-flush.interval'='60s'
+       |)""".stripMargin
+  }
   /**
    *
    * @param topic
