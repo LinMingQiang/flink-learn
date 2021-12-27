@@ -176,6 +176,8 @@ object DDLSourceSQLManager {
        |    'value.json.fail-on-missing-field' = 'false',
        |    'key.json.ignore-parse-errors' = 'true',
        |    'key.format' = '$format'
+       |   -- 'sink.buffer-flush.max-rows'='10',
+       |   -- 'sink.buffer-flush.interval'='60s'
        |)""".stripMargin
   }
   def createUpsertMysqlSinkTable(tableName: String): String = {
