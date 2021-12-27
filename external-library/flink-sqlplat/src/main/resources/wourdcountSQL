@@ -1,0 +1,26 @@
+-- zhusi
+CREATE TABLE test (
+    msg VARCHAR
+) WITH (
+    'connector' = 'kafka',
+    'topic' = 'test',
+    'scan.startup.mode' = 'latest-offset',
+    'properties.bootstrap.servers' = 'localhost:9092',
+    'properties.group.id' = 'test',
+    'format' = 'json',
+    'json.ignore-parse-errors' = 'true'
+);
+-- zhushi
+CREATE TABLE sinkTable (
+msg VARCHAR,
+uv BIGINT
+) WITH (
+'connector' = 'print'
+);
+
+CREATE TEMPORARY VIEW tmpSelect AS (
+ select msg,count(1) as uv from test group by msg
+ union all
+ select msg,count(1) as uv from test group by msg);
+
+insert into sinkTable ( select * from tmpSelect);

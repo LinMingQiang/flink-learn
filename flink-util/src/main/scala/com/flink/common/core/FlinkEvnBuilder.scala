@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}
-import org.apache.flink.table.api.bridge.scala.{BatchTableEnvironment, StreamTableEnvironment}
+import org.apache.flink.table.api.bridge.scala.{StreamTableEnvironment}
 
 object FlinkEvnBuilder {
 
@@ -82,9 +82,6 @@ object FlinkEvnBuilder {
     ExecutionEnvironment.getExecutionEnvironment
   }
 
-  def buildBatchEnv(e: ExecutionEnvironment): BatchTableEnvironment ={
-    BatchTableEnvironment.create(e)
-  }
   /**
     *
     * @return
@@ -93,8 +90,8 @@ object FlinkEvnBuilder {
     StateTtlConfig
       .newBuilder(Time.minutes(timeOut)) // 2个小时
       .updateTtlOnReadAndWrite() // 每次读取或者更新这个key的值的时候都对ttl做更新，所以清理的时间是 lastpdatetime + outtime
-      .cleanupFullSnapshot() // 创建完整快照时清理
-      .cleanupInRocksdbCompactFilter(10000) // 达到100个过期就清理？
+//      .cleanupFullSnapshot() // 创建完整快照时清理
+//      .cleanupInRocksdbCompactFilter(10000) // 达到100个过期就清理？
       .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
       .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
       .build();

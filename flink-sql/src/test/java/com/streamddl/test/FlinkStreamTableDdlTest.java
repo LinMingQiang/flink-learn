@@ -45,11 +45,10 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                         "test",
                         "json"));
         tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printlnRetractSink"));
-        tableEnv.toRetractStream(tableEnv.sqlQuery("select concat(msg, topic) as ss,count(*) as cnt from test group by msg,topic"), Row.class)
-                .print();
-
-        // 要在 executeSql 之前
-        streamEnv.executeAsync();
+//        tableEnv.toRetractStream(tableEnv.sqlQuery("select concat(msg, topic) as ss,max(*) as cnt from test group by msg,topic"), Row.class)
+//                .print();
+//        // 要在 executeSql 之前
+//        streamEnv.executeAsync();
         TableResult re = tableEnv.executeSql("insert into printlnRetractSink select msg,count(*) as cnt from test group by msg");
         re.print();
     }
@@ -88,8 +87,9 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                 " where msg = 'hello' " +
                 " group by TUMBLE(rowtime, INTERVAL '30' SECOND), msg " +
                 "";
-        TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
-        re.print();
+        System.out.printf(tableEnv.explainSql(sql));
+//        TableResult re = tableEnv.executeSql("insert into printlnRetractSink " + sql);
+//        re.print();
 
     }
 
@@ -147,6 +147,10 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
         streamEnv.execute();
     }
 
+    /**
+     * 测试谓词下推
+     * @throws Exception
+     */
     @Test
     public void joinTest() throws Exception {
         // {"rowtime":"2021-01-20 00:00:13","msg":"hello"}

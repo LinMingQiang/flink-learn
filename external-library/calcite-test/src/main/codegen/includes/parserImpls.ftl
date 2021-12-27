@@ -22,9 +22,8 @@ SqlEmit emit = null;
 }
 {
 (
-<EMIT> <INTO>
-)
 query = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)
+)
 <#--必须是  [] 可选-->
 [
 emit = EmitSpecification()

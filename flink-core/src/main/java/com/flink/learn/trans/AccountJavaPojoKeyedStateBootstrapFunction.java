@@ -24,4 +24,5 @@ public class AccountJavaPojoKeyedStateBootstrapFunction
     public void processElement(WordCountPoJo value, Context ctx) throws Exception {
         lastState.update(new WordCountPoJo(value.word, 1000L+ value.count, value.timestamp, value.srcArr, value.keyby));
     }
+
 }

@@ -5,7 +5,7 @@ import com.flink.common.core.FlinkLearnPropertiesUtil.{param, CHECKPOINT_PATH}
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.bridge.scala.{BatchTableEnvironment, StreamTableEnvironment}
+import org.apache.flink.table.api.bridge.scala.{StreamTableEnvironment}
 import org.apache.flink.table.api.{Table, TableEnvironment}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.apache.flink.table.api.bridge.scala._
@@ -16,7 +16,6 @@ class FlinkStreamTableCommonSuit extends FunSuite with BeforeAndAfterAll {
   var tableE: TableEnvironment = null
   var streamEnv: StreamExecutionEnvironment = null
   var bEnv: ExecutionEnvironment = null
-  var batchEnv: BatchTableEnvironment = null
 
   protected override def beforeAll(): Unit = {
     super.beforeAll()
@@ -31,7 +30,6 @@ class FlinkStreamTableCommonSuit extends FunSuite with BeforeAndAfterAll {
     FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH,
                                   "FlinkLearnStreamDDLSQLEntry")
     bEnv = ExecutionEnvironment.createLocalEnvironment()
-    batchEnv = BatchTableEnvironment.create(bEnv)
     streamEnv = FlinkEvnBuilder.buildStreamingEnv(
       FlinkLearnPropertiesUtil.param,
       FlinkLearnPropertiesUtil.CHECKPOINT_PATH,

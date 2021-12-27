@@ -1,7 +1,0 @@
-com.factory.deprecatedfactory.PrintlnAppendStreamFactory
-com.factory.deprecatedfactory.PrintlnRetractStreamFactory
-com.factory.deprecatedfactory.PrintlnUpsertStreamFactory
-com.factory.deprecatedfactory.HbaseRetractStreamFactory
-com.factory.deprecatedfactory.HbaseLookUpFactory
-com.format.csvformat.CsvCustomRowFormatFactory
-com.factory.deprecatedfactory.ElasticsearchRetractStreamFactory

@@ -36,6 +36,7 @@ public class CustomSqlSelectEmit extends SqlCall {
     public SqlOperator getOperator() {
         return OPERATOR;
     }
+
     public void unparse(SqlWriter writer, int leftPrec, int rightPrec) {
 
         writer.keyword("select : ");

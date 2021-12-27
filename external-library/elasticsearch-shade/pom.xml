@@ -5,7 +5,7 @@
     <parent>
         <artifactId>external-library</artifactId>
         <groupId>com.flink.learn</groupId>
-        <version>1.13.0</version>
+        <version>1.14.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -64,18 +64,18 @@
                                     <pattern>io.netty</pattern>
                                     <shadedPattern>my.io.netty</shadedPattern>
                                 </relocation>
-                                <!--                <relocation>-->
-                                <!--                  <pattern>com.fasterxml.jackson.core</pattern>-->
-                                <!--                  <shadedPattern>my.elasticsearch.jackson.core</shadedPattern>-->
-                                <!--                </relocation>-->
+<!--                                                <relocation>-->
+<!--                                                  <pattern>com.fasterxml.jackson.core</pattern>-->
+<!--                                                  <shadedPattern>my.elasticsearch.jackson.core</shadedPattern>-->
+<!--                                                </relocation>-->
 
                             </relocations>
-<!--                            <transformers>-->
-<!--                                <transformer-->
-<!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer" />-->
-<!--                                <transformer-->
-<!--                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />-->
-<!--                            </transformers>-->
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer" />
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            </transformers>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>

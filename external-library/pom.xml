@@ -2,7 +2,7 @@
   <parent>
     <artifactId>flink-learn</artifactId>
     <groupId>com.flink.learn</groupId>
-    <version>1.13.0</version>
+    <version>1.14.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -12,6 +12,9 @@
     <module>elasticsearch-shade</module>
     <module>flink-monitor</module>
       <module>flink-rpc</module>
+      <module>flink-sqlplat</module>
+      <module>java-learn</module>
+      <module>metric-report</module>
       <!--    <module>calcite-test</module>-->
   </modules>
 
@@ -20,7 +23,24 @@
     <dependencies>
       <dependency>
         <groupId>org.apache.flink</groupId>
+        <artifactId>flink-table-common</artifactId>
+        <version>${flink.version}</version>
+        <scope>${scope.value}</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-table-api-java-bridge_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.flink</groupId>
         <artifactId>flink-connector-hive_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
         <scope>${scope.value}</scope>
       </dependency>
       <dependency>
@@ -32,98 +52,218 @@
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-table-common</artifactId>
+        <version>${flink.version}</version>
         <scope>${scope.value}</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-orc_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
         <scope>${scope.value}</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-table-api-java-bridge_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-json</artifactId>
+        <version>${flink.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-clients_${scala.binary.version}</artifactId>
+        <version>${flink.version}</version>
+        <scope>${scope.value}</scope>
+      </dependency>
     </dependencies>
 
   </dependencyManagement>
 
 
-  <build>
-<!--    <plugins>-->
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-surefire-plugin</artifactId>-->
-<!--        <configuration>-->
-<!--          <skipTests>true</skipTests>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-compiler-plugin</artifactId>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        &lt;!&ndash; 这个是必须的 &ndash;&gt;-->
-<!--        <groupId>net.alchim31.maven</groupId>-->
-<!--        <artifactId>scala-maven-plugin</artifactId>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-shade-plugin</artifactId>-->
-<!--        <version>3.2.1</version>-->
-<!--        <configuration>-->
-<!--          <createDependencyReducedPom>false</createDependencyReducedPom>-->
-<!--        </configuration>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <phase>package</phase>-->
-<!--            <goals>-->
-<!--              <goal>shade</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <filters>-->
-<!--                <filter>-->
-<!--                  <artifact>*:*</artifact>-->
-<!--                  <excludes>-->
-<!--                    <exclude>META-INF/*.SF</exclude>-->
-<!--                    <exclude>META-INF/*.DSA</exclude>-->
-<!--                    <exclude>META-INF/*.RSA</exclude>-->
-<!--                  </excludes>-->
-<!--                </filter>-->
-<!--              </filters>-->
-<!--              <transformers>-->
-<!--                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">-->
-<!--                  <resource>META-INF/services/org.apache.flink.table.factories.TableFactory</resource>-->
-<!--                </transformer>-->
-<!--                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">-->
-<!--                  <resource>META-INF/services/com.mob.plat.udf.UdfRegister</resource>-->
-<!--                </transformer>-->
-<!--              </transformers>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
+  <build> <pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M5</version>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.scalastyle</groupId>
+        <artifactId>scalastyle-maven-plugin</artifactId>
+        <configuration>
+          <configLocation>${project.basedir}/../resources/file/scalastyle-config.xml</configLocation>
+        </configuration>
+        <version>0.8.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.6.1</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!-- 这个是必须的 -->
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.2.2</version>
+        <executions>
+          <!-- Run scala compiler in the process-resources phase, so that dependencies on
+              scala classes can be resolved later in the (Java) compile phase -->
+          <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
 
-<!--    </plugins>-->
+          <!-- Run scala compiler in the process-test-resources phase, so that dependencies on
+               scala classes can be resolved later in the (Java) test-compile phase -->
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.scala-tools</groupId>
+        <artifactId>maven-scala-plugin</artifactId>
+        <version>2.15.2</version>
+
+        <executions>
+          <execution>
+            <id>compile</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <phase>compile</phase>
+          </execution>
+          <execution>
+            <id>testCompile</id>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+            <phase>test</phase>
+          </execution>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--   jar包打进一个lib下         -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>
+                ${project.build.directory}/lib
+              </outputDirectory>
+              <excludeArtifactIds>
+                spark-core_2.10,
+                spark-streaming_2.10
+              </excludeArtifactIds>
+              <!-- <excludeArtifactIds> spark-core_2.10, json, hbase-client, spark-streaming_2.10
+                  </excludeArtifactIds> <excludeGroupIds> org.apache.hadoop </excludeGroupIds> -->
+
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.1</version>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers combine.children="append">
+                <!-- The service transformer is needed to merge META-INF/services files -->
+                <transformer
+                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!--                <plugin>-->
+      <!--                    <artifactId>maven-assembly-plugin</artifactId>-->
+      <!--                    <version>3.3.0</version>-->
+      <!--                    <configuration>-->
+      <!--                        <descriptorRefs>-->
+      <!--                            <descriptorRef>jar-with-dependencies</descriptorRef>-->
+      <!--                        </descriptorRefs>-->
+      <!--                    </configuration>-->
+      <!--                    <executions>-->
+      <!--                        <execution>-->
+      <!--                            <id>make-assembly</id>-->
+      <!--                            <phase>package</phase>-->
+      <!--                            <goals>-->
+      <!--                                <goal>assembly</goal>-->
+      <!--                            </goals>-->
+      <!--                        </execution>-->
+      <!--                    </executions>-->
+      <!--                </plugin>-->
+    </plugins>
+  </pluginManagement>
   </build>
 </project>
