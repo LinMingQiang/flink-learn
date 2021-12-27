@@ -15,6 +15,7 @@ public class FlinkSQLExplainSrcRead extends FlinkJavaStreamTableTestBase {
     @Test
     public void wordCount() throws Exception {
         // {"rowtime":"2020-01-01 00:00:01","msg":"c"}
+
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
@@ -22,9 +23,13 @@ public class FlinkSQLExplainSrcRead extends FlinkJavaStreamTableTestBase {
                         "test",
                         "json"));
         String selectSQL = "SELECT msg,count(1) from test group by msg";
+
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("test2"));
         System.out.println(tableEnv.explainSql(selectSQL));
-        tableEnv.toRetractStream(tableEnv.sqlQuery(selectSQL), Row.class);
-        streamEnv.execute("");
+        StatementSet set = tableEnv.createStatementSet();
+        set.addInsert("test2", tableEnv.sqlQuery(selectSQL));
+        set.execute().await();
     }
 
     @Test
