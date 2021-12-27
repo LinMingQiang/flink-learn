@@ -4,6 +4,7 @@ import com.ddlsql.DDLSourceSQLManager;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.TableResult;
+import org.apache.flink.types.Row;
 import org.junit.Test;
 
 import java.util.concurrent.ExecutionException;
@@ -15,7 +16,7 @@ public class FlinkUpsertDDLTest extends FlinkJavaStreamTableTestBase {
      * @throws InterruptedException
      */
     @Test
-    public void upsertKafkaTest() throws ExecutionException, InterruptedException {
+    public void upsertKafkaSinkTest() throws ExecutionException, InterruptedException {
         tableEnv.executeSql(DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                 "test",
                 "test",
@@ -27,7 +28,7 @@ public class FlinkUpsertDDLTest extends FlinkJavaStreamTableTestBase {
                 "test2",
                 "test",
                 "json"));
-//        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("test2"));
+//     tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("test2"));
 
        String selectSQL = "SELECT msg,count(1) from test group by msg";
        StatementSet set = tableEnv.createStatementSet();
@@ -35,7 +36,28 @@ public class FlinkUpsertDDLTest extends FlinkJavaStreamTableTestBase {
         TableResult re = set.execute();
         re.await();
     }
-
+    /**
+     * upsert-kafka 只支持从 earliest开始消费 （其实输入数据都是 I和D）
+     * // 查看执行计划就能看懂了，多了一个 ChangelogNormalize 用来处理输入的数据，
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    @Test
+    public void upsertKafkaSourceTest() throws Exception {
+        // {"msg":"c","cnt":10}
+        // 会把数据做state，输出为 +U -U
+        tableEnv.executeSql(DDLSourceSQLManager.createUpsertKafkaSinkTable("localhost:9092",
+                "test2",
+                "test",
+                "test",
+                "json"));
+     tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("test2"));
+        System.out.println(tableEnv.explainSql("insert into test2 select * from test"));
+        StatementSet set = tableEnv.createStatementSet();
+        set.addInsert("test2", tableEnv.from("test"));
+        TableResult re = set.execute();
+        re.await();
+    }
 
     /**
      * mysql -uroot -p123456
