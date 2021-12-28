@@ -66,6 +66,7 @@ public class FlinkUpsertDDLTest extends FlinkJavaStreamTableTestBase {
      *     cnt BIGINT(20)
      * );
      * sink的时候配置了批次和间隔后，对数据的缓存是按key去重之后最后再写出，同一个key只保留最新的记录
+     * {"rowtime":"2020-01-01 00:00:01","msg":"c"}
      */
     @Test
     public void upsertMysql() throws ExecutionException, InterruptedException {
@@ -75,9 +76,12 @@ public class FlinkUpsertDDLTest extends FlinkJavaStreamTableTestBase {
                 "test",
                 "json"));
         tableEnv.executeSql(DDLSourceSQLManager.createUpsertMysqlSinkTable("mysqlSinkTbl"));
-        String selectSQL = "SELECT msg,count(1) cnt from test group by msg";
+//        String selectSQL = "SELECT msg,count(1) cnt from test group by msg";
+
+        System.out.println(tableEnv.explainSql("insert into mysqlSinkTbl SELECT msg,count(1) cnt from test group by msg"));
+
         StatementSet set = tableEnv.createStatementSet();
-        set.addInsert("mysqlSinkTbl", tableEnv.sqlQuery(selectSQL));
+        set.addInsertSql("insert into mysqlSinkTbl SELECT msg,count(1) cnt from test group by msg");
         TableResult re = set.execute();
         re.await();
     }

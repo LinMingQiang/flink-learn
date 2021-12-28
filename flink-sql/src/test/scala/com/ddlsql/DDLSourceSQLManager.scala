@@ -192,7 +192,7 @@ object DDLSourceSQLManager {
        |'username'='root',
        |'password'='123456',
        |'sink.buffer-flush.max-rows'='10', -- 这个是数据进入mysqlsink的条数
-       |'sink.buffer-flush.interval'='60s'
+       |'sink.buffer-flush.interval'='3s'
        |)""".stripMargin
   }
   /**
