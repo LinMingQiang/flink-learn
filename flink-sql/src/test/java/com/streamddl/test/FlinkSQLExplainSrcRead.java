@@ -15,14 +15,14 @@ public class FlinkSQLExplainSrcRead extends FlinkJavaStreamTableTestBase {
     @Test
     public void wordCount() throws Exception {
         // {"rowtime":"2020-01-01 00:00:01","msg":"c"}
-
+        tableEnv.executeSql("CREATE FUNCTION hll_distinct AS 'com.flink.learn.sql.func.HyperLogCountDistinctAgg'");
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
                         "test",
                         "test",
                         "test",
                         "json"));
-        String selectSQL = "SELECT msg,count(1) from test group by msg";
+        String selectSQL = "SELECT msg,hll_distinct(uid) from test group by msg";
 
         tableEnv.executeSql(
                 DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("test2"));

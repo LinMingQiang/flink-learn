@@ -38,8 +38,17 @@ under the License.
             <scope>${scope.value}</scope>
         </dependency>
         <dependency>
+            <groupId>io.airlift</groupId>
+            <artifactId>slice</artifactId>
+            <version>0.37</version>
+        </dependency>
 
-
+        <dependency>
+            <groupId>io.airlift</groupId>
+            <artifactId>stats</artifactId>
+            <version>0.177</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
         </dependency>
