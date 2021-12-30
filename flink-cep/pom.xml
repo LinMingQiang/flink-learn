@@ -2,7 +2,7 @@
   <parent>
     <artifactId>flink-learn</artifactId>
     <groupId>com.flink.learn</groupId>
-    <version>1.13.0</version>
+    <version>1.13.3</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

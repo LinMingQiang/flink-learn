@@ -49,13 +49,16 @@ public class ConsumerReport extends AbstractReporter implements Scheduled {
     @Override
     public void report() {
         for (Map.Entry<Counter, String> metric : counters.entrySet()) {
+            if(metric.getValue().contains("jdbcSinkMetric"))
             LOG.info("[Origin Counters] " + metric.getValue() + ": " + metric.getKey().getCount());
         }
         // localhost.jobmanager.Status.JVM.Memory.Direct.Count  : 11
         for (Map.Entry<Gauge<?>, String> metric : gauges.entrySet()) {
+            if(metric.getValue().contains("jdbcSinkMetric"))
             LOG.info("[Origin Guages] " + metric.getValue() + ":" + metric.getKey().getValue());
         }
         for (Map.Entry<Meter, String> metric : meters.entrySet()) {
+            if(metric.getValue().contains("jdbcSinkMetric"))
             LOG.info("[Origin Meters] " + metric.getValue() + ": count=" + metric.getKey().getCount() + ",rate=" + metric.getKey().getRate());
         }
         for (Map.Entry<Histogram, String> metric : histograms.entrySet()) {

@@ -138,4 +138,33 @@ public class FlinkSQLExplainSrcRead extends FlinkJavaStreamTableTestBase {
 //        +- TableSourceScan(table=[[default_catalog, default_database, test, watermark=[-($0, 10000:INTERVAL SECOND)]]], fields=[rowtime, msg, uid, topic, offset])
     }
 
+
+    @Test
+    public void miniBatchHLLResultIsZeroErr() throws Exception {
+        // {"rowtime":"2020-01-01 00:00:01","msg":"3"}
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+                        "test",
+                        "test",
+                        "test",
+                        "json"));
+        Configuration configuration = tableEnv.getConfig().getConfiguration();
+        configuration.setString("table.exec.mini-batch.enabled", "true"); // enable mini-batch optimization
+        configuration.setString("table.exec.mini-batch.allow-latency", "5 s"); // use 5 seconds to buffer input records
+        configuration.setString("table.exec.mini-batch.size", "5000");
+        configuration.setString("table.optimizer.agg-phase-strategy", "TWO_PHASE"); // enable two-phase, i.e. local-global aggregation
+        tableEnv.executeSql("CREATE FUNCTION hll_distinct AS 'com.flink.learn.sql.func.HyperLogCountDistinctAgg'");
+
+
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("mysqlSinkTbl"));
+        System.out.println(tableEnv.explainSql("insert into mysqlSinkTbl SELECT msg,hll_distinct(msg) cnt from test group by msg"));
+        StatementSet set = tableEnv.createStatementSet();
+        set.addInsertSql("insert into mysqlSinkTbl SELECT msg,hll_distinct(msg) cnt from test group by msg");
+        set.execute().await();
+
+//        System.out.println(tableEnv.explainSql(selectSQL));
+//        tableEnv.toRetractStream(tableEnv.sqlQuery(selectSQL), Row.class);
+//        streamEnv.execute("");
+    }
+
 }
