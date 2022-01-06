@@ -2,17 +2,15 @@ package common.rest.httputil;
 
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.Map;
 
 public class OkHttp3Client {
 
-    private  static OkHttpClient asynokHttpClient = null;
+    private static OkHttpClient asynokHttpClient = null;
+
     /**
      * @param url
      */
@@ -24,7 +22,7 @@ public class OkHttp3Client {
                 .method("GET", null)
                 .build();
         Call call = okHttpClient.newCall(request);
-         Response response = call.execute();
+        Response response = call.execute();
         // String str = response.body().string();
         String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
         return str;
@@ -33,10 +31,10 @@ public class OkHttp3Client {
     /**
      * @param url
      */
-    public static String getWithParameter(String url, Map<String,String> para) throws IOException {
+    public static String getWithParameter(String url, Map<String, String> para) throws IOException {
         OkHttpClient okHttpClient = new OkHttpClient();
         FormBody.Builder formBody = new FormBody.Builder();
-        para.forEach((x,y)->{
+        para.forEach((x, y) -> {
             formBody.add(x, y);
         });
         Request request = new Request
@@ -49,12 +47,13 @@ public class OkHttp3Client {
         String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
         return str;
     }
+
     /**
      * @param url
      * @param callback
      */
     public static void asynGet(String url, Callback callback) {
-        if(asynokHttpClient == null)
+        if (asynokHttpClient == null)
             asynokHttpClient = new OkHttpClient();
         Request request = new Request
                 .Builder()
@@ -65,11 +64,12 @@ public class OkHttp3Client {
         call.enqueue(callback);
         call.cancel();
     }
-    public static void closeAsyn(){
+
+    public static void closeAsyn() {
     }
 
 
-    public static String post(String url) throws IOException {
+    public static String post(String url, String json) throws IOException {
         RequestBody formBody = new FormBody.Builder()
                 .add("username", "test")
                 .add("password", "test")
@@ -87,6 +87,8 @@ public class OkHttp3Client {
     }
 
     public static String postJson(String url, String json) throws IOException {
+        if (asynokHttpClient == null)
+            asynokHttpClient = new OkHttpClient();
         RequestBody body = RequestBody.create(
                 MediaType.parse("application/json"), json);
 
@@ -100,5 +102,4 @@ public class OkHttp3Client {
         String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
         return str;
     }
-
 }

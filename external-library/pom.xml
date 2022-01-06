@@ -15,6 +15,7 @@
       <module>flink-sqlplat</module>
       <module>java-learn</module>
       <module>metric-report</module>
+      <module>flink-sql-gateway</module>
       <!--    <module>calcite-test</module>-->
   </modules>
 
