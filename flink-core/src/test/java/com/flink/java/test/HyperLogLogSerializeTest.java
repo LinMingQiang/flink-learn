@@ -3,7 +3,6 @@ package com.flink.java.test;
 import com.clearspring.analytics.stream.cardinality.HyperLogLog;
 import com.clearspring.analytics.stream.cardinality.RegisterSet;
 import com.google.common.hash.BloomFilter;
-
 import java.io.*;
 import java.util.HashMap;
 
@@ -14,38 +13,18 @@ public class HyperLogLogSerializeTest {
      */
     public static void main(String[] args) throws Exception {
         // 0.0075 和0.00075，对象大小差100倍，大小只跟精度有关系
-//        HyperLogLog hll = new HyperLogLog(0.0055);
-//        hll.offer("1");
-//        hll.offer("2");
-//        hll.offer("3");
-//        hll.offer("4");
-//        hll.offer("1");
-//        for (int i = 0; i < 10000; i++) {
-//            hll.offer(""+i);
-//        }
-        HashMap<String, String> h = new HashMap<>();  // 10w - 4290k
-        HyperLogLog hll = new HyperLogLog(0.0075); // 11k
-        // hll的大小只和精度有关
-        for(int i = 0; i< 10000; i++){
-            hll.offer(""+i);
+        // 0.0075：11kb 0.005：22k
+        // 1%:6k 3%:800b
+//        HashMap<String, String> h = new HashMap<>();  // 10w - 4290k
+        HyperLogLog hll = new HyperLogLog(0.03); // 11k
+        for (int i = 0; i < 1000000; i++) {
+            hll.offer(i+":");
         }
         System.out.println(hll.cardinality());
-        System.out.println(hll.offer("11111") + ":" + hll.cardinality()); // true
-        System.out.println(hll.offer("1") + ":" + hll.cardinality()); // true
-        System.out.println(hll.offer("2") + ":" + hll.cardinality()); // false
-        System.out.println(hll.offer("r") + ":" + hll.cardinality()); // false
-        System.out.println(hll.offer("44444444") + ":" + hll.cardinality()); // true
-        System.out.println(hll.offer("11111111") + ":" + hll.cardinality()); // false
-        System.out.println(hll.offer("aa") + ":" + hll.cardinality()); // false
-//        System.out.println(hll.offerHashed("11111".hashCode()) + ":" + hll.cardinality()); // true
-//        System.out.println(hll.offerHashed("1".hashCode()) + ":" + hll.cardinality()); // true
-//        System.out.println(hll.offerHashed("2".hashCode()) + ":" + hll.cardinality()); // false
-//        System.out.println(hll.offerHashed("r".hashCode()) + ":" + hll.cardinality()); // false
-//        System.out.println(hll.offerHashed("44444444".hashCode()) + ":" + hll.cardinality()); // true
-//        System.out.println(hll.offerHashed("11111111".hashCode()) + ":" + hll.cardinality()); // false
-//        System.out.println(hll.offerHashed("aa".hashCode()) + ":" + hll.cardinality()); // false
-//        SerializableObjToFile(hll);
-//        SerializableObjToFile(h);
+        SerializableBytesToFile(hll);
+        // hll的大小只和精度有关
+//        SerializableBytesToFile(hll.serialize().getBytes());
+//        SerializableObjToFile(hll.serialize().getBytes());
 //        byte[] bys = objectToByteArray(hll);
 //        HyperLogLog hll2 = (HyperLogLog) byteArrayToObject(bys);
 //
@@ -60,18 +39,26 @@ public class HyperLogLogSerializeTest {
 
 
     // 序列化成文件
-    public static  void SerializableObjToFile(Object obj) throws IOException {
-        FileOutputStream fileOut = new FileOutputStream("/Users/eminem/workspace/flink/flink-learn/resources/file/BloomFilter.ser");
+    public static  void SerializableObjToFile(byte[] bytes) throws IOException {
+        FileOutputStream fileOut = new FileOutputStream("/Users/eminem/workspace/flink/flink-learn/resources/file/hyperloglog.ser");
+        fileOut.write(bytes,0, bytes.length);
+        fileOut.flush();
+        fileOut.close();
+        System.out.println("Serialized data is saved in /tmp/employee.ser");
+    }
+
+
+    // 序列化成文件
+    public static  void SerializableBytesToFile(Object obj) throws IOException {
+        FileOutputStream fileOut = new FileOutputStream("/Users/eminem/workspace/flink/flink-learn/resources/file/hyperloglog.ser");
         ObjectOutputStream out = new ObjectOutputStream(fileOut);
         out.writeObject(obj);
         out.close();
         fileOut.close();
         System.out.println("Serialized data is saved in /tmp/employee.ser");
     }
-
-
     public static Object DeserializableBloomFilter() throws IOException, ClassNotFoundException {
-        FileInputStream fileIn = new FileInputStream("/Users/eminem/workspace/flink/flink-learn/resources/file/BloomFilter.ser");
+        FileInputStream fileIn = new FileInputStream("/Users/eminem/workspace/flink/flink-learn/resources/file/hyperloglog.ser");
         ObjectInputStream in = new ObjectInputStream(fileIn);
         Object e = in.readObject();
         in.close();

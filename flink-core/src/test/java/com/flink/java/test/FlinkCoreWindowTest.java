@@ -126,6 +126,8 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
     /**
      * 数据会在多个窗口重叠， windowstate是keystate。
      * -- 如果用的rudec，重叠其实也还好，都是聚合后的数据
+     * -- 如果是process，最好在之前做一个聚合在process
+     *
      * @throws Exception
      */
     @Test
@@ -136,9 +138,19 @@ public class FlinkCoreWindowTest extends FlinkJavaStreamTableTestBase {
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
                 .keyBy((KeySelector<Tuple2<String, Long>, String>) o -> o.f0)
                 .window(SlidingEventTimeWindows.of(Time.seconds(10), Time.seconds(4)))
-                .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) ->
-                        new Tuple2<>(value1.f0, value1.f1 + value2.f1))
-                .setParallelism(2)
+                .trigger(ContinuousProcessingTimeTrigger.of(Time.seconds(2)))
+//                .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) ->
+//                        new Tuple2<>(value1.f0, value1.f1 + value2.f1))
+                .process(new ProcessWindowFunction<Tuple2<String, Long>, Object, String, TimeWindow>() {
+                    @Override
+                    public void process(String s, ProcessWindowFunction<Tuple2<String, Long>, Object, String, TimeWindow>.Context context,
+                                        Iterable<Tuple2<String, Long>> elements, Collector<Object> out) throws Exception {
+                        elements.forEach(x -> out.collect(x));
+                    }
+                })
+//                .reduce((ReduceFunction<Tuple2<String, Long>>) (value1, value2) ->
+//                        new Tuple2<>(value1.f0, value1.f1 + value2.f1))
+//                .setParallelism(2)
                 .print();
         streamEnv.execute();
     }
