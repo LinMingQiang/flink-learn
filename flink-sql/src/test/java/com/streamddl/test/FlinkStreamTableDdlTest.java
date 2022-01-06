@@ -142,9 +142,9 @@ public class FlinkStreamTableDdlTest extends FlinkJavaStreamTableTestBase {
                 "FROM test o, test2 s " +
                 "WHERE o.msg = s.msg AND" +
                 "      o.rowtime BETWEEN s.rowtime - INTERVAL '4' SECOND AND s.rowtime";
-        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
-
-        streamEnv.execute();
+        System.out.println(tableEnv.explainSql(sql));
+//        tableEnv.toRetractStream(tableEnv.sqlQuery(sql), Row.class).print();
+//        streamEnv.execute();
     }
 
     /**
