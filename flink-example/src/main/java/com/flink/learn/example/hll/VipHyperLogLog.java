@@ -1,4 +1,4 @@
-package com.hll;
+package com.flink.learn.example.hll;
 
 import com.clearspring.analytics.hash.MurmurHash;
 import com.clearspring.analytics.stream.cardinality.CardinalityMergeException;

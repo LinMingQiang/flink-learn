@@ -1,4 +1,4 @@
-package com.hll;
+package com.flink.learn.example.hll;
 
 import java.io.Serializable;
 

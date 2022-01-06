@@ -31,7 +31,8 @@ public class HLLUdafTest {
                     }
                 })
                         .returns(WordWithCount.class);
-        streamTableEnv.createTemporaryView("test", windowCounts);
+        streamTableEnv.createTemporaryView("test", windowCounts
+        );
         String selectSql = "select word,hll_distinct(word) cnt from test group by word";
         streamTableEnv.toRetractStream(streamTableEnv.sqlQuery(selectSql), Row.class).print();
         env.execute("WordCountJobName");

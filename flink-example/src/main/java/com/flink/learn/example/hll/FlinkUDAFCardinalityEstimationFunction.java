@@ -1,4 +1,4 @@
-package com.hll;
+package com.flink.learn.example.hll;
 
 import com.clearspring.analytics.stream.cardinality.CardinalityMergeException;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
