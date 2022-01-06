@@ -1,12 +1,13 @@
+package com.sql.gateway.rest;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.http.util.OkHttp3Client;
 import org.junit.Test;
 
 import java.io.IOException;
 
-public class FlinkSqlGatewayRestTest {
+public class FlinkSqlGatewayRESTApiTest {
 
     /**
      * 组装一个请求的json
@@ -95,7 +96,7 @@ public class FlinkSqlGatewayRestTest {
     }
 
     @Test
-    public void testCreateSession() throws IOException {
+    public void testCreateSession() {
         String json = "{\n" +
                 "\t\"planner\": \"blink\",\n" +
                 "    \"execution_type\": \"streaming\"" +
