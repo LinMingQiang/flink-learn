@@ -96,6 +96,14 @@ public class FlinkSqlGatewayRESTApiTest {
     }
 
     @Test
+    public void testGetStreamingResult(){
+        // {"msg":"hello","money":100}
+        String sessionId = "d780c778ff7efc8144b39b4d98bf2942";
+        String jobId = "1b2c87a932ce12b60a1a213845f65e2e";
+        int token = 1;
+        printStreamingResult(sessionId, jobId, token);
+    }
+    @Test
     public void testCreateSession() {
         String json = "{\n" +
                 "\t\"planner\": \"blink\",\n" +
@@ -111,6 +119,16 @@ public class FlinkSqlGatewayRESTApiTest {
         createTable(sessionId, "test", "test");
         String sTablesSql = "show tables";
         sendReq(sessionId, sTablesSql);
+    }
+
+    /**
+     * 只有SET 的话是返回所有配置参数， set xxx = xxx 是设置参数
+     */
+    @Test
+    public void testSetSql() {
+        String sessionId = createSession();
+        String querySQl = "SET";
+        sendReq(sessionId, querySQl);
     }
 
     @Test
