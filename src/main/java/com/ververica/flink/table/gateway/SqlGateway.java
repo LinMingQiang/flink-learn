@@ -125,7 +125,7 @@ public class SqlGateway {
 	// --------------------------------------------------------------------------------------------
 
 	public static void main(String[] args) {
-		checkFlinkVersion();
+//		checkFlinkVersion();
 		final GatewayOptions options = GatewayOptionsParser.parseGatewayOptions(args);
 		if (options.isPrintHelp()) {
 			GatewayOptionsParser.printHelp();
