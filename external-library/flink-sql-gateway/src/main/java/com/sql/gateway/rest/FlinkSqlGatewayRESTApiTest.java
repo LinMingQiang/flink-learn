@@ -231,4 +231,39 @@ public class FlinkSqlGatewayRESTApiTest {
         // 查询结果
         printStreamingResult(sessionId, jobId, 0);
     }
+    @Test
+    public void oneJobMultipleSink(){
+        String sourceTbl = "test";
+        String sinkTbl = "test2";
+        String sinkTbl2 = "test3";
+        String sessionId = createSession();
+        createTable(sessionId, sourceTbl, sourceTbl);
+        createTable(sessionId, sinkTbl, "test2");
+        createTable(sessionId, sinkTbl2, "test2");
+        sendReq(sessionId, "show tables");
+
+// 这个方式提交是两个 job
+//        // 任务1： 执行insert
+        String insertSql = "insert into " + sinkTbl + " select msg,money from  " + sourceTbl + "";
+//        sendReq(sessionId, insertSql);
+//        // 任务2： 执行insert
+        String insertSql2 = "insert into " + sinkTbl + " select msg,money  from  " + sourceTbl + "";
+//        sendReq(sessionId, insertSql2);
+
+// 两种提交方式 这种方式不支持
+        // 任务3： 执行insert
+        String insertSql3 = insertSql+";" + insertSql2;
+        sendReq(sessionId, insertSql3);
+
+        // 插入两数据给 sourceTbl
+        String insertValueSql =
+                "insert into " + sourceTbl + " VALUES ('hello', 100), ('word', 200), ('word', 200)";
+        sendReq(sessionId, insertValueSql);
+
+        // 查询结果
+//        printStreamingResult(sessionId, jobId, 0);
+    }
+
+
+
 }

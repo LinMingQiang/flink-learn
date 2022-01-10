@@ -11,12 +11,14 @@ import com.flink.learn.sql.func.StrSplitTableFunction;
 import com.flink.learn.test.common.FlinkJavaStreamTableTestBase;
 import org.junit.Test;
 
+import java.util.concurrent.ExecutionException;
+
 import static org.apache.flink.table.api.Expressions.$;
 
 public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
     @Test
-    public void writetoJdbcTest() {
+    public void writetoJdbcTest() throws ExecutionException, InterruptedException {
         StatementSet set = tableEnv.createStatementSet();
         tableEnv.getConfig()
                 .getConfiguration()
@@ -31,18 +33,40 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
                         "localhost:9092", "test", "test", "test", "json"));
         tableEnv.executeSql(DDLSourceSQLManager.createFromMysql("mysqltest"));
 
-        System.out.println(
-                tableEnv.explainSql(
-                        "insert into"
-                                + " mysqltest /*+ OPTIONS('sink.buffer-flush.max-rows'='1596282223') */"
-                                + "  select msg,count(1) cnt from test"
-                                + " group by msg"));
+//        System.out.println(
+//                tableEnv.explainSql(
+//                        "insert into"
+//                                + " mysqltest /*+ OPTIONS('sink.buffer-flush.max-rows'='1596282223') */"
+//                                + "  select msg,count(1) cnt from test"
+//                                + " group by msg"));
+
         set.addInsertSql("insert into mysqltest select msg,count(1) cnt from test group by msg");
-        set.addInsertSql("insert into mysqltest select msg,count(1) cnt from test group by msg");
-        set.execute();
+        set.addInsertSql("insert into mysqltest select msg,max(1) cnt from test group by msg");
+        set.execute().await();
         //        TableResult re = tableEnv.executeSql("insert into mysqltest select msg,count(1)
         // cnt from test group by msg");
         //        re.print();
+    }
+
+    @Test
+    public void statementSetTest() throws ExecutionException, InterruptedException {
+        StatementSet set = tableEnv.createStatementSet();
+        tableEnv.getConfig()
+                .getConfiguration()
+                .set(
+                        ConfigOptions.key("table.dynamic-table-options.enabled")
+                                .booleanType()
+                                .defaultValue(true),
+                        true);
+
+        tableEnv.executeSql(
+                DDLSourceSQLManager.createStreamFromKafka(
+                        "localhost:9092", "test", "test", "test", "json"));
+        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printSink"));
+        // 产生一个 StreamGraph里面带两个Sink，两个 Agg， 产生一个 JobGraph
+        set.addInsertSql("insert into printSink select msg,count(1) cnt from test group by msg");
+        set.addInsertSql("insert into printSink select msg,max(1) cnt from test group by msg");
+        set.execute().await();
     }
 
     @Test
