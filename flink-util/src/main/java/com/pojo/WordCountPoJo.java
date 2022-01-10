@@ -11,8 +11,7 @@ public class WordCountPoJo {
         if (this == o) return true;
         if (!(o instanceof WordCountPoJo)) return false;
         WordCountPoJo that = (WordCountPoJo) o;
-        return num == that.num &&
-                Objects.equals(word, that.word);
+        return num == that.num && Objects.equals(word, that.word);
     }
 
     @Override
@@ -43,12 +42,8 @@ public class WordCountPoJo {
 
     @Override
     public String toString() {
-        return "WordCountPoJo{" +
-                "word='" + word + '\'' +
-                ", num=" + num +
-                '}';
+        return "WordCountPoJo{" + "word='" + word + '\'' + ", num=" + num + '}';
     }
 
-    public WordCountPoJo() {
-    }
+    public WordCountPoJo() {}
 }

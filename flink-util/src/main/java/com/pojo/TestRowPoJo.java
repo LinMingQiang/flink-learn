@@ -4,19 +4,26 @@ import org.apache.flink.table.annotation.DataTypeHint;
 
 public class TestRowPoJo {
 
-    public  String topic,msg;
+    public String topic, msg;
     public Long offsets;
+
     @DataTypeHint("RAW")
-    public  DayMonthHour oay_month_hour;
+    public DayMonthHour oay_month_hour;
 
     @Override
     public String toString() {
-        return "TestRowPoJo{" +
-                "topic='" + topic + '\'' +
-                ", msg='" + msg + '\'' +
-                ", offsets=" + offsets +
-                ", oay_month_hour=" + oay_month_hour +
-                '}';
+        return "TestRowPoJo{"
+                + "topic='"
+                + topic
+                + '\''
+                + ", msg='"
+                + msg
+                + '\''
+                + ", offsets="
+                + offsets
+                + ", oay_month_hour="
+                + oay_month_hour
+                + '}';
     }
 
     public Long getOffsets() {
@@ -43,7 +50,6 @@ public class TestRowPoJo {
         this.msg = msg;
     }
 
-
     public DayMonthHour getoay_month_hour() {
         return oay_month_hour;
     }
@@ -59,6 +65,5 @@ public class TestRowPoJo {
         this.oay_month_hour = oay_month_hour;
     }
 
-    public TestRowPoJo() {
-    }
+    public TestRowPoJo() {}
 }

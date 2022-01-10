@@ -6,9 +6,7 @@ import com.google.common.hash.Funnels;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- * 布隆过滤器，可以动态扩容
- */
+/** 布隆过滤器，可以动态扩容 */
 public class BloomFilterScalable implements Serializable {
     // 记录没个布隆的存储个数
     public ArrayList<BloomFilterInfo> bloomFilterList = new ArrayList<>();
@@ -38,8 +36,7 @@ public class BloomFilterScalable implements Serializable {
         return fpp;
     }
 
-    public BloomFilterScalable() {
-    }
+    public BloomFilterScalable() {}
 
     public void setFpp(Double fpp) {
         this.fpp = fpp;
@@ -49,14 +46,13 @@ public class BloomFilterScalable implements Serializable {
         return currentUV;
     }
 
-
     /**
      * 有误差率，比实际要少1% - 3% ，这里用这个方式的会乘上
      *
      * @return
      */
     public Long getRealCurrentUV(int ratio) {
-        return (currentUV * (100+ratio))/100L;
+        return (currentUV * (100 + ratio)) / 100L;
     }
 
     public void setCurrentUV(Long currentUV) {
@@ -93,6 +89,7 @@ public class BloomFilterScalable implements Serializable {
 
     /**
      * 插入的同时返回是否为新id
+     *
      * @param id
      * @return true表示新id
      */
@@ -109,7 +106,7 @@ public class BloomFilterScalable implements Serializable {
                 hasPut = true;
                 break;
             } else { // 满了，要判断一下存不存在
-                if(element.mightContain(id)) {
+                if (element.mightContain(id)) {
                     hasPut = true;
                     break;
                 }
@@ -122,7 +119,6 @@ public class BloomFilterScalable implements Serializable {
         }
         return newId;
     }
-
 
     /**
      * @param id
@@ -137,11 +133,9 @@ public class BloomFilterScalable implements Serializable {
         return false;
     }
 
-
     public int getBloomNum() {
         return bloomFilterList.size();
     }
-
 
     public class BloomFilterInfo implements Serializable {
         public BloomFilter<CharSequence> bloomFilter;
@@ -153,8 +147,7 @@ public class BloomFilterScalable implements Serializable {
         }
 
         /**
-         * bloomFilter.put(id) ： 当布隆发生了变化返回true表示一个新值，如果返回false也有可能是一个新值，
-         * 如果用put的返回值来判断是否新值，会导致结果偏小，
+         * bloomFilter.put(id) ： 当布隆发生了变化返回true表示一个新值，如果返回false也有可能是一个新值， 如果用put的返回值来判断是否新值，会导致结果偏小，
          * 用mightContain 来累积会导致结果偏小
          *
          * @param id
@@ -173,15 +166,12 @@ public class BloomFilterScalable implements Serializable {
         }
 
         public BloomFilterInfo(int expectedInsertions, Double fpp) {
-            this.bloomFilter = BloomFilter.create(
-                    Funnels.stringFunnel(),
-                    expectedInsertions, fpp);
+            this.bloomFilter = BloomFilter.create(Funnels.stringFunnel(), expectedInsertions, fpp);
             ;
             this.expectedInsertions = expectedInsertions;
         }
 
-        public BloomFilterInfo() {
-        }
+        public BloomFilterInfo() {}
 
         public BloomFilter<CharSequence> getBloomFilter() {
             return bloomFilter;

@@ -13,13 +13,17 @@ public class KafkaTopicOffsetMsgPoJo {
 
     @Override
     public String toString() {
-        return "KafkaTopicOffsetMsgPoJo{" +
-                "topic='" + topic + '\'' +
-                ", msg='" + msg + '\'' +
-                ", offset=" + offset +
-                '}';
+        return "KafkaTopicOffsetMsgPoJo{"
+                + "topic='"
+                + topic
+                + '\''
+                + ", msg='"
+                + msg
+                + '\''
+                + ", offset="
+                + offset
+                + '}';
     }
 
-    public KafkaTopicOffsetMsgPoJo() {
-    }
+    public KafkaTopicOffsetMsgPoJo() {}
 }
