@@ -25,6 +25,4 @@ public class HbaseTableFunc extends TableFunction<RowData> {
     public void close() throws Exception {
         super.close();
     }
-
-
 }

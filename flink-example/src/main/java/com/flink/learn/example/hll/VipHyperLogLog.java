@@ -3,16 +3,16 @@ package com.flink.learn.example.hll;
 import com.clearspring.analytics.hash.MurmurHash;
 import com.clearspring.analytics.stream.cardinality.CardinalityMergeException;
 import com.clearspring.analytics.stream.cardinality.ICardinality;
+import com.clearspring.analytics.util.Bits;
 import com.clearspring.analytics.util.IBuilder;
 
 import java.io.*;
-import com.clearspring.analytics.util.Bits;
 
 public class VipHyperLogLog implements ICardinality, Serializable {
 
-    public  RegisterSet registerSet;
-    public  int log2m;
-    public  double alphaMM;
+    public RegisterSet registerSet;
+    public int log2m;
+    public double alphaMM;
 
     public VipHyperLogLog() {
         this(log2m(0.05));
@@ -21,8 +21,8 @@ public class VipHyperLogLog implements ICardinality, Serializable {
     /**
      * Create a new HyperLogLog instance using the specified standard deviation.
      *
-     * @param rsd - the relative standard deviation for the counter.
-     *            smaller values create counters that require more space.
+     * @param rsd - the relative standard deviation for the counter. smaller values create counters
+     *     that require more space.
      */
     public VipHyperLogLog(double rsd) {
         this(log2m(rsd));
@@ -33,10 +33,10 @@ public class VipHyperLogLog implements ICardinality, Serializable {
     }
 
     /**
-     * Create a new HyperLogLog instance.  The log2m parameter defines the accuracy of
-     * the counter.  The larger the log2m the better the accuracy.
-     * <p/>
-     * accuracy = 1.04/sqrt(2^log2m)
+     * Create a new HyperLogLog instance. The log2m parameter defines the accuracy of the counter.
+     * The larger the log2m the better the accuracy.
+     *
+     * <p>accuracy = 1.04/sqrt(2^log2m)
      *
      * @param log2m - the number of bits to use as the basis for the HLL instance
      */
@@ -45,15 +45,15 @@ public class VipHyperLogLog implements ICardinality, Serializable {
     }
 
     /**
-     * Creates a new HyperLogLog instance using the given registers.  Used for unmarshalling a serialized
-     * instance and for merging multiple counters together.
+     * Creates a new HyperLogLog instance using the given registers. Used for unmarshalling a
+     * serialized instance and for merging multiple counters together.
      *
      * @param registerSet - the initial values for the register set
      */
     public VipHyperLogLog(int log2m, RegisterSet registerSet) {
         if (log2m < 0 || log2m > 30) {
-            throw new IllegalArgumentException("log2m argument is "
-                    + log2m + " and is outside the range [0, 30]");
+            throw new IllegalArgumentException(
+                    "log2m argument is " + log2m + " and is outside the range [0, 30]");
         }
         this.registerSet = registerSet;
         this.log2m = log2m;
@@ -67,7 +67,9 @@ public class VipHyperLogLog implements ICardinality, Serializable {
         // j becomes the binary address determined by the first b log2m of x
         // j will be between 0 and 2^log2m
         final int j = (int) (hashedValue >>> (Long.SIZE - log2m));
-        final int r = Long.numberOfLeadingZeros((hashedValue << this.log2m) | (1 << (this.log2m - 1)) + 1) + 1;
+        final int r =
+                Long.numberOfLeadingZeros((hashedValue << this.log2m) | (1 << (this.log2m - 1)) + 1)
+                        + 1;
         return registerSet.updateIfGreater(j, r);
     }
 
@@ -76,7 +78,10 @@ public class VipHyperLogLog implements ICardinality, Serializable {
         // j becomes the binary address determined by the first b log2m of x
         // j will be between 0 and 2^log2m
         final int j = hashedValue >>> (Integer.SIZE - log2m);
-        final int r = Integer.numberOfLeadingZeros((hashedValue << this.log2m) | (1 << (this.log2m - 1)) + 1) + 1;
+        final int r =
+                Integer.numberOfLeadingZeros(
+                                (hashedValue << this.log2m) | (1 << (this.log2m - 1)) + 1)
+                        + 1;
         return registerSet.updateIfGreater(j, r);
     }
 
@@ -85,7 +90,6 @@ public class VipHyperLogLog implements ICardinality, Serializable {
         final int x = MurmurHash.hash(o);
         return offerHashed(x);
     }
-
 
     @Override
     public long cardinality() {
@@ -134,8 +138,8 @@ public class VipHyperLogLog implements ICardinality, Serializable {
 
     /**
      * Add all the elements of the other set to this set.
-     * <p/>
-     * This operation does not imply a loss of precision.
+     *
+     * <p>This operation does not imply a loss of precision.
      *
      * @param other A compatible Hyperloglog instance (same log2m)
      * @throws CardinalityMergeException if other is not compatible
@@ -158,8 +162,7 @@ public class VipHyperLogLog implements ICardinality, Serializable {
         }
 
         for (ICardinality estimator : estimators) {
-            if (!(estimator instanceof VipHyperLogLog)) {
-            }
+            if (!(estimator instanceof VipHyperLogLog)) {}
             VipHyperLogLog hll = (VipHyperLogLog) estimator;
             merged.addAll(hll);
         }
@@ -171,22 +174,17 @@ public class VipHyperLogLog implements ICardinality, Serializable {
         return new SerializationHolder(this);
     }
 
-
     /**
-     * This class exists to support Externalizable semantics for
-     * HyperLogLog objects without having to expose a public
-     * constructor, public write/read methods, or pretend final
-     * fields aren't final.
+     * This class exists to support Externalizable semantics for HyperLogLog objects without having
+     * to expose a public constructor, public write/read methods, or pretend final fields aren't
+     * final.
      *
-     * In short, Externalizable allows you to skip some of the more
-     * verbose meta-data default Serializable gets you, but still
-     * includes the class name. In that sense, there is some cost
-     * to this holder object because it has a longer class name. I
-     * imagine people who care about optimizing for that have their
-     * own work-around for long class names in general, or just use
-     * a custom serialization framework. Therefore we make no attempt
-     * to optimize that here (eg. by raising this from an inner class
-     * and giving it an unhelpful name).
+     * <p>In short, Externalizable allows you to skip some of the more verbose meta-data default
+     * Serializable gets you, but still includes the class name. In that sense, there is some cost
+     * to this holder object because it has a longer class name. I imagine people who care about
+     * optimizing for that have their own work-around for long class names in general, or just use a
+     * custom serialization framework. Therefore we make no attempt to optimize that here (eg. by
+     * raising this from an inner class and giving it an unhelpful name).
      */
     private static class SerializationHolder implements Externalizable {
 
@@ -196,12 +194,8 @@ public class VipHyperLogLog implements ICardinality, Serializable {
             this.hyperLogLogHolder = hyperLogLogHolder;
         }
 
-        /**
-         * required for Externalizable
-         */
-        public SerializationHolder() {
-
-        }
+        /** required for Externalizable */
+        public SerializationHolder() {}
 
         @Override
         public void writeExternal(ObjectOutput out) throws IOException {
@@ -246,7 +240,8 @@ public class VipHyperLogLog implements ICardinality, Serializable {
         public static VipHyperLogLog build(DataInput serializedByteStream) throws IOException {
             int log2m = serializedByteStream.readInt();
             int byteArraySize = serializedByteStream.readInt();
-            return new VipHyperLogLog(log2m,
+            return new VipHyperLogLog(
+                    log2m,
                     new RegisterSet(1 << log2m, Bits.getBits(serializedByteStream, byteArraySize)));
         }
     }
@@ -272,8 +267,9 @@ public class VipHyperLogLog implements ICardinality, Serializable {
                 return (0.7213 / (1 + 1.079 / m)) * m * m;
         }
     }
+
     public static int log2m(Double rsd) {
-        return (int)(Math.log((1.106 / rsd) * (1.106 / rsd)) / Math.log(2));
+        return (int) (Math.log((1.106 / rsd) * (1.106 / rsd)) / Math.log(2));
     }
 
     protected static double linearCounting(int m, double V) {

@@ -1,14 +1,5 @@
 package com.flink.learn.entry;
 
-import com.flink.common.core.EnvironmentalKey;
-import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.core.FlinkEvnBuilder;
-import com.flink.common.deserialize.KafkaMessageDeserialize;
-import com.manager.KafkaSourceManager;
-import com.flink.common.kafka.KafkaManager;
-import com.flink.common.kafka.KafkaManager.KafkaMessge;
-
-import com.func.processfunc.StreamConnectCoProcessFunc;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -18,48 +9,65 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.OutputTag;
 
+import com.core.FlinkEvnBuilder;
+import com.flink.common.core.EnvironmentalKey;
+import com.flink.common.core.FlinkLearnPropertiesUtil;
+import com.flink.common.deserialize.KafkaMessageDeserialize;
+import com.flink.common.kafka.KafkaManager.KafkaMessge;
+import com.func.processfunc.StreamConnectCoProcessFunc;
+import com.manager.KafkaSourceManager;
+
 import java.time.Duration;
 
 public class FlinkCoreOperatorEntry {
     public static StreamExecutionEnvironment streamEnv = null;
 
     public static void main(String[] args) throws Exception {
-        FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(),
-                "WordCountEntry");
-        streamEnv = FlinkEvnBuilder.buildStreamingEnv(FlinkLearnPropertiesUtil.param(),
-                FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
-                FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());
-//        StreamTableEnvironment tableEnv = FlinkEvnBuilder.buildStreamTableEnv(
-//                streamEnv,
-//                Time.minutes(1),
-//                Time.minutes(6));
-        if(args.length > 0) {
+        FlinkLearnPropertiesUtil.init(EnvironmentalKey.LOCAL_PROPERTIES_PATH(), "WordCountEntry");
+        streamEnv =
+                FlinkEvnBuilder.buildStreamingEnv(
+                        FlinkLearnPropertiesUtil.param(),
+                        FlinkLearnPropertiesUtil.CHECKPOINT_PATH(),
+                        FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL());
+        //        StreamTableEnvironment tableEnv = FlinkEvnBuilder.buildStreamTableEnv(
+        //                streamEnv,
+        //                Time.minutes(1),
+        //                Time.minutes(6));
+        if (args.length > 0) {
             switch (args[0]) {
-                case "runWordCount": runWordCount(); break;
-                case "runStreamConnect":  runStreamConnect(); break;
+                case "runWordCount":
+                    runWordCount();
+                    break;
+                case "runStreamConnect":
+                    runStreamConnect();
+                    break;
                 default:
-                    System.out.println("未匹配 ：" + args[0]);break;
+                    System.out.println("未匹配 ：" + args[0]);
+                    break;
             }
         } else {
             runWordCount();
         }
-        streamEnv.execute("FlinkCoreOperatorEntry"); //程序名
+        streamEnv.execute("FlinkCoreOperatorEntry"); // 程序名
     }
 
-
-    /**
-     * wordcount
-     */
+    /** wordcount */
     public static void runWordCount() {
         DataStreamSource<KafkaMessge> s1 =
-                KafkaSourceManager.getKafkaDataStream(streamEnv, "test", "localhost:9092", "latest", new KafkaMessageDeserialize());
+                KafkaSourceManager.getKafkaDataStream(
+                        streamEnv,
+                        "test",
+                        "localhost:9092",
+                        "latest",
+                        new KafkaMessageDeserialize());
 
-        s1
-                .flatMap((FlatMapFunction<KafkaMessge, String>) (value, out) -> {
-                    for (String s : value.msg().split(",", -1)) {
-                        out.collect(s);
-                    }
-                })
+        s1.flatMap(
+                        (FlatMapFunction<KafkaMessge, String>)
+                                (value, out) -> {
+                                    for (String s : value.msg().split(",", -1)) {
+                                        out.collect(s);
+                                    }
+                                })
                 .returns(Types.STRING)
                 .map(x -> new Tuple2(x, 1L))
                 .returns(Types.TUPLE(Types.STRING, Types.LONG))
@@ -68,41 +76,44 @@ public class FlinkCoreOperatorEntry {
                 .print();
     }
 
-
     public static void runStreamConnect() throws Exception {
         // 10s过期
-        OutputTag<String> rejectedWordsTag = new OutputTag<String>("rejected") {
-        };
+        OutputTag<String> rejectedWordsTag = new OutputTag<String>("rejected") {};
         SingleOutputStreamOperator<KafkaMessge> a =
-                KafkaSourceManager.getKafkaDataStream(streamEnv,
-                        "test",
-                        "localhost:9092",
-                        "latest", new KafkaMessageDeserialize())
+                KafkaSourceManager.getKafkaDataStream(
+                                streamEnv,
+                                "test",
+                                "localhost:9092",
+                                "latest",
+                                new KafkaMessageDeserialize())
                         .assignTimestampsAndWatermarks(
-                                WatermarkStrategy.<KafkaMessge>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-                                        .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
+                                WatermarkStrategy.<KafkaMessge>forBoundedOutOfOrderness(
+                                                Duration.ofSeconds(10))
+                                        .withTimestampAssigner(
+                                                ((element, recordTimestamp) -> element.ts())))
                         .setParallelism(2);
 
         SingleOutputStreamOperator<KafkaMessge> b =
-                KafkaSourceManager.getKafkaDataStream(streamEnv,
-                        "test2",
-                        "localhost:9092",
-                        "latest", new KafkaMessageDeserialize())
+                KafkaSourceManager.getKafkaDataStream(
+                                streamEnv,
+                                "test2",
+                                "localhost:9092",
+                                "latest",
+                                new KafkaMessageDeserialize())
                         .assignTimestampsAndWatermarks(
-                                WatermarkStrategy.<KafkaMessge>forBoundedOutOfOrderness(Duration.ofSeconds(10))
-                                        .withTimestampAssigner(((element, recordTimestamp) -> element.ts())))
+                                WatermarkStrategy.<KafkaMessge>forBoundedOutOfOrderness(
+                                                Duration.ofSeconds(10))
+                                        .withTimestampAssigner(
+                                                ((element, recordTimestamp) -> element.ts())))
                         .setParallelism(2);
 
         SingleOutputStreamOperator resultStream =
-                a
-                        .connect(b)
+                a.connect(b)
                         .keyBy(KafkaMessge::msg, KafkaMessge::msg)
                         .process(new StreamConnectCoProcessFunc(rejectedWordsTag))
                         .setParallelism(2);
 
-
         resultStream.returns(Types.STRING).print();
         resultStream.getSideOutput(rejectedWordsTag).print();
-
     }
 }

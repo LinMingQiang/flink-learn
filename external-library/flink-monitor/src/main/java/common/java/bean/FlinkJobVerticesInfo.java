@@ -17,11 +17,17 @@ public class FlinkJobVerticesInfo {
 
     @Override
     public String toString() {
-        return "FlinkJobVerticesInfo{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", parallelism=" + parallelism +
-                ", metrics=" + metrics +
-                '}';
+        return "FlinkJobVerticesInfo{"
+                + "id='"
+                + id
+                + '\''
+                + ", name='"
+                + name
+                + '\''
+                + ", parallelism="
+                + parallelism
+                + ", metrics="
+                + metrics
+                + '}';
     }
 }

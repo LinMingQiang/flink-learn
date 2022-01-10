@@ -1,6 +1,5 @@
 package com.func.richfunc;
 
-import com.flink.common.core.FlinkLearnPropertiesUtil;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -12,13 +11,16 @@ import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.types.Row;
+
+import com.flink.common.core.FlinkLearnPropertiesUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class HbaseAsyncSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>>
         implements CheckpointedFunction {
     private int flushSize = 1000;
-    private ListState<Row> checkpointedState = null;// checkpoint state
+    private ListState<Row> checkpointedState = null; // checkpoint state
     private HashMap<String, Row> bufferedElements = new HashMap(); // buffer List
 
     public HbaseAsyncSinkFunction(int flushSize) {
@@ -44,9 +46,8 @@ public class HbaseAsyncSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        ParameterTool p = (ParameterTool) getRuntimeContext()
-                .getExecutionConfig()
-                .getGlobalJobParameters();
+        ParameterTool p =
+                (ParameterTool) getRuntimeContext().getExecutionConfig().getGlobalJobParameters();
         FlinkLearnPropertiesUtil.init(p);
         // init hbase conn
     }
@@ -60,7 +61,7 @@ public class HbaseAsyncSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row
         commitFlush();
     }
 
-    public void commitFlush(){
+    public void commitFlush() {
         for (Map.Entry<String, Row> r : bufferedElements.entrySet()) {
             System.out.println("sink : " + r);
         }
@@ -69,17 +70,13 @@ public class HbaseAsyncSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row
 
     @Override
     public void initializeState(FunctionInitializationContext context) throws Exception {
-        ListStateDescriptor descriptor = new ListStateDescriptor<Row>(
-                "hbase-sink-ckp",
-                TypeInformation.of(Row.class)
-        );
-        checkpointedState = context.getOperatorStateStore()
-                .getListState(descriptor);
+        ListStateDescriptor descriptor =
+                new ListStateDescriptor<Row>("hbase-sink-ckp", TypeInformation.of(Row.class));
+        checkpointedState = context.getOperatorStateStore().getListState(descriptor);
         if (context.isRestored()) {
             for (Row element : checkpointedState.get()) {
                 bufferedElements.put(element.getField(0).toString(), element);
             }
         }
-
     }
 }

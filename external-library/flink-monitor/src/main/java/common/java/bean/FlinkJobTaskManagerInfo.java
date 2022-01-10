@@ -3,7 +3,7 @@ package common.java.bean;
 import com.alibaba.fastjson.JSONObject;
 
 public class FlinkJobTaskManagerInfo {
-    public String id ;
+    public String id;
     public JSONObject metrics;
 
     public FlinkJobTaskManagerInfo(String id, JSONObject metrics) {
@@ -13,29 +13,24 @@ public class FlinkJobTaskManagerInfo {
 
     @Override
     public String toString() {
-        return "FlinkJobTaskManagerInfo{" +
-                "id='" + id + '\'' +
-                ", metrics=" + metrics +
-                '}';
+        return "FlinkJobTaskManagerInfo{" + "id='" + id + '\'' + ", metrics=" + metrics + '}';
     }
 
     public FlinkJobTaskManagerInfo(JSONObject tmInfo) {
-        if(tmInfo.containsKey("metrics")){
+        if (tmInfo.containsKey("metrics")) {
             metrics = tmInfo.getJSONObject("metrics");
         }
     }
 
-    public Long getHeapMax(){
+    public Long getHeapMax() {
         return metrics.getLong("heapMax");
     }
 
-
-    public Long getHeapUsed(){
+    public Long getHeapUsed() {
         return metrics.getLong("heapUsed");
     }
 
-
-    public Long getRemainHeap(){
+    public Long getRemainHeap() {
         return (getHeapUsed() - getHeapMax());
     }
 }

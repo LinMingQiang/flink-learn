@@ -2,9 +2,7 @@ package com.flink.state.processor.api.pojo;
 
 import java.util.Objects;
 
-/**
- * hashCode 和 equals是必须的，否则无法做key
- */
+/** hashCode 和 equals是必须的，否则无法做key */
 public class WordCountGroupByKey {
     public String getKey() {
         return key;
@@ -16,12 +14,12 @@ public class WordCountGroupByKey {
 
     public String key = "";
 
-    public WordCountGroupByKey(){
+    public WordCountGroupByKey() {}
 
+    public WordCountGroupByKey(String key) {
+        this.key = key;
     }
-    public WordCountGroupByKey(String key){
-      this.key = key;
-    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -37,8 +35,6 @@ public class WordCountGroupByKey {
 
     @Override
     public String toString() {
-        return "WordCountGroupByKey{" +
-                "key='" + key + '\'' +
-                '}';
+        return "WordCountGroupByKey{" + "key='" + key + '\'' + '}';
     }
 }

@@ -14,9 +14,8 @@ import static org.apache.flink.configuration.ConfigOptions.key;
 
 public class HttpSourceFactory implements DynamicTableSourceFactory {
     public static final String IDENTIFIER = "http-source";
-    public static final ConfigOption<String> HTTPURL = key("url")
-            .stringType()
-            .noDefaultValue();
+    public static final ConfigOption<String> HTTPURL = key("url").stringType().noDefaultValue();
+
     @Override
     public DynamicTableSource createDynamicTableSource(Context context) {
         FactoryUtil.TableFactoryHelper helper = FactoryUtil.createTableFactoryHelper(this, context);
@@ -32,7 +31,6 @@ public class HttpSourceFactory implements DynamicTableSourceFactory {
     public String factoryIdentifier() {
         return IDENTIFIER;
     }
-
 
     @Override
     public Set<ConfigOption<?>> requiredOptions() {

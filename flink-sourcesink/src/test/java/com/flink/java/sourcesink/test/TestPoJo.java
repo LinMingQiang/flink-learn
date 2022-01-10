@@ -2,7 +2,7 @@ package com.flink.java.sourcesink.test;
 
 public class TestPoJo {
 
-    public  String topic,msg;
+    public String topic, msg;
     public Long ll;
 
     public String getTopic() {
@@ -27,6 +27,5 @@ public class TestPoJo {
         this.ll = ll;
     }
 
-    public TestPoJo() {
-    }
+    public TestPoJo() {}
 }

@@ -8,15 +8,24 @@ public class FlinkJobsExceptionInfo {
 
     @Override
     public String toString() {
-        return "FlinkJobsExceptionInfo{" +
-                "root_exception='" + root_exception + '\'' +
-                ", timestamp='" + timestamp + '\'' +
-                ", all_exceptions='" + all_exceptions + '\'' +
-                ", truncated='" + truncated + '\'' +
-                '}';
+        return "FlinkJobsExceptionInfo{"
+                + "root_exception='"
+                + root_exception
+                + '\''
+                + ", timestamp='"
+                + timestamp
+                + '\''
+                + ", all_exceptions='"
+                + all_exceptions
+                + '\''
+                + ", truncated='"
+                + truncated
+                + '\''
+                + '}';
     }
 
-    public FlinkJobsExceptionInfo(String root_exception, String timestamp, String all_exceptions, String truncated) {
+    public FlinkJobsExceptionInfo(
+            String root_exception, String timestamp, String all_exceptions, String truncated) {
         this.root_exception = root_exception;
         this.timestamp = timestamp;
         this.all_exceptions = all_exceptions;

@@ -1,7 +1,5 @@
 package actor;
 
-import akka.actor.AbstractActor;
-import akka.actor.Actor;
 import akka.actor.UntypedActor;
 
 public class ReciveActor extends UntypedActor {

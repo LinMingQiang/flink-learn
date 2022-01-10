@@ -12,15 +12,23 @@ public class FLinkJobsCheckpointInfo {
 
     @Override
     public String toString() {
-        return "FLinkJobsCheckpointInfo{" +
-                "summary=" + summary +
-                ", counts=" + counts +
-                ", latest=" + latest +
-                ", history=" + history +
-                '}';
+        return "FLinkJobsCheckpointInfo{"
+                + "summary="
+                + summary
+                + ", counts="
+                + counts
+                + ", latest="
+                + latest
+                + ", history="
+                + history
+                + '}';
     }
 
-    public FLinkJobsCheckpointInfo(JSONObject summary, JSONObject counts, LatestCkpInfo latest, List<CheckpointInfo> history) {
+    public FLinkJobsCheckpointInfo(
+            JSONObject summary,
+            JSONObject counts,
+            LatestCkpInfo latest,
+            List<CheckpointInfo> history) {
         this.summary = summary;
         this.counts = counts;
         this.latest = latest;
@@ -32,24 +40,52 @@ public class FLinkJobsCheckpointInfo {
 
         @Override
         public String toString() {
-            return "CheckpointInfo{" +
-                    "id=" + id +
-                    ", status='" + status + '\'' +
-                    ", is_savepoint=" + is_savepoint +
-                    ", trigger_timestamp=" + trigger_timestamp +
-                    ", latest_ack_timestamp=" + latest_ack_timestamp +
-                    ", state_size=" + state_size +
-                    ", end_to_end_duration=" + end_to_end_duration +
-                    ", alignment_buffered=" + alignment_buffered +
-                    ", num_subtasks=" + num_subtasks +
-                    ", num_acknowledged_subtasks=" + num_acknowledged_subtasks +
-                    ", tasks=" + tasks +
-                    ", external_path='" + external_path + '\'' +
-                    ", discarded=" + discarded +
-                    '}';
+            return "CheckpointInfo{"
+                    + "id="
+                    + id
+                    + ", status='"
+                    + status
+                    + '\''
+                    + ", is_savepoint="
+                    + is_savepoint
+                    + ", trigger_timestamp="
+                    + trigger_timestamp
+                    + ", latest_ack_timestamp="
+                    + latest_ack_timestamp
+                    + ", state_size="
+                    + state_size
+                    + ", end_to_end_duration="
+                    + end_to_end_duration
+                    + ", alignment_buffered="
+                    + alignment_buffered
+                    + ", num_subtasks="
+                    + num_subtasks
+                    + ", num_acknowledged_subtasks="
+                    + num_acknowledged_subtasks
+                    + ", tasks="
+                    + tasks
+                    + ", external_path='"
+                    + external_path
+                    + '\''
+                    + ", discarded="
+                    + discarded
+                    + '}';
         }
 
-        public CheckpointInfo(int id, String status, boolean is_savepoint, long trigger_timestamp, long latest_ack_timestamp, long state_size, int end_to_end_duration, int alignment_buffered, int num_subtasks, int num_acknowledged_subtasks, JSONObject tasks, String external_path, boolean discarded) {
+        public CheckpointInfo(
+                int id,
+                String status,
+                boolean is_savepoint,
+                long trigger_timestamp,
+                long latest_ack_timestamp,
+                long state_size,
+                int end_to_end_duration,
+                int alignment_buffered,
+                int num_subtasks,
+                int num_acknowledged_subtasks,
+                JSONObject tasks,
+                String external_path,
+                boolean discarded) {
             this.id = id;
             this.status = status;
             this.is_savepoint = is_savepoint;
@@ -79,8 +115,9 @@ public class FLinkJobsCheckpointInfo {
         public boolean discarded;
     }
 
-    public class LatestCkpInfo{
-        public LatestCkpInfo(CheckpointInfo completed, String savepoint, String failed, String restored) {
+    public class LatestCkpInfo {
+        public LatestCkpInfo(
+                CheckpointInfo completed, String savepoint, String failed, String restored) {
             this.completed = completed;
             this.savepoint = savepoint;
             this.failed = failed;
@@ -89,12 +126,19 @@ public class FLinkJobsCheckpointInfo {
 
         @Override
         public String toString() {
-            return "LatestCkpInfo{" +
-                    "completed=" + completed +
-                    ", savepoint='" + savepoint + '\'' +
-                    ", failed='" + failed + '\'' +
-                    ", restored='" + restored + '\'' +
-                    '}';
+            return "LatestCkpInfo{"
+                    + "completed="
+                    + completed
+                    + ", savepoint='"
+                    + savepoint
+                    + '\''
+                    + ", failed='"
+                    + failed
+                    + '\''
+                    + ", restored='"
+                    + restored
+                    + '\''
+                    + '}';
         }
 
         public CheckpointInfo completed;

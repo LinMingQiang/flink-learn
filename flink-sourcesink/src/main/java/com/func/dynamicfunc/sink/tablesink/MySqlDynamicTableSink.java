@@ -1,11 +1,12 @@
 package com.func.dynamicfunc.sink.tablesink;
 
-import com.func.dynamicfunc.sink.sinkfunc.MySqlTableRichSinkFunction;
 import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.sink.DynamicTableSink;
 import org.apache.flink.table.connector.sink.SinkFunctionProvider;
 import org.apache.flink.table.types.DataType;
+
+import com.func.dynamicfunc.sink.sinkfunc.MySqlTableRichSinkFunction;
 
 public class MySqlDynamicTableSink implements DynamicTableSink {
     private DataType type;

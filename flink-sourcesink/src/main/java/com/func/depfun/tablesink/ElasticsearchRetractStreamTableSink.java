@@ -1,6 +1,5 @@
 package com.func.depfun.tablesink;
 
-import com.func.richfunc.ElasticSinkFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
@@ -11,6 +10,8 @@ import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
+
+import com.func.richfunc.ElasticSinkFunction;
 
 @Deprecated
 public class ElasticsearchRetractStreamTableSink implements RetractStreamTableSink<Row> {
@@ -25,17 +26,18 @@ public class ElasticsearchRetractStreamTableSink implements RetractStreamTableSi
 
     @Override
     public TypeInformation<Row> getRecordType() {
-        return new RowTypeInfo(getTableSchema().getFieldTypes(),getTableSchema().getFieldNames());
+        return new RowTypeInfo(getTableSchema().getFieldTypes(), getTableSchema().getFieldNames());
     }
 
     @Override
     public TableSchema getTableSchema() {
-        if(ts == null)
-            this.ts = new TableSchema.Builder().fields(fieldNames, fieldTypes).build();
-        return ts;    }
+        if (ts == null) this.ts = new TableSchema.Builder().fields(fieldNames, fieldTypes).build();
+        return ts;
+    }
 
     @Override
-    public TableSink<Tuple2<Boolean, Row>> configure(String[] strings, TypeInformation<?>[] typeInformations) {
+    public TableSink<Tuple2<Boolean, Row>> configure(
+            String[] strings, TypeInformation<?>[] typeInformations) {
         return this;
     }
 
@@ -44,9 +46,9 @@ public class ElasticsearchRetractStreamTableSink implements RetractStreamTableSi
         return dataStream
                 .filter(x -> x.f0)
                 .map(x -> x.f1)
-                .addSink(new ElasticSinkFunction(fieldNames, getTableSchema().getFieldTypes(),
-                        1000,
-                        10))
+                .addSink(
+                        new ElasticSinkFunction(
+                                fieldNames, getTableSchema().getFieldTypes(), 1000, 10))
                 .name(this.getClass().getSimpleName());
     }
 }

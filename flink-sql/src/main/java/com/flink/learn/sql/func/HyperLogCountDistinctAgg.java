@@ -1,11 +1,9 @@
 package com.flink.learn.sql.func;
 
-import com.clearspring.analytics.stream.cardinality.CardinalityMergeException;
-import com.clearspring.analytics.stream.cardinality.ICardinality;
 import org.apache.flink.table.functions.AggregateFunction;
 
-import java.io.IOException;
-import java.io.Serializable;
+import com.clearspring.analytics.stream.cardinality.CardinalityMergeException;
+
 import java.util.Iterator;
 
 public class HyperLogCountDistinctAgg extends AggregateFunction<Long, HyperLogLog> {
@@ -23,6 +21,7 @@ public class HyperLogCountDistinctAgg extends AggregateFunction<Long, HyperLogLo
 
     /**
      * 当开启 mini-batch的时候需要有merge
+     *
      * @param acc
      * @param it
      * @throws CardinalityMergeException
@@ -31,12 +30,13 @@ public class HyperLogCountDistinctAgg extends AggregateFunction<Long, HyperLogLo
         Iterator<HyperLogLog> iter = it.iterator();
         while (iter.hasNext()) {
             HyperLogLog a = iter.next();
-            if(a != null) {
+            if (a != null) {
                 acc.addAll(a);
             }
         }
     }
-    public void accumulate(HyperLogLog acc,  String input) {
+
+    public void accumulate(HyperLogLog acc, String input) {
         acc.offer(input);
     }
 }

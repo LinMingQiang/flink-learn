@@ -5,6 +5,23 @@ package com.format.csvformat;
 // (powered by Fernflower decompiler)
 //
 
+import org.apache.flink.annotation.PublicEvolving;
+import org.apache.flink.api.common.serialization.DeserializationSchema;
+import org.apache.flink.api.common.typeinfo.BasicArrayTypeInfo;
+import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.java.typeutils.ObjectArrayTypeInfo;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
+import org.apache.flink.formats.csv.CsvRowSchemaConverter;
+import org.apache.flink.types.Row;
+import org.apache.flink.util.Preconditions;
+
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectReader;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -16,22 +33,6 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.apache.flink.annotation.PublicEvolving;
-import org.apache.flink.api.common.serialization.DeserializationSchema;
-import org.apache.flink.api.common.typeinfo.BasicArrayTypeInfo;
-import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.typeutils.ObjectArrayTypeInfo;
-import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.apache.flink.formats.csv.CsvRowSchemaConverter;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectReader;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.apache.flink.types.Row;
-import org.apache.flink.util.Preconditions;
-
 @PublicEvolving
 public final class CsvCustomRowDeserializationSchema implements DeserializationSchema<Row> {
     private static final long serialVersionUID = 2135553495874539201L;
@@ -42,7 +43,8 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
     private final ObjectReader objectReader;
     private final boolean ignoreParseErrors;
 
-    private CsvCustomRowDeserializationSchema(RowTypeInfo typeInfo, CsvSchema csvSchema, boolean ignoreParseErrors) {
+    private CsvCustomRowDeserializationSchema(
+            RowTypeInfo typeInfo, CsvSchema csvSchema, boolean ignoreParseErrors) {
         this.typeInfo = typeInfo;
         this.rowTypeInfo = typeInfo;
         this.runtimeConverter = createRowRuntimeConverter(typeInfo, ignoreParseErrors, true);
@@ -77,7 +79,8 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
                 if (this.ignoreParseErrors) {
                     return row;
                 } else {
-                    throw new IOException("Failed to deserialize CSV row '" + new String(message) + "'.", var3);
+                    throw new IOException(
+                            "Failed to deserialize CSV row '" + new String(message) + "'.", var3);
                 }
             }
         }
@@ -97,25 +100,49 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
         } else if (o != null && o.getClass() == this.getClass()) {
             CsvCustomRowDeserializationSchema that = (CsvCustomRowDeserializationSchema) o;
             CsvSchema otherSchema = that.csvSchema;
-            return this.typeInfo.equals(that.typeInfo) && this.ignoreParseErrors == that.ignoreParseErrors && this.csvSchema.getColumnSeparator() == otherSchema.getColumnSeparator() && this.csvSchema.allowsComments() == otherSchema.allowsComments() && this.csvSchema.getArrayElementSeparator().equals(otherSchema.getArrayElementSeparator()) && this.csvSchema.getQuoteChar() == otherSchema.getQuoteChar() && this.csvSchema.getEscapeChar() == otherSchema.getEscapeChar() && Arrays.equals(this.csvSchema.getNullValue(), otherSchema.getNullValue());
+            return this.typeInfo.equals(that.typeInfo)
+                    && this.ignoreParseErrors == that.ignoreParseErrors
+                    && this.csvSchema.getColumnSeparator() == otherSchema.getColumnSeparator()
+                    && this.csvSchema.allowsComments() == otherSchema.allowsComments()
+                    && this.csvSchema
+                            .getArrayElementSeparator()
+                            .equals(otherSchema.getArrayElementSeparator())
+                    && this.csvSchema.getQuoteChar() == otherSchema.getQuoteChar()
+                    && this.csvSchema.getEscapeChar() == otherSchema.getEscapeChar()
+                    && Arrays.equals(this.csvSchema.getNullValue(), otherSchema.getNullValue());
         } else {
             return false;
         }
     }
 
     public int hashCode() {
-        return Objects.hash(new Object[]{this.typeInfo, this.ignoreParseErrors, this.csvSchema.getColumnSeparator(), this.csvSchema.allowsComments(), this.csvSchema.getArrayElementSeparator(), this.csvSchema.getQuoteChar(), this.csvSchema.getEscapeChar(), this.csvSchema.getNullValue()});
+        return Objects.hash(
+                new Object[] {
+                    this.typeInfo,
+                    this.ignoreParseErrors,
+                    this.csvSchema.getColumnSeparator(),
+                    this.csvSchema.allowsComments(),
+                    this.csvSchema.getArrayElementSeparator(),
+                    this.csvSchema.getQuoteChar(),
+                    this.csvSchema.getEscapeChar(),
+                    this.csvSchema.getNullValue()
+                });
     }
 
-    private static CsvCustomRowDeserializationSchema.RuntimeConverter createRowRuntimeConverter(RowTypeInfo rowTypeInfo, boolean ignoreParseErrors, boolean isTopLevel) {
+    private static CsvCustomRowDeserializationSchema.RuntimeConverter createRowRuntimeConverter(
+            RowTypeInfo rowTypeInfo, boolean ignoreParseErrors, boolean isTopLevel) {
         TypeInformation<?>[] fieldTypes = rowTypeInfo.getFieldTypes();
         String[] fieldNames = rowTypeInfo.getFieldNames();
-        CsvCustomRowDeserializationSchema.RuntimeConverter[] fieldConverters = createFieldRuntimeConverters(ignoreParseErrors, fieldTypes);
-        return assembleRowRuntimeConverter(ignoreParseErrors, isTopLevel, fieldNames, fieldConverters);
+        CsvCustomRowDeserializationSchema.RuntimeConverter[] fieldConverters =
+                createFieldRuntimeConverters(ignoreParseErrors, fieldTypes);
+        return assembleRowRuntimeConverter(
+                ignoreParseErrors, isTopLevel, fieldNames, fieldConverters);
     }
 
-    static CsvCustomRowDeserializationSchema.RuntimeConverter[] createFieldRuntimeConverters(boolean ignoreParseErrors, TypeInformation<?>[] fieldTypes) {
-        CsvCustomRowDeserializationSchema.RuntimeConverter[] fieldConverters = new CsvCustomRowDeserializationSchema.RuntimeConverter[fieldTypes.length];
+    static CsvCustomRowDeserializationSchema.RuntimeConverter[] createFieldRuntimeConverters(
+            boolean ignoreParseErrors, TypeInformation<?>[] fieldTypes) {
+        CsvCustomRowDeserializationSchema.RuntimeConverter[] fieldConverters =
+                new CsvCustomRowDeserializationSchema.RuntimeConverter[fieldTypes.length];
 
         for (int i = 0; i < fieldTypes.length; ++i) {
             fieldConverters[i] = createNullableRuntimeConverter(fieldTypes[i], ignoreParseErrors);
@@ -124,7 +151,11 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
         return fieldConverters;
     }
 
-    private static CsvCustomRowDeserializationSchema.RuntimeConverter assembleRowRuntimeConverter(boolean ignoreParseErrors, boolean isTopLevel, String[] fieldNames, CsvCustomRowDeserializationSchema.RuntimeConverter[] fieldConverters) {
+    private static CsvCustomRowDeserializationSchema.RuntimeConverter assembleRowRuntimeConverter(
+            boolean ignoreParseErrors,
+            boolean isTopLevel,
+            String[] fieldNames,
+            CsvCustomRowDeserializationSchema.RuntimeConverter[] fieldConverters) {
         int rowArity = fieldNames.length;
         return (node) -> {
             int nodeSize = node.size();
@@ -142,8 +173,10 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
         };
     }
 
-    private static CsvCustomRowDeserializationSchema.RuntimeConverter createNullableRuntimeConverter(TypeInformation<?> info, boolean ignoreParseErrors) {
-        CsvCustomRowDeserializationSchema.RuntimeConverter valueConverter = createRuntimeConverter(info, ignoreParseErrors);
+    private static CsvCustomRowDeserializationSchema.RuntimeConverter
+            createNullableRuntimeConverter(TypeInformation<?> info, boolean ignoreParseErrors) {
+        CsvCustomRowDeserializationSchema.RuntimeConverter valueConverter =
+                createRuntimeConverter(info, ignoreParseErrors);
         return (node) -> {
             if (node.isNull()) {
                 return null;
@@ -161,7 +194,8 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
         };
     }
 
-    private static CsvCustomRowDeserializationSchema.RuntimeConverter createRuntimeConverter(TypeInformation<?> info, boolean ignoreParseErrors) {
+    private static CsvCustomRowDeserializationSchema.RuntimeConverter createRuntimeConverter(
+            TypeInformation<?> info, boolean ignoreParseErrors) {
         if (info.equals(Types.VOID)) {
             return (node) -> {
                 return null;
@@ -232,19 +266,25 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
             RowTypeInfo rowTypeInfo = (RowTypeInfo) info;
             return createRowRuntimeConverter(rowTypeInfo, ignoreParseErrors, false);
         } else if (info instanceof BasicArrayTypeInfo) {
-            return createObjectArrayRuntimeConverter(((BasicArrayTypeInfo) info).getComponentInfo(), ignoreParseErrors);
+            return createObjectArrayRuntimeConverter(
+                    ((BasicArrayTypeInfo) info).getComponentInfo(), ignoreParseErrors);
         } else if (info instanceof ObjectArrayTypeInfo) {
-            return createObjectArrayRuntimeConverter(((ObjectArrayTypeInfo) info).getComponentInfo(), ignoreParseErrors);
-        } else if (info instanceof PrimitiveArrayTypeInfo && ((PrimitiveArrayTypeInfo) info).getComponentType() == Types.BYTE) {
+            return createObjectArrayRuntimeConverter(
+                    ((ObjectArrayTypeInfo) info).getComponentInfo(), ignoreParseErrors);
+        } else if (info instanceof PrimitiveArrayTypeInfo
+                && ((PrimitiveArrayTypeInfo) info).getComponentType() == Types.BYTE) {
             return createByteArrayRuntimeConverter(ignoreParseErrors);
         } else {
             throw new RuntimeException("Unsupported type information '" + info + "'.");
         }
     }
 
-    private static CsvCustomRowDeserializationSchema.RuntimeConverter createObjectArrayRuntimeConverter(TypeInformation<?> elementType, boolean ignoreParseErrors) {
+    private static CsvCustomRowDeserializationSchema.RuntimeConverter
+            createObjectArrayRuntimeConverter(
+                    TypeInformation<?> elementType, boolean ignoreParseErrors) {
         Class<?> elementClass = elementType.getTypeClass();
-        CsvCustomRowDeserializationSchema.RuntimeConverter elementConverter = createNullableRuntimeConverter(elementType, ignoreParseErrors);
+        CsvCustomRowDeserializationSchema.RuntimeConverter elementConverter =
+                createNullableRuntimeConverter(elementType, ignoreParseErrors);
         return (node) -> {
             int nodeSize = node.size();
             Object[] array = (Object[]) ((Object[]) Array.newInstance(elementClass, nodeSize));
@@ -257,7 +297,8 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
         };
     }
 
-    private static CsvCustomRowDeserializationSchema.RuntimeConverter createByteArrayRuntimeConverter(boolean ignoreParseErrors) {
+    private static CsvCustomRowDeserializationSchema.RuntimeConverter
+            createByteArrayRuntimeConverter(boolean ignoreParseErrors) {
         return (node) -> {
             try {
                 return node.binaryValue();
@@ -273,7 +314,12 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
 
     static void validateArity(int expected, int actual, boolean ignoreParseErrors) {
         if (expected != actual && !ignoreParseErrors) {
-            throw new RuntimeException("Row length mismatch. " + expected + " fields expected but was " + actual + ".");
+            throw new RuntimeException(
+                    "Row length mismatch. "
+                            + expected
+                            + " fields expected but was "
+                            + actual
+                            + ".");
         }
     }
 
@@ -307,7 +353,8 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
             return this;
         }
 
-        public CsvCustomRowDeserializationSchema.Builder setArrayElementDelimiter(String delimiter) {
+        public CsvCustomRowDeserializationSchema.Builder setArrayElementDelimiter(
+                String delimiter) {
             Preconditions.checkNotNull(delimiter, "Array element delimiter must not be null.");
             this.csvSchema = this.csvSchema.rebuild().setArrayElementSeparator(delimiter).build();
             return this;
@@ -329,14 +376,15 @@ public final class CsvCustomRowDeserializationSchema implements DeserializationS
             return this;
         }
 
-        public CsvCustomRowDeserializationSchema.Builder setIgnoreParseErrors(boolean ignoreParseErrors) {
+        public CsvCustomRowDeserializationSchema.Builder setIgnoreParseErrors(
+                boolean ignoreParseErrors) {
             this.ignoreParseErrors = ignoreParseErrors;
             return this;
         }
 
         public CsvCustomRowDeserializationSchema build() {
-            return new CsvCustomRowDeserializationSchema(this.typeInfo, this.csvSchema, this.ignoreParseErrors);
+            return new CsvCustomRowDeserializationSchema(
+                    this.typeInfo, this.csvSchema, this.ignoreParseErrors);
         }
     }
 }
-

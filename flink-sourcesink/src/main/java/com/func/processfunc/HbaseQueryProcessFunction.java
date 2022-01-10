@@ -1,7 +1,5 @@
 package com.func.processfunc;
 
-import com.flink.common.core.FlinkLearnPropertiesUtil;
-import com.flink.common.dbutil.FlinkHbaseFactory;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -14,6 +12,9 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
+
+import com.flink.common.core.FlinkLearnPropertiesUtil;
+import com.flink.common.dbutil.FlinkHbaseFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.slf4j.Logger;
@@ -24,14 +25,14 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @param <IN>  Tuple2<String, KafkaTopicOffsetMsgPoJo>
+ * @param <IN> Tuple2<String, KafkaTopicOffsetMsgPoJo>
  * @param <OUT> WordCountPoJo
  */
 public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<String, IN, OUT>
         implements CheckpointedFunction {
     private Logger _log = LoggerFactory.getLogger(this.getClass());
     private int flushSize = 100;
-    private ListState<IN> checkpointedState = null;// checkpoint state
+    private ListState<IN> checkpointedState = null; // checkpoint state
     private List<IN> bufferedElements = new ArrayList<IN>(); // buffer List
     private List<OUT> queryResBuffer = new ArrayList<>(); // ckp的时候结果
     private AbstractHbaseQueryFunction<IN, OUT> qf = null;
@@ -49,17 +50,15 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        ParameterTool p = (ParameterTool) getRuntimeContext()
-                .getExecutionConfig()
-                .getGlobalJobParameters();
+        ParameterTool p =
+                (ParameterTool) getRuntimeContext().getExecutionConfig().getGlobalJobParameters();
         FlinkLearnPropertiesUtil.init(p);
-        if(tablename != null)
+        if (tablename != null)
             t = FlinkHbaseFactory.getTable(FlinkLearnPropertiesUtil.ZOOKEEPER(), tablename);
         _log.info("Init Hbase Success !");
     }
 
     /**
-     *
      * @param qf
      * @param tablename
      * @param flushSize
@@ -95,12 +94,9 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
 
     @Override
     public void initializeState(FunctionInitializationContext context) throws Exception {
-        ListStateDescriptor descriptor = new ListStateDescriptor(
-                "HbaseQueryRichMapFunction",
-                inType
-        );
-        checkpointedState = context.getOperatorStateStore()
-                .getListState(descriptor);
+        ListStateDescriptor descriptor =
+                new ListStateDescriptor("HbaseQueryRichMapFunction", inType);
+        checkpointedState = context.getOperatorStateStore().getListState(descriptor);
         if (context.isRestored()) {
             for (IN element : checkpointedState.get()) {
                 bufferedElements.add(element);
@@ -119,15 +115,17 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     @Override
     public void processElement(IN value, Context ctx, Collector<OUT> out) throws Exception {
         // 每个元素在最后一次ckp之后10s后执行一次
-        ctx.timerService().registerProcessingTimeTimer(
-                new Date().getTime() + FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL() + 1000L);
+        ctx.timerService()
+                .registerProcessingTimeTimer(
+                        new Date().getTime()
+                                + FlinkLearnPropertiesUtil.CHECKPOINT_INTERVAL()
+                                + 1000L);
         if (!queryResBuffer.isEmpty()) {
             queryResBuffer.forEach(x -> out.collect(x));
             queryResBuffer.clear();
         }
-        if(!queryEmptList.isEmpty()){
-            if(queryEmptOutput != null)
-                queryEmptList.forEach(x -> ctx.output(queryEmptOutput, x));
+        if (!queryEmptList.isEmpty()) {
+            if (queryEmptOutput != null) queryEmptList.forEach(x -> ctx.output(queryEmptOutput, x));
             queryEmptList.clear();
         }
         if (!qf.getRowkey(value).isEmpty()) {
@@ -137,7 +135,7 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
             // query hbase
             for (Tuple2<Result, IN> tmp : qf.queryHbase(t, bufferedElements)) {
                 qf.transResult(tmp, queryResBuffer);
-                if ((tmp.f0 == null || tmp.f0.isEmpty()) &&  queryEmptOutput != null) {
+                if ((tmp.f0 == null || tmp.f0.isEmpty()) && queryEmptOutput != null) {
                     ctx.output(queryEmptOutput, tmp.f1);
                 }
             }
@@ -146,8 +144,7 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
     }
 
     /**
-     * 当没有数据之后，触发最后一个查询结果.
-     * 如果ckp卡主，这里也会延后，所以不会有gap问题
+     * 当没有数据之后，触发最后一个查询结果. 如果ckp卡主，这里也会延后，所以不会有gap问题
      *
      * @param timestamp
      * @param ctx
@@ -161,13 +158,9 @@ public class HbaseQueryProcessFunction<IN, OUT> extends KeyedProcessFunction<Str
             queryResBuffer.forEach(x -> out.collect(x));
             queryResBuffer.clear();
         }
-        if(!queryEmptList.isEmpty()){
-            if(queryEmptOutput != null)
-                queryEmptList.forEach(x -> ctx.output(queryEmptOutput, x));
+        if (!queryEmptList.isEmpty()) {
+            if (queryEmptOutput != null) queryEmptList.forEach(x -> ctx.output(queryEmptOutput, x));
             queryEmptList.clear();
         }
     }
-
-
 }
-

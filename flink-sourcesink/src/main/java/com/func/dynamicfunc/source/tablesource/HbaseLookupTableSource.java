@@ -1,13 +1,14 @@
 package com.func.dynamicfunc.source.tablesource;
 
-import com.func.dynamicfunc.source.tablefunc.HbaseTableFunc;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.source.DynamicTableSource;
 import org.apache.flink.table.connector.source.LookupTableSource;
 import org.apache.flink.table.connector.source.ScanTableSource;
 import org.apache.flink.table.connector.source.TableFunctionProvider;
 
-public class HbaseLookupTableSource implements ScanTableSource,LookupTableSource {
+import com.func.dynamicfunc.source.tablefunc.HbaseTableFunc;
+
+public class HbaseLookupTableSource implements ScanTableSource, LookupTableSource {
 
     // tableFunction
     // LookupRuntimeProvider的实现有两个，一个是同步，一个是异步
@@ -28,7 +29,6 @@ public class HbaseLookupTableSource implements ScanTableSource,LookupTableSource
     public String asSummaryString() {
         return "hbase lookup:";
     }
-
 
     @Override
     public ChangelogMode getChangelogMode() {

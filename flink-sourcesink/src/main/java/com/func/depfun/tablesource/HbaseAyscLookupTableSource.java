@@ -11,20 +11,18 @@ import org.apache.flink.table.sources.LookupableTableSource;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
 
-/**
- * 维表
- */
+/** 维表 */
 @Deprecated
-public class HbaseAyscLookupTableSource implements StreamTableSource<Row>, LookupableTableSource<Row> {
+public class HbaseAyscLookupTableSource
+        implements StreamTableSource<Row>, LookupableTableSource<Row> {
 
     public TableSchema schema;
     public TableFunction<Row> func = null;
     public AsyncTableFunction<Row> asyncFunc = null;
 
-    public HbaseAyscLookupTableSource(TableSchema schema,
-                                      TableFunction<Row> func,
-                                      AsyncTableFunction<Row> asyncFunc) {
-        this.schema=schema;
+    public HbaseAyscLookupTableSource(
+            TableSchema schema, TableFunction<Row> func, AsyncTableFunction<Row> asyncFunc) {
+        this.schema = schema;
         this.func = func;
         this.asyncFunc = asyncFunc;
     }
@@ -44,14 +42,14 @@ public class HbaseAyscLookupTableSource implements StreamTableSource<Row>, Looku
         return asyncFunc != null;
     }
 
-//    @Override
-//    public boolean isBounded() {
-//        return false;
-//    }
+    //    @Override
+    //    public boolean isBounded() {
+    //        return false;
+    //    }
 
     @Override
     public TypeInformation<Row> getReturnType() {
-        return new RowTypeInfo(getTableSchema().getFieldTypes(),getTableSchema().getFieldNames());
+        return new RowTypeInfo(getTableSchema().getFieldTypes(), getTableSchema().getFieldNames());
     }
 
     @Override
@@ -64,7 +62,9 @@ public class HbaseAyscLookupTableSource implements StreamTableSource<Row>, Looku
         return null;
     }
 
-    /***
+    /**
+     * *
+     *
      * @param execEnv
      * @return
      */
@@ -72,7 +72,6 @@ public class HbaseAyscLookupTableSource implements StreamTableSource<Row>, Looku
     public DataStream<Row> getDataStream(StreamExecutionEnvironment execEnv) {
         throw new UnsupportedOperationException("do not support getDataStream");
     }
-
 
     public static final class Builder {
         private String[] fieldNames;
@@ -97,9 +96,8 @@ public class HbaseAyscLookupTableSource implements StreamTableSource<Row>, Looku
             return this;
         }
 
-
-//        public HbaseAyscLookupTableSource build() {
-//            return new HbaseAyscLookupTableSource(fieldNames,connectionField, fieldTypes);
-//        }
+        //        public HbaseAyscLookupTableSource build() {
+        //            return new HbaseAyscLookupTableSource(fieldNames,connectionField, fieldTypes);
+        //        }
     }
 }

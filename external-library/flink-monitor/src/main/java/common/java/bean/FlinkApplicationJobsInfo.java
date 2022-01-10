@@ -12,19 +12,38 @@ public class FlinkApplicationJobsInfo {
 
     @Override
     public String toString() {
-        return "FlinkJobsInfo{" +
-                "duration=" + duration +
-                ", start_time=" + start_time +
-                ", jid='" + jid + '\'' +
-                ", name='" + name + '\'' +
-                ", state='" + state + '\'' +
-                ", end_time=" + end_time +
-                ", last_modification=" + last_modification +
-                ", tasks=" + tasks +
-                '}';
+        return "FlinkJobsInfo{"
+                + "duration="
+                + duration
+                + ", start_time="
+                + start_time
+                + ", jid='"
+                + jid
+                + '\''
+                + ", name='"
+                + name
+                + '\''
+                + ", state='"
+                + state
+                + '\''
+                + ", end_time="
+                + end_time
+                + ", last_modification="
+                + last_modification
+                + ", tasks="
+                + tasks
+                + '}';
     }
 
-    public FlinkApplicationJobsInfo(long duration, long start_time, String jid, String name, String state, long end_time, long last_modification, FlinkJobsTaskInfo tasks) {
+    public FlinkApplicationJobsInfo(
+            long duration,
+            long start_time,
+            String jid,
+            String name,
+            String state,
+            long end_time,
+            long last_modification,
+            FlinkJobsTaskInfo tasks) {
         this.duration = duration;
         this.start_time = start_time;
         this.jid = jid;
@@ -49,21 +68,41 @@ public class FlinkApplicationJobsInfo {
 
         @Override
         public String toString() {
-            return "FlinkJobsTaskInfo{" +
-                    "running=" + running +
-                    ", canceling=" + canceling +
-                    ", canceled=" + canceled +
-                    ", total=" + total +
-                    ", created=" + created +
-                    ", scheduled=" + scheduled +
-                    ", deploying=" + deploying +
-                    ", reconciling=" + reconciling +
-                    ", finished=" + finished +
-                    ", failed=" + failed +
-                    '}';
+            return "FlinkJobsTaskInfo{"
+                    + "running="
+                    + running
+                    + ", canceling="
+                    + canceling
+                    + ", canceled="
+                    + canceled
+                    + ", total="
+                    + total
+                    + ", created="
+                    + created
+                    + ", scheduled="
+                    + scheduled
+                    + ", deploying="
+                    + deploying
+                    + ", reconciling="
+                    + reconciling
+                    + ", finished="
+                    + finished
+                    + ", failed="
+                    + failed
+                    + '}';
         }
 
-        public FlinkJobsTaskInfo(int running, int canceling, int canceled, int total, int created, int scheduled, int deploying, int reconciling, int finished, int failed) {
+        public FlinkJobsTaskInfo(
+                int running,
+                int canceling,
+                int canceled,
+                int total,
+                int created,
+                int scheduled,
+                int deploying,
+                int reconciling,
+                int finished,
+                int failed) {
             this.running = running;
             this.canceling = canceling;
             this.canceled = canceled;
@@ -77,4 +116,3 @@ public class FlinkApplicationJobsInfo {
         }
     }
 }
-

@@ -1,4 +1,5 @@
 package com.flink.learn.test.common;
+
 import com.core.FlinkSourceBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -16,5 +17,4 @@ public class FlinkJavaStreamTableTestBase extends FlinkSourceBuilder implements 
     public void after() {
         System.out.println("Test End");
     }
-
 }

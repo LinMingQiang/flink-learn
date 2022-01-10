@@ -1,6 +1,7 @@
 package com.func.processfunc;
 
 import org.apache.flink.api.java.tuple.Tuple2;
+
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
@@ -15,16 +16,17 @@ public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializabl
     public abstract String getRowkey(IN input);
     /**
      * 查询结果转化
+     *
      * @param res
      * @return
      */
-    public void transResult(List<Tuple2<Result, IN>> res, List<OUT> result){};
+    public void transResult(List<Tuple2<Result, IN>> res, List<OUT> result) {};
 
     public abstract void transResult(Tuple2<Result, IN> res, List<OUT> result);
 
-
     /**
      * 查询逻辑
+     *
      * @param t
      * @return
      * @throws IOException
@@ -46,6 +48,4 @@ public abstract class AbstractHbaseQueryFunction<IN, OUT> implements Serializabl
         }
         return ret;
     }
-
-
 }

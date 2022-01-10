@@ -1,25 +1,18 @@
 package com.flink.sql.parse;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Simple parser for determining the type of command and its parameters.
- */
+/** Simple parser for determining the type of command and its parameters. */
 public final class SqlCommandParser {
 
-    private SqlCommandParser() {
-    }
+    private SqlCommandParser() {}
 
-    /**
-     * @return
-     */
+    /** @return */
     public static List<SqlCommandCall> parse(String file) throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(file));
         List<SqlCommandCall> calls = new ArrayList<>();
@@ -81,46 +74,44 @@ public final class SqlCommandParser {
 
     private static final int DEFAULT_PATTERN_FLAGS = Pattern.CASE_INSENSITIVE | Pattern.DOTALL;
 
-    /**
-     * Supported SQL commands.
-     */
+    /** Supported SQL commands. */
     public enum SqlCommand {
-        INSERT_INTO(
-                "(INSERT\\s+INTO.*)",
-                SINGLE_OPERAND),
+        INSERT_INTO("(INSERT\\s+INTO.*)", SINGLE_OPERAND),
 
         // CREATE [TEMPORARY] VIEW [IF NOT EXISTS] [catalog_name.][db_name.]view_name
         //  [{columnName [, columnName ]* }] [COMMENT view_comment]
         //  AS query_expression
         // flink sql 支持 这个，不需要单独例外处理
-//        CREATE_TABLE(
-//                "(CREATE\\s+TABLE.*)",
-//                SINGLE_OPERAND),
-//        SET(
-//                "SET(\\s+(\\S+)\\s*=(.*))?", // whitespace is only ignored on the left side of '='
-//                (operands) -> {
-//                    if (operands.length < 3) {
-//                        return Optional.empty();
-//                    } else if (operands[0] == null) {
-//                        return Optional.of(new String[0]);
-//                    }
-//                    return Optional.of(new String[]{operands[1], operands[2]});
-//                }),
+        //        CREATE_TABLE(
+        //                "(CREATE\\s+TABLE.*)",
+        //                SINGLE_OPERAND),
+        //        SET(
+        //                "SET(\\s+(\\S+)\\s*=(.*))?", // whitespace is only ignored on the left
+        // side of '='
+        //                (operands) -> {
+        //                    if (operands.length < 3) {
+        //                        return Optional.empty();
+        //                    } else if (operands[0] == null) {
+        //                        return Optional.of(new String[0]);
+        //                    }
+        //                    return Optional.of(new String[]{operands[1], operands[2]});
+        //                }),
 
         DEFAULT("DEFAULT", SINGLE_OPERAND),
-        // CREATE [TEMPORARY] VIEW [IF NOT EXISTS] [catalog_name.][db_name.]view_name
-        //  [{columnName [, columnName ]* }] [COMMENT view_comment]
-        //  AS query_expression
-        // flink 支持这个语句建表
-//        ASSIGNMENT(
-//                "CREATE\\s+VIEW\\s+(\\S+)\\s+AS\\s+(SELECT.*)", // whitespace is only ignored on the left side of '='
-//                        (operands) -> {
-//            if (operands.length < 2) {
-//                return Optional.empty();
-//            }
-//            return Optional.of(new String[]{operands[1], operands[0]});
-//        })
-        ;
+    // CREATE [TEMPORARY] VIEW [IF NOT EXISTS] [catalog_name.][db_name.]view_name
+    //  [{columnName [, columnName ]* }] [COMMENT view_comment]
+    //  AS query_expression
+    // flink 支持这个语句建表
+    //        ASSIGNMENT(
+    //                "CREATE\\s+VIEW\\s+(\\S+)\\s+AS\\s+(SELECT.*)", // whitespace is only ignored
+    // on the left side of '='
+    //                        (operands) -> {
+    //            if (operands.length < 2) {
+    //                return Optional.empty();
+    //            }
+    //            return Optional.of(new String[]{operands[1], operands[0]});
+    //        })
+    ;
 
         public final Pattern pattern;
         public final Function<String, Optional<String>> operandConverter;
@@ -140,9 +131,7 @@ public final class SqlCommandParser {
         }
     }
 
-    /**
-     * Call of SQL command with operands and command type.
-     */
+    /** Call of SQL command with operands and command type. */
     public static class SqlCommandCall {
         public final SqlCommand command;
         public final String sql;
@@ -181,4 +170,3 @@ public final class SqlCommandParser {
         }
     }
 }
-

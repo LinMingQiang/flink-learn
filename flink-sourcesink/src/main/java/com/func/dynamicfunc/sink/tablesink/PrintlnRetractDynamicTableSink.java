@@ -1,10 +1,11 @@
 package com.func.dynamicfunc.sink.tablesink;
 
-import com.func.dynamicfunc.sink.sinkfunc.PrintlnRetractRichSinkFunction;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.sink.DynamicTableSink;
 import org.apache.flink.table.connector.sink.SinkFunctionProvider;
 import org.apache.flink.table.types.DataType;
+
+import com.func.dynamicfunc.sink.sinkfunc.PrintlnRetractRichSinkFunction;
 
 public class PrintlnRetractDynamicTableSink implements DynamicTableSink {
     private final DataType type;
@@ -23,10 +24,10 @@ public class PrintlnRetractDynamicTableSink implements DynamicTableSink {
     }
 
     @Override
-    public SinkRuntimeProvider getSinkRuntimeProvider(Context context)
-    {
+    public SinkRuntimeProvider getSinkRuntimeProvider(Context context) {
         DataStructureConverter converter = context.createDataStructureConverter(type);
-        return SinkFunctionProvider.of(new PrintlnRetractRichSinkFunction(converter, printIdentifier, stdErr));
+        return SinkFunctionProvider.of(
+                new PrintlnRetractRichSinkFunction(converter, printIdentifier, stdErr));
     }
 
     @Override

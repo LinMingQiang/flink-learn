@@ -1,6 +1,5 @@
 package com.factory.deprecatedfactory;
 
-import com.func.depfun.tablesink.PrintlnUpsertStreamTableSink;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.descriptors.DescriptorProperties;
@@ -8,6 +7,8 @@ import org.apache.flink.table.factories.StreamTableSinkFactory;
 import org.apache.flink.table.sinks.StreamTableSink;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
+
+import com.func.depfun.tablesink.PrintlnUpsertStreamTableSink;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -19,33 +20,37 @@ import static org.apache.flink.table.descriptors.FormatDescriptorValidator.FORMA
 import static org.apache.flink.table.descriptors.KafkaValidator.*;
 import static org.apache.flink.table.descriptors.Schema.*;
 import static org.apache.flink.table.descriptors.StreamTableDescriptorValidator.UPDATE_MODE;
-@Deprecated
 
+@Deprecated
 public class PrintlnUpsertStreamFactory implements StreamTableSinkFactory<Tuple2<Boolean, Row>> {
     @Override
-    public StreamTableSink<Tuple2<Boolean, Row>> createStreamTableSink(Map<String, String> properties) {
+    public StreamTableSink<Tuple2<Boolean, Row>> createStreamTableSink(
+            Map<String, String> properties) {
         DescriptorProperties descriptorProperties = new DescriptorProperties(true);
         descriptorProperties.putProperties(properties);
         TableSchema tableSchema = descriptorProperties.getTableSchema(SCHEMA);
-       // bridge to java.sql.Timestamp/Time/Date
-        DataType[] fieldTypes = Arrays.stream(tableSchema.getFieldDataTypes())
-                .map(dt -> {
-                    switch (dt.getLogicalType().getTypeRoot()) {
-                        case TIMESTAMP_WITHOUT_TIME_ZONE:
-                            return dt.bridgedTo(Timestamp.class);
-                        case TIME_WITHOUT_TIME_ZONE:
-                            return dt.bridgedTo(Time.class);
-                        case DATE:
-                            return dt.bridgedTo(Date.class);
-                        default:
-                            return dt;
-                    }
-                })
-                .toArray(DataType[]::new);
+        // bridge to java.sql.Timestamp/Time/Date
+        DataType[] fieldTypes =
+                Arrays.stream(tableSchema.getFieldDataTypes())
+                        .map(
+                                dt -> {
+                                    switch (dt.getLogicalType().getTypeRoot()) {
+                                        case TIMESTAMP_WITHOUT_TIME_ZONE:
+                                            return dt.bridgedTo(Timestamp.class);
+                                        case TIME_WITHOUT_TIME_ZONE:
+                                            return dt.bridgedTo(Time.class);
+                                        case DATE:
+                                            return dt.bridgedTo(Date.class);
+                                        default:
+                                            return dt;
+                                    }
+                                })
+                        .toArray(DataType[]::new);
         return new PrintlnUpsertStreamTableSink(tableSchema.getFieldNames(), fieldTypes);
     }
     /**
      * 必须要有此context 里面的 key(CONNECTOR_TYPE) 的 配置才会匹配到此 factory
+     *
      * @return
      */
     @Override
@@ -58,6 +63,7 @@ public class PrintlnUpsertStreamFactory implements StreamTableSinkFactory<Tuple2
 
     /**
      * 支持的配置，不在这里面的会报错
+     *
      * @return
      */
     @Override

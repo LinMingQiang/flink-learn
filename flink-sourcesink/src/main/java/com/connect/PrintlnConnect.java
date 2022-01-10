@@ -12,30 +12,24 @@ public class PrintlnConnect extends ConnectorDescriptor {
     /**
      * Constructs a {@link ConnectorDescriptor}.
      *
-     * @param type         string that identifies this connector
-     * @param version      property version for backwards compatibility
+     * @param type string that identifies this connector
+     * @param version property version for backwards compatibility
      * @param formatNeeded flag for basic validation of a needed format descriptor
      */
     public PrintlnConnect(String type, int version, boolean formatNeeded) {
         super(type, version, formatNeeded);
     }
-    /**
-     * Connector descriptor for the Apache Kafka message queue.
-     */
+    /** Connector descriptor for the Apache Kafka message queue. */
     public PrintlnConnect() {
         super("printsink", 1, true);
     }
-
-
 
     @Override
     protected Map<String, String> toConnectorProperties() {
         return printProperties;
     }
 
-
     /**
-     *
      * @param key
      * @param value
      * @return

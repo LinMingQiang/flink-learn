@@ -5,8 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.http.util.OkHttp3Client;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class FlinkSqlGatewayRESTApiTest {
 
     /**
@@ -26,18 +24,23 @@ public class FlinkSqlGatewayRESTApiTest {
      * @param tableName
      */
     public static void createTable(String sessionId, String tableName, String topic) {
-        String createSQL = "CREATE TABLE " + tableName + " (" +
-                "  `msg` VARCHAR," +
-                "  `money` BIGINT " +
-                ") WITH (" +
-                "  'connector' = 'kafka'," +
-                "  'topic' = '"+topic+"'," +
-                "  'properties.bootstrap.servers' = 'localhost:9092'," +
-                "  'properties.group.id' = 'test'," +
-                "  'scan.startup.mode' = 'latest-offset'," +
-                "  'format' = 'json'," +
-                "  'json.ignore-parse-errors' = 'true'" +
-                ")";
+        String createSQL =
+                "CREATE TABLE "
+                        + tableName
+                        + " ("
+                        + "  `msg` VARCHAR,"
+                        + "  `money` BIGINT "
+                        + ") WITH ("
+                        + "  'connector' = 'kafka',"
+                        + "  'topic' = '"
+                        + topic
+                        + "',"
+                        + "  'properties.bootstrap.servers' = 'localhost:9092',"
+                        + "  'properties.group.id' = 'test',"
+                        + "  'scan.startup.mode' = 'latest-offset',"
+                        + "  'format' = 'json',"
+                        + "  'json.ignore-parse-errors' = 'true'"
+                        + ")";
         sendReq(sessionId, createSQL);
     }
 
@@ -47,11 +50,14 @@ public class FlinkSqlGatewayRESTApiTest {
      * @return
      */
     public static String createSession() {
-        String json = "{\n" +
-                "\t\"planner\": \"blink\",\n" +
-                "    \"execution_type\": \"streaming\"" +
-                "}";
-        String sessionId = JSON.parseObject(OkHttp3Client.postJson("http://localhost:8083/v1/sessions", json)).getString("session_id");
+        String json =
+                "{\n"
+                        + "\t\"planner\": \"blink\",\n"
+                        + "    \"execution_type\": \"streaming\""
+                        + "}";
+        String sessionId =
+                JSON.parseObject(OkHttp3Client.postJson("http://localhost:8083/v1/sessions", json))
+                        .getString("session_id");
         System.out.println(sessionId);
         return sessionId;
     }
@@ -63,7 +69,10 @@ public class FlinkSqlGatewayRESTApiTest {
      * @param sql
      */
     public static String sendReq(String sessionId, String sql) {
-        String res = OkHttp3Client.postJson("http://localhost:8083/v1/sessions/" + sessionId + "/statements", getRequestJsonStr(sql));
+        String res =
+                OkHttp3Client.postJson(
+                        "http://localhost:8083/v1/sessions/" + sessionId + "/statements",
+                        getRequestJsonStr(sql));
         System.out.println(res);
         return res;
     }
@@ -76,13 +85,18 @@ public class FlinkSqlGatewayRESTApiTest {
      * @param token
      */
     public static void printStreamingResult(String sessionId, String jobId, int token) {
-        String reqURL = "http://localhost:8083/v1/sessions/" + sessionId + "/jobs/" + jobId + "/result/" + token;
+        String reqURL =
+                "http://localhost:8083/v1/sessions/"
+                        + sessionId
+                        + "/jobs/"
+                        + jobId
+                        + "/result/"
+                        + token;
         String result = OkHttp3Client.get(reqURL);
         System.out.println(result);
     }
 
     /**
-     *
      * @param json
      * @return
      */
@@ -96,20 +110,24 @@ public class FlinkSqlGatewayRESTApiTest {
     }
 
     @Test
-    public void testGetStreamingResult(){
+    public void testGetStreamingResult() {
         // {"msg":"hello","money":100}
         String sessionId = "d780c778ff7efc8144b39b4d98bf2942";
         String jobId = "1b2c87a932ce12b60a1a213845f65e2e";
         int token = 1;
         printStreamingResult(sessionId, jobId, token);
     }
+
     @Test
     public void testCreateSession() {
-        String json = "{\n" +
-                "\t\"planner\": \"blink\",\n" +
-                "    \"execution_type\": \"streaming\"" +
-                "}";
-        String sessionId = JSON.parseObject(OkHttp3Client.postJson("http://localhost:8083/v1/sessions", json)).getString("session_id");
+        String json =
+                "{\n"
+                        + "\t\"planner\": \"blink\",\n"
+                        + "    \"execution_type\": \"streaming\""
+                        + "}";
+        String sessionId =
+                JSON.parseObject(OkHttp3Client.postJson("http://localhost:8083/v1/sessions", json))
+                        .getString("session_id");
         System.out.println(sessionId);
     }
 
@@ -121,9 +139,7 @@ public class FlinkSqlGatewayRESTApiTest {
         sendReq(sessionId, sTablesSql);
     }
 
-    /**
-     * 只有SET 的话是返回所有配置参数， set xxx = xxx 是设置参数
-     */
+    /** 只有SET 的话是返回所有配置参数， set xxx = xxx 是设置参数 */
     @Test
     public void testSetSql() {
         String sessionId = createSession();
@@ -169,7 +185,7 @@ public class FlinkSqlGatewayRESTApiTest {
     }
 
     @Test
-    public void testInsert()  {
+    public void testInsert() {
         String tableName = "test";
         String sessionId = createSession();
         createTable(sessionId, tableName, tableName);
@@ -177,7 +193,8 @@ public class FlinkSqlGatewayRESTApiTest {
         String req = sendReq(sessionId, querySQl);
         String jobId = getJobId(req);
         System.out.println(jobId);
-        String insertSql = "insert into " + tableName + " VALUES ('hello', 100), ('word', 200), ('word', 200)";
+        String insertSql =
+                "insert into " + tableName + " VALUES ('hello', 100), ('word', 200), ('word', 200)";
         sendReq(sessionId, insertSql);
 
         printStreamingResult(sessionId, jobId, 0);
@@ -185,6 +202,7 @@ public class FlinkSqlGatewayRESTApiTest {
 
     /**
      * 测试从一个source到另一个sink
+     *
      * @throws InterruptedException
      */
     @Test
@@ -197,7 +215,7 @@ public class FlinkSqlGatewayRESTApiTest {
         sendReq(sessionId, "show tables");
 
         // 任务1： 执行insert
-        String insertSql = "insert into "+sinkTbl+" select msg, money from  " + sourceTbl ;
+        String insertSql = "insert into " + sinkTbl + " select msg, money from  " + sourceTbl;
         sendReq(sessionId, insertSql);
 
         // 任务2： 查询sinkTbl
@@ -207,10 +225,10 @@ public class FlinkSqlGatewayRESTApiTest {
         System.out.println(jobId);
 
         // 插入两数据给 sourceTbl
-        String insertValueSql = "insert into " + sourceTbl + " VALUES ('hello', 100), ('word', 200), ('word', 200)";
+        String insertValueSql =
+                "insert into " + sourceTbl + " VALUES ('hello', 100), ('word', 200), ('word', 200)";
         sendReq(sessionId, insertValueSql);
         // 查询结果
         printStreamingResult(sessionId, jobId, 0);
-
     }
 }

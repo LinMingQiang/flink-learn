@@ -36,42 +36,120 @@ public class ApplicationInfo {
 
     @Override
     public String toString() {
-        return "ApplicationInfo{" +
-                "id='" + id + '\'' +
-                ", user='" + user + '\'' +
-                ", name='" + name + '\'' +
-                ", queue='" + queue + '\'' +
-                ", state='" + state + '\'' +
-                ", finalStatus='" + finalStatus + '\'' +
-                ", trackingUI='" + trackingUI + '\'' +
-                ", trackingUrl='" + trackingUrl + '\'' +
-                ", applicationType='" + applicationType + '\'' +
-                ", priority='" + priority + '\'' +
-                ", startedTime=" + startedTime +
-                ", finishedTime=" + finishedTime +
-                ", elapsedTime=" + elapsedTime +
-                ", amContainerLogs='" + amContainerLogs + '\'' +
-                ", amHostHttpAddress='" + amHostHttpAddress + '\'' +
-                ", amRPCAddress='" + amRPCAddress + '\'' +
-                ", allocatedMB=" + allocatedMB +
-                ", allocatedVCores=" + allocatedVCores +
-                ", runningContainers=" + runningContainers +
-                ", memorySeconds=" + memorySeconds +
-                ", vcoreSeconds=" + vcoreSeconds +
-                ", queueUsagePercentage=" + queueUsagePercentage +
-                ", clusterUsagePercentage=" + clusterUsagePercentage +
-                ", preemptedResourceMB=" + preemptedResourceMB +
-                ", preemptedResourceVCores=" + preemptedResourceVCores +
-                ", numNonAMContainerPreempted=" + numNonAMContainerPreempted +
-                ", numAMContainerPreempted=" + numAMContainerPreempted +
-                ", logAggregationStatus='" + logAggregationStatus + '\'' +
-                ", unmanagedApplication=" + unmanagedApplication +
-                ", appNodeLabelExpression='" + appNodeLabelExpression + '\'' +
-                ", amNodeLabelExpression='" + amNodeLabelExpression + '\'' +
-                '}';
+        return "ApplicationInfo{"
+                + "id='"
+                + id
+                + '\''
+                + ", user='"
+                + user
+                + '\''
+                + ", name='"
+                + name
+                + '\''
+                + ", queue='"
+                + queue
+                + '\''
+                + ", state='"
+                + state
+                + '\''
+                + ", finalStatus='"
+                + finalStatus
+                + '\''
+                + ", trackingUI='"
+                + trackingUI
+                + '\''
+                + ", trackingUrl='"
+                + trackingUrl
+                + '\''
+                + ", applicationType='"
+                + applicationType
+                + '\''
+                + ", priority='"
+                + priority
+                + '\''
+                + ", startedTime="
+                + startedTime
+                + ", finishedTime="
+                + finishedTime
+                + ", elapsedTime="
+                + elapsedTime
+                + ", amContainerLogs='"
+                + amContainerLogs
+                + '\''
+                + ", amHostHttpAddress='"
+                + amHostHttpAddress
+                + '\''
+                + ", amRPCAddress='"
+                + amRPCAddress
+                + '\''
+                + ", allocatedMB="
+                + allocatedMB
+                + ", allocatedVCores="
+                + allocatedVCores
+                + ", runningContainers="
+                + runningContainers
+                + ", memorySeconds="
+                + memorySeconds
+                + ", vcoreSeconds="
+                + vcoreSeconds
+                + ", queueUsagePercentage="
+                + queueUsagePercentage
+                + ", clusterUsagePercentage="
+                + clusterUsagePercentage
+                + ", preemptedResourceMB="
+                + preemptedResourceMB
+                + ", preemptedResourceVCores="
+                + preemptedResourceVCores
+                + ", numNonAMContainerPreempted="
+                + numNonAMContainerPreempted
+                + ", numAMContainerPreempted="
+                + numAMContainerPreempted
+                + ", logAggregationStatus='"
+                + logAggregationStatus
+                + '\''
+                + ", unmanagedApplication="
+                + unmanagedApplication
+                + ", appNodeLabelExpression='"
+                + appNodeLabelExpression
+                + '\''
+                + ", amNodeLabelExpression='"
+                + amNodeLabelExpression
+                + '\''
+                + '}';
     }
 
-    public ApplicationInfo(String id, String user, String name, String queue, String state, String finalStatus, String trackingUI, String trackingUrl, String applicationType, String priority, long startedTime, long finishedTime, long elapsedTime, String amContainerLogs, String amHostHttpAddress, String amRPCAddress, int allocatedMB, int allocatedVCores, int runningContainers, long memorySeconds, long vcoreSeconds, float queueUsagePercentage, float clusterUsagePercentage, long preemptedResourceMB, long preemptedResourceVCores, int numNonAMContainerPreempted, int numAMContainerPreempted, String logAggregationStatus, boolean unmanagedApplication, String appNodeLabelExpression, String amNodeLabelExpression) {
+    public ApplicationInfo(
+            String id,
+            String user,
+            String name,
+            String queue,
+            String state,
+            String finalStatus,
+            String trackingUI,
+            String trackingUrl,
+            String applicationType,
+            String priority,
+            long startedTime,
+            long finishedTime,
+            long elapsedTime,
+            String amContainerLogs,
+            String amHostHttpAddress,
+            String amRPCAddress,
+            int allocatedMB,
+            int allocatedVCores,
+            int runningContainers,
+            long memorySeconds,
+            long vcoreSeconds,
+            float queueUsagePercentage,
+            float clusterUsagePercentage,
+            long preemptedResourceMB,
+            long preemptedResourceVCores,
+            int numNonAMContainerPreempted,
+            int numAMContainerPreempted,
+            String logAggregationStatus,
+            boolean unmanagedApplication,
+            String appNodeLabelExpression,
+            String amNodeLabelExpression) {
         this.id = id;
         this.user = user;
         this.name = name;

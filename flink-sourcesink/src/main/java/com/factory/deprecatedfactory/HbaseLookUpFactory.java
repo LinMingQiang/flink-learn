@@ -1,12 +1,14 @@
 package com.factory.deprecatedfactory;
 
-import com.func.udffunc.HbaseLookupFunction;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.descriptors.DescriptorProperties;
 import org.apache.flink.table.factories.StreamTableSourceFactory;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.utils.TableSchemaUtils;
 import org.apache.flink.types.Row;
+
+import com.func.depfun.tablesource.HbaseAyscLookupTableSource;
+import com.func.udffunc.HbaseLookupFunction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,17 +23,18 @@ import static org.apache.flink.table.descriptors.KafkaValidator.CONNECTOR_PROPER
 import static org.apache.flink.table.descriptors.Schema.*;
 import static org.apache.flink.table.descriptors.Schema.SCHEMA_NAME;
 import static org.apache.flink.table.descriptors.StreamTableDescriptorValidator.UPDATE_MODE;
-import com.func.depfun.tablesource.HbaseAyscLookupTableSource;
+
 @Deprecated
 public class HbaseLookUpFactory implements StreamTableSourceFactory<Row> {
     @Override
     public StreamTableSource<Row> createStreamTableSource(Map<String, String> properties) {
         DescriptorProperties descriptorProperties = new DescriptorProperties(true);
         descriptorProperties.putProperties(properties);
-        TableSchema schema = TableSchemaUtils.getPhysicalSchema(
-                descriptorProperties.getTableSchema(SCHEMA));
+        TableSchema schema =
+                TableSchemaUtils.getPhysicalSchema(descriptorProperties.getTableSchema(SCHEMA));
 
-        return new HbaseAyscLookupTableSource(schema,
+        return new HbaseAyscLookupTableSource(
+                schema,
                 HbaseLookupFunction.builder()
                         .setFieldNames(schema.getFieldNames())
                         .setFieldTypes(schema.getFieldTypes())

@@ -15,7 +15,9 @@ public class PrintlnRetractRichSinkFunction extends RichSinkFunction<RowData> {
     private final PrintSinkOutputWriter<String> writer;
 
     public PrintlnRetractRichSinkFunction(
-            DynamicTableSink.DataStructureConverter converter, String printIdentifier, boolean stdErr) {
+            DynamicTableSink.DataStructureConverter converter,
+            String printIdentifier,
+            boolean stdErr) {
         this.converter = converter;
         this.writer = new PrintSinkOutputWriter<>(printIdentifier, stdErr);
     }

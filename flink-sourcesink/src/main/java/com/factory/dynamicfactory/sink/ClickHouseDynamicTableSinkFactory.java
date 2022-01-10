@@ -1,7 +1,5 @@
 package com.factory.dynamicfactory.sink;
 
-import com.func.dynamicfunc.sink.tablesink.ClickhouseDynamicTableSink;
-import com.func.dynamicfunc.sink.tablesink.MySqlDynamicTableSink;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.ReadableConfig;
@@ -11,11 +9,10 @@ import org.apache.flink.table.factories.DynamicTableSinkFactory;
 import org.apache.flink.table.factories.FactoryUtil;
 import org.apache.flink.table.types.DataType;
 
-import java.time.Duration;
+import com.func.dynamicfunc.sink.tablesink.ClickhouseDynamicTableSink;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.apache.flink.configuration.ConfigOptions.key;
 
 public class ClickHouseDynamicTableSinkFactory implements DynamicTableSinkFactory {
     public static final String IDENTIFIER = "clickhouse";
@@ -54,18 +51,17 @@ public class ClickHouseDynamicTableSinkFactory implements DynamicTableSinkFactor
                     .withDescription(
                             "the flush interval mills, over this time, asynchronous threads will flush data. The "
                                     + "default value is 1s.");
+
     @Override
     public DynamicTableSink createDynamicTableSink(DynamicTableFactory.Context context) {
         FactoryUtil.TableFactoryHelper helper = FactoryUtil.createTableFactoryHelper(this, context);
         helper.validate();
         ReadableConfig options = helper.getOptions();
-        final DataType shcema =
-                context.getCatalogTable().getSchema().toPhysicalRowDataType();
+        final DataType shcema = context.getCatalogTable().getSchema().toPhysicalRowDataType();
 
         return new ClickhouseDynamicTableSink(
-                context.getCatalogTable().getSchema().toPhysicalRowDataType(),
-                options,
-                shcema);    }
+                context.getCatalogTable().getSchema().toPhysicalRowDataType(), options, shcema);
+    }
 
     @Override
     public String factoryIdentifier() {

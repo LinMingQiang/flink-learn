@@ -1,6 +1,5 @@
 package com.flink.state.processor.api.pojo;
 
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
@@ -36,10 +35,7 @@ public class WordCountPoJo implements Serializable {
         this.word = word;
     }
 
-
-    public WordCountPoJo() {
-
-    }
+    public WordCountPoJo() {}
 
     public Long getCount() {
         return count;
@@ -57,8 +53,8 @@ public class WordCountPoJo implements Serializable {
         this.srcArr = srcArr;
     }
 
-
-    public WordCountPoJo(String word, Long count, Long timestamp, String[] srcArr, WordCountGroupByKey keyby) {
+    public WordCountPoJo(
+            String word, Long count, Long timestamp, String[] srcArr, WordCountGroupByKey keyby) {
         this.word = word;
         this.count = count;
         this.timestamp = timestamp;
@@ -71,11 +67,11 @@ public class WordCountPoJo implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WordCountPoJo that = (WordCountPoJo) o;
-        return Objects.equals(word, that.word) &&
-                Objects.equals(count, that.count) &&
-                Objects.equals(timestamp, that.timestamp) &&
-                Arrays.equals(srcArr, that.srcArr) &&
-                Objects.equals(keyby, that.keyby);
+        return Objects.equals(word, that.word)
+                && Objects.equals(count, that.count)
+                && Objects.equals(timestamp, that.timestamp)
+                && Arrays.equals(srcArr, that.srcArr)
+                && Objects.equals(keyby, that.keyby);
     }
 
     @Override
@@ -87,12 +83,18 @@ public class WordCountPoJo implements Serializable {
 
     @Override
     public String toString() {
-        return "WordCountPoJo{" +
-                "word='" + word + '\'' +
-                ", count=" + count +
-                ", timestamp=" + timestamp +
-                ", srcArr=" + Arrays.toString(srcArr) +
-                ", keyby=" + keyby +
-                '}';
+        return "WordCountPoJo{"
+                + "word='"
+                + word
+                + '\''
+                + ", count="
+                + count
+                + ", timestamp="
+                + timestamp
+                + ", srcArr="
+                + Arrays.toString(srcArr)
+                + ", keyby="
+                + keyby
+                + '}';
     }
 }

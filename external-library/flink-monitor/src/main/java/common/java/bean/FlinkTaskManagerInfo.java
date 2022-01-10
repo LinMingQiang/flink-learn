@@ -15,15 +15,24 @@ public class FlinkTaskManagerInfo {
 
     @Override
     public String toString() {
-        return "FlinkTaskManagerInfo{" +
-                "id='" + id + '\'' +
-                ", path='" + path + '\'' +
-                ", dataPort=" + dataPort +
-                ", timeSinceLastHeartbeat=" + timeSinceLastHeartbeat +
-                ", slotsNumber=" + slotsNumber +
-                ", freeSlots=" + freeSlots +
-                ", hardware=" + hardware +
-                '}';
+        return "FlinkTaskManagerInfo{"
+                + "id='"
+                + id
+                + '\''
+                + ", path='"
+                + path
+                + '\''
+                + ", dataPort="
+                + dataPort
+                + ", timeSinceLastHeartbeat="
+                + timeSinceLastHeartbeat
+                + ", slotsNumber="
+                + slotsNumber
+                + ", freeSlots="
+                + freeSlots
+                + ", hardware="
+                + hardware
+                + '}';
     }
 
     @Override
@@ -31,18 +40,19 @@ public class FlinkTaskManagerInfo {
         if (this == o) return true;
         if (!(o instanceof FlinkTaskManagerInfo)) return false;
         FlinkTaskManagerInfo that = (FlinkTaskManagerInfo) o;
-        return dataPort == that.dataPort &&
-                timeSinceLastHeartbeat == that.timeSinceLastHeartbeat &&
-                slotsNumber == that.slotsNumber &&
-                freeSlots == that.freeSlots &&
-                Objects.equals(id, that.id) &&
-                Objects.equals(path, that.path) &&
-                Objects.equals(hardware, that.hardware);
+        return dataPort == that.dataPort
+                && timeSinceLastHeartbeat == that.timeSinceLastHeartbeat
+                && slotsNumber == that.slotsNumber
+                && freeSlots == that.freeSlots
+                && Objects.equals(id, that.id)
+                && Objects.equals(path, that.path)
+                && Objects.equals(hardware, that.hardware);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, path, dataPort, timeSinceLastHeartbeat, slotsNumber, freeSlots, hardware);
+        return Objects.hash(
+                id, path, dataPort, timeSinceLastHeartbeat, slotsNumber, freeSlots, hardware);
     }
 
     public String getId() {
@@ -101,10 +111,16 @@ public class FlinkTaskManagerInfo {
         this.hardware = hardware;
     }
 
-    public FlinkTaskManagerInfo() {
-    }
+    public FlinkTaskManagerInfo() {}
 
-    public FlinkTaskManagerInfo(String id, String path, int dataPort, long timeSinceLastHeartbeat, int slotsNumber, int freeSlots, JSONObject hardware) {
+    public FlinkTaskManagerInfo(
+            String id,
+            String path,
+            int dataPort,
+            long timeSinceLastHeartbeat,
+            int slotsNumber,
+            int freeSlots,
+            JSONObject hardware) {
         this.id = id;
         this.path = path;
         this.dataPort = dataPort;

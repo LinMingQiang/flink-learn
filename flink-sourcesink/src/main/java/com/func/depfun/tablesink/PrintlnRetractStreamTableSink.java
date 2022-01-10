@@ -23,32 +23,37 @@ public class PrintlnRetractStreamTableSink implements RetractStreamTableSink<Row
         this.fieldTypes = fieldTypes;
     }
 
-    public PrintlnRetractStreamTableSink() {
-
-    }
+    public PrintlnRetractStreamTableSink() {}
 
     @Override
     public TypeInformation<Row> getRecordType() {
-        return new RowTypeInfo(getTableSchema().getFieldTypes(),getTableSchema().getFieldNames());
+        return new RowTypeInfo(getTableSchema().getFieldTypes(), getTableSchema().getFieldNames());
     }
+
     @Override
     public TableSchema getTableSchema() {
-        if(ts == null)
-            this.ts = new TableSchema.Builder().fields(fieldNames, fieldTypes).build();
+        if (ts == null) this.ts = new TableSchema.Builder().fields(fieldNames, fieldTypes).build();
         return ts;
     }
 
     @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> dataStream) {
-        return dataStream.filter(x -> x.f0).addSink(new SinkFunction<Tuple2<Boolean, Row>>() {
-            @Override
-            public void invoke(Tuple2<Boolean, Row> value, Context context) throws Exception {
-                System.out.println("Factory Print : " + value.f1);
-            }
-        }).name(this.getClass().getSimpleName());
+        return dataStream
+                .filter(x -> x.f0)
+                .addSink(
+                        new SinkFunction<Tuple2<Boolean, Row>>() {
+                            @Override
+                            public void invoke(Tuple2<Boolean, Row> value, Context context)
+                                    throws Exception {
+                                System.out.println("Factory Print : " + value.f1);
+                            }
+                        })
+                .name(this.getClass().getSimpleName());
     }
+
     @Override
-    public TableSink<Tuple2<Boolean, Row>> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
+    public TableSink<Tuple2<Boolean, Row>> configure(
+            String[] fieldNames, TypeInformation<?>[] fieldTypes) {
         return this;
     }
 }

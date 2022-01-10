@@ -19,10 +19,11 @@ public class HiveReadEntry {
         for (String s : tableEnv.listCatalogs()) {
             System.out.println(s);
         }
-        String sinksql = "create table print_table(" +
-                "app_id VARCHAR" +
-                ") WITH(" +
-                "'connector' = 'print')";
+        String sinksql =
+                "create table print_table("
+                        + "app_id VARCHAR"
+                        + ") WITH("
+                        + "'connector' = 'print')";
         tableEnv.executeSql(sinksql);
 
         // 必须转hive才能找到hive的表
@@ -31,10 +32,7 @@ public class HiveReadEntry {
 
         // 必须转回 default_catalog，否则找不到sink表。
         tableEnv.useCatalog("default_catalog");
-//        tableEnv.createTemporaryView("hive_result", r);
+        //        tableEnv.createTemporaryView("hive_result", r);
         r.executeInsert("print_table");
-
     }
-
-
 }

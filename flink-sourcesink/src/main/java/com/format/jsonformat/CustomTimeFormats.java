@@ -22,25 +22,27 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 
-/**
- * Time formats respecting the RFC3339 specification.
- */
+/** Time formats respecting the RFC3339 specification. */
 class CustomTimeFormats {
 
-	/** Formatter for RFC 3339-compliant string representation of a time value. */
-	static final DateTimeFormatter RFC3339_TIME_FORMAT = new DateTimeFormatterBuilder()
-		.appendPattern("HH:mm:ss")
-		.appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
-		.appendPattern("'Z'")
-		.toFormatter();
+    /** Formatter for RFC 3339-compliant string representation of a time value. */
+    static final DateTimeFormatter RFC3339_TIME_FORMAT =
+            new DateTimeFormatterBuilder()
+                    .appendPattern("HH:mm:ss")
+                    .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+                    .appendPattern("'Z'")
+                    .toFormatter();
 
-	/** Formatter for RFC 3339-compliant string representation of a timestamp value (with UTC timezone). */
-	static final DateTimeFormatter RFC3339_TIMESTAMP_FORMAT = new DateTimeFormatterBuilder()
-		.append(DateTimeFormatter.ISO_LOCAL_DATE)
-		.appendLiteral('T')
-		.append(RFC3339_TIME_FORMAT)
-		.toFormatter();
+    /**
+     * Formatter for RFC 3339-compliant string representation of a timestamp value (with UTC
+     * timezone).
+     */
+    static final DateTimeFormatter RFC3339_TIMESTAMP_FORMAT =
+            new DateTimeFormatterBuilder()
+                    .append(DateTimeFormatter.ISO_LOCAL_DATE)
+                    .appendLiteral('T')
+                    .append(RFC3339_TIME_FORMAT)
+                    .toFormatter();
 
-	private CustomTimeFormats() {
-	}
+    private CustomTimeFormats() {}
 }

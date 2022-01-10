@@ -1,6 +1,5 @@
 package com.factory.dynamicfactory.sink;
 
-import com.func.dynamicfunc.sink.tablesink.MySqlDynamicTableSink;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.ReadableConfig;
@@ -10,11 +9,11 @@ import org.apache.flink.table.factories.DynamicTableSinkFactory;
 import org.apache.flink.table.factories.FactoryUtil;
 import org.apache.flink.table.types.DataType;
 
+import com.func.dynamicfunc.sink.tablesink.MySqlDynamicTableSink;
+
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.apache.flink.configuration.ConfigOptions.key;
 
 public class MysqlDynamicTableSinkFactory implements DynamicTableSinkFactory {
     public static final String IDENTIFIER = "mysql";
@@ -70,13 +69,11 @@ public class MysqlDynamicTableSinkFactory implements DynamicTableSinkFactory {
         FactoryUtil.TableFactoryHelper helper = FactoryUtil.createTableFactoryHelper(this, context);
         helper.validate();
         ReadableConfig options = helper.getOptions();
-        final DataType shcema =
-                context.getCatalogTable().getSchema().toPhysicalRowDataType();
+        final DataType shcema = context.getCatalogTable().getSchema().toPhysicalRowDataType();
 
         return new MySqlDynamicTableSink(
-                context.getCatalogTable().getSchema().toPhysicalRowDataType(),
-                options,
-                shcema);    }
+                context.getCatalogTable().getSchema().toPhysicalRowDataType(), options, shcema);
+    }
 
     @Override
     public String factoryIdentifier() {

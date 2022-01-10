@@ -10,21 +10,30 @@ public class ReportLogPojo {
     public Long imp;
     public Long click;
 
-    public ReportLogPojo() {
-    }
+    public ReportLogPojo() {}
 
     @Override
     public String toString() {
-        return "ReportLogPojo{" +
-                "app_id='" + app_id + '\'' +
-                ", reqTime=" + reqTime +
-                ", impTime=" + impTime +
-                ", clickTime=" + clickTime +
-                ", req_id='" + req_id + '\'' +
-                ", req=" + req +
-                ", imp=" + imp +
-                ", click=" + click +
-                '}';
+        return "ReportLogPojo{"
+                + "app_id='"
+                + app_id
+                + '\''
+                + ", reqTime="
+                + reqTime
+                + ", impTime="
+                + impTime
+                + ", clickTime="
+                + clickTime
+                + ", req_id='"
+                + req_id
+                + '\''
+                + ", req="
+                + req
+                + ", imp="
+                + imp
+                + ", click="
+                + click
+                + '}';
     }
 
     public String getApp_id() {
@@ -91,7 +100,15 @@ public class ReportLogPojo {
         this.click = click;
     }
 
-    public ReportLogPojo(String req_id, String app_id, Long reqTime, Long impTime, Long clickTime, Long req, Long imp, Long click) {
+    public ReportLogPojo(
+            String req_id,
+            String app_id,
+            Long reqTime,
+            Long impTime,
+            Long clickTime,
+            Long req,
+            Long imp,
+            Long click) {
         this.app_id = app_id;
         this.impTime = impTime;
         this.req_id = req_id;
@@ -102,4 +119,3 @@ public class ReportLogPojo {
         this.clickTime = clickTime;
     }
 }
-

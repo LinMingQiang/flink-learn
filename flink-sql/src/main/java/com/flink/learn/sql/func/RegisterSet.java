@@ -4,16 +4,15 @@ import java.io.Serializable;
 
 public class RegisterSet implements Serializable {
 
-    public  static int LOG2_BITS_PER_WORD = 6;
-    public  static int REGISTER_SIZE = 5;
+    public static int LOG2_BITS_PER_WORD = 6;
+    public static int REGISTER_SIZE = 5;
 
-    public  int count;
-    public  int size;
+    public int count;
+    public int size;
 
-    public  int[] M;
+    public int[] M;
 
-    public RegisterSet() {
-    }
+    public RegisterSet() {}
 
     public RegisterSet(int count) {
         this(count, null);
@@ -97,4 +96,3 @@ public class RegisterSet implements Serializable {
         return copy;
     }
 }
-

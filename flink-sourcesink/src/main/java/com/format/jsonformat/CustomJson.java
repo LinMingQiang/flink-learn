@@ -12,7 +12,7 @@ import java.util.Map;
 import static org.apache.flink.table.descriptors.FormatDescriptorValidator.FORMAT_DERIVE_SCHEMA;
 import static org.apache.flink.table.descriptors.JsonValidator.*;
 
-public class CustomJson  extends FormatDescriptor {
+public class CustomJson extends FormatDescriptor {
     private Boolean failOnMissingField;
     private Boolean deriveSchema;
     private String jsonSchema;
@@ -21,7 +21,7 @@ public class CustomJson  extends FormatDescriptor {
     /**
      * Constructs a {@link FormatDescriptor}.
      *
-     * @param type    string that identifies this format
+     * @param type string that identifies this format
      * @param version property version for backwards compatibility
      */
     public CustomJson(String type, int version) {
@@ -55,20 +55,16 @@ public class CustomJson  extends FormatDescriptor {
         return properties.asMap();
     }
 
-
     /**
      * Sets flag whether to fail if a field is missing or not.
      *
-     * @param failOnMissingField If set to true, the operation fails if there is a missing field.
-     *                           If set to false, a missing field is set to null.
+     * @param failOnMissingField If set to true, the operation fails if there is a missing field. If
+     *     set to false, a missing field is set to null.
      */
     public CustomJson failOnMissingField(boolean failOnMissingField) {
         this.failOnMissingField = failOnMissingField;
         return this;
     }
-
-
-
 
     /**
      * Sets the JSON schema string with field names and the types according to the JSON schema
@@ -108,12 +104,12 @@ public class CustomJson  extends FormatDescriptor {
      *
      * <p>This allows for defining schema information only once.
      *
-     * <p>The names, types, and fields' order of the format are determined by the table's
-     * schema. Time attributes are ignored if their origin is not a field. A "from" definition
-     * is interpreted as a field renaming in the format.
+     * <p>The names, types, and fields' order of the format are determined by the table's schema.
+     * Time attributes are ignored if their origin is not a field. A "from" definition is
+     * interpreted as a field renaming in the format.
      *
-     * @deprecated Derivation format schema from table's schema is the default behavior now.
-     * 	So there is no need to explicitly declare to derive schema.
+     * @deprecated Derivation format schema from table's schema is the default behavior now. So
+     *     there is no need to explicitly declare to derive schema.
      */
     @Deprecated
     public CustomJson deriveSchema() {
