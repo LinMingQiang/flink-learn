@@ -5,6 +5,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.http.util.OkHttp3Client;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class FlinkSqlGatewayRESTApiTest {
 
     /**
@@ -46,15 +49,27 @@ public class FlinkSqlGatewayRESTApiTest {
 
     /**
      * 创建sessionid
-     *
+     *  注意： 可使用的参数参考 ExecutionEntry
+     *  执行部分的参数配置前缀要加上： execution.
+     *  tableConfig的配置加上： table. // TODO
+     *  服务配置： server
+     *  session配置：session
+     *  deployment配置： deployment ：这个是部署参数，应该是flink.conf配置里面的
      * @return
      */
     public static String createSession() {
         String json =
                 "{\n"
-                        + "\t\"planner\": \"blink\",\n"
-                        + "    \"execution_type\": \"streaming\""
+                        + "\"planner\": \"blink\",\n"
+                        + "\"execution_type\": \"streaming\",\n"+
+                        " \"properties\":" +
+                        "{" +
+                            "\"execution.parallelism\":3," +
+                            "\"execution.max-parallelism\":4," +
+                            "\"table.exec.state.ttl\":1000" +
+                        "}\n"
                         + "}";
+        System.out.println(json);
         String sessionId =
                 JSON.parseObject(OkHttp3Client.postJson("http://localhost:8083/v1/sessions", json))
                         .getString("session_id");
@@ -120,15 +135,7 @@ public class FlinkSqlGatewayRESTApiTest {
 
     @Test
     public void testCreateSession() {
-        String json =
-                "{\n"
-                        + "\t\"planner\": \"blink\",\n"
-                        + "    \"execution_type\": \"streaming\""
-                        + "}";
-        String sessionId =
-                JSON.parseObject(OkHttp3Client.postJson("http://localhost:8083/v1/sessions", json))
-                        .getString("session_id");
-        System.out.println(sessionId);
+        createSession();
     }
 
     @Test
@@ -139,7 +146,9 @@ public class FlinkSqlGatewayRESTApiTest {
         sendReq(sessionId, sTablesSql);
     }
 
-    /** 只有SET 的话是返回所有配置参数， set xxx = xxx 是设置参数 */
+    /**
+     * 只有SET 的话是返回所有配置参数， set xxx = xxx 是设置参数
+     */
     @Test
     public void testSetSql() {
         String sessionId = createSession();
@@ -231,8 +240,9 @@ public class FlinkSqlGatewayRESTApiTest {
         // 查询结果
         printStreamingResult(sessionId, jobId, 0);
     }
+
     @Test
-    public void oneJobMultipleSink(){
+    public void oneJobMultipleSink() {
         String sourceTbl = "test";
         String sinkTbl = "test2";
         String sinkTbl2 = "test3";
@@ -245,15 +255,15 @@ public class FlinkSqlGatewayRESTApiTest {
 // 这个方式提交是两个 job
 //        // 任务1： 执行insert
         String insertSql = "insert into " + sinkTbl + " select msg,money from  " + sourceTbl + "";
-//        sendReq(sessionId, insertSql);
+        sendReq(sessionId, insertSql);
 //        // 任务2： 执行insert
         String insertSql2 = "insert into " + sinkTbl + " select msg,money  from  " + sourceTbl + "";
-//        sendReq(sessionId, insertSql2);
+        sendReq(sessionId, insertSql2);
 
 // 两种提交方式 这种方式不支持
         // 任务3： 执行insert
-        String insertSql3 = insertSql+";" + insertSql2;
-        sendReq(sessionId, insertSql3);
+//        String insertSql3 = insertSql+";" + insertSql2;
+//        sendReq(sessionId, insertSql3);
 
         // 插入两数据给 sourceTbl
         String insertValueSql =
@@ -263,7 +273,6 @@ public class FlinkSqlGatewayRESTApiTest {
         // 查询结果
 //        printStreamingResult(sessionId, jobId, 0);
     }
-
 
 
 }

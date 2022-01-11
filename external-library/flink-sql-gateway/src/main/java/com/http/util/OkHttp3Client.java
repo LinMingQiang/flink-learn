@@ -72,7 +72,6 @@ public class OkHttp3Client {
     public static String postJson(String url, String json) {
         if (asynokHttpClient == null) asynokHttpClient = new OkHttpClient();
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
-
         Request request = new Request.Builder().url(url).post(body).build();
 
         Call call = asynokHttpClient.newCall(request);
@@ -86,4 +85,30 @@ public class OkHttp3Client {
             return null;
         }
     }
+
+    public static String postJsonWithParam(String url, String json, Map<String, String> para) {
+        if (asynokHttpClient == null) asynokHttpClient = new OkHttpClient();
+        FormBody.Builder formBody =
+                new FormBody.Builder();
+        para.forEach(
+                (x, y) -> {
+                    formBody.add(x, y);
+                });
+
+        Request request = new Request.Builder().url(url).post(formBody.build()).build();
+
+        Call call = asynokHttpClient.newCall(request);
+        Response response = null;
+        try {
+            response = call.execute();
+            String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
+            return str;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+
 }
