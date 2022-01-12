@@ -401,6 +401,7 @@ public class ExecutionContext<ClusterID> {
 		final EnvironmentSettings settings = environment.getExecution().getEnvironmentSettings();
 		// Step 0.0 Initialize the table configuration.
 		final TableConfig config = new TableConfig();
+		// TODO 这里应该支持 table.exec.state.ttl 的 Duration参数配置
 		environment.getConfiguration().asMap().forEach((k, v) ->
 			config.getConfiguration().setString(k, v));
 		final boolean noInheritedState = sessionState == null;

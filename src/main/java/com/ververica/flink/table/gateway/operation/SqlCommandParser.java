@@ -117,6 +117,7 @@ public final class SqlCommandParser {
 		} catch (org.apache.calcite.sql.parser.SqlParseException e) {
 			throw new SqlParseException("Failed to parse statement.", e);
 		}
+		// TODO 支持多个sql语句一次性发过来
 		if (sqlNodes.size() != 1) {
 			throw new SqlParseException("Only single statement is supported now");
 		}

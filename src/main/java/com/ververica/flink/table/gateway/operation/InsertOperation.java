@@ -123,6 +123,8 @@ public class InsertOperation extends AbstractJobOperation {
 		// parse and validate statement
 		try {
 			executionContext.wrapClassLoader(() -> {
+				// 这里不能改为 executeSql ， sqlUpdate和他的实现不一样，需要改flink源码才行
+//				tableEnv.executeSql(statement);
 				tableEnv.sqlUpdate(statement);
 				return null;
 			});
