@@ -5,7 +5,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.http.util.OkHttp3Client;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FlinkSqlGatewayRESTApiTest {
@@ -16,7 +21,10 @@ public class FlinkSqlGatewayRESTApiTest {
      * @param sql
      * @return
      */
-    public static String getRequestJsonStr(String sql) {
+    public static String getRequestJsonStr(String sql, String jobName) {
+        // 不能带 \n
+        if(jobName!=null)
+        return "{ \"statement\": \"" + sql + "\",\"job_name\":\""+jobName+"\"}";
         return "{ \"statement\": \"" + sql + "\"}";
     }
 
@@ -44,7 +52,7 @@ public class FlinkSqlGatewayRESTApiTest {
                         + "  'format' = 'json',"
                         + "  'json.ignore-parse-errors' = 'true'"
                         + ")";
-        sendReq(sessionId, createSQL);
+        sendReq(sessionId, createSQL, "createTable_"+tableName);
     }
 
     /**
@@ -65,7 +73,7 @@ public class FlinkSqlGatewayRESTApiTest {
                         " \"properties\":" +
                         "{" +
                             "\"execution.parallelism\":3," +
-                            "\"execution.max-parallelism\":4," +
+                            "\"execution.max-parallelism\":3," +
                             "\"table.exec.state.ttl\":1000" +
                         "}\n"
                         + "}";
@@ -84,14 +92,31 @@ public class FlinkSqlGatewayRESTApiTest {
      * @param sql
      */
     public static String sendReq(String sessionId, String sql) {
+        String sqlJson =  getRequestJsonStr(sql, null);
+        System.out.println(sqlJson);
         String res =
                 OkHttp3Client.postJson(
                         "http://localhost:8083/v1/sessions/" + sessionId + "/statements",
-                        getRequestJsonStr(sql));
+                        sqlJson);
         System.out.println(res);
         return res;
     }
-
+    /**
+     * 发送请求并答应结果
+     *
+     * @param sessionId
+     * @param sql
+     */
+    public static String sendReq(String sessionId, String sql, String jobName) {
+        String sqlJson =  getRequestJsonStr(sql, jobName);
+        System.out.println(sqlJson);
+        String res =
+                OkHttp3Client.postJson(
+                        "http://localhost:8083/v1/sessions/" + sessionId + "/statements",
+                        sqlJson);
+        System.out.println(res);
+        return res;
+    }
     /**
      * 获取流计算的结果并展示
      *
@@ -189,24 +214,20 @@ public class FlinkSqlGatewayRESTApiTest {
         String tableName = "test";
         String sessionId = createSession();
         createTable(sessionId, tableName, tableName);
-        String explainSql = getRequestJsonStr("EXPLAIN PLAN FOR select * from " + tableName);
+        String explainSql = getRequestJsonStr("EXPLAIN PLAN FOR select * from " + tableName, null);
         sendReq(sessionId, explainSql);
     }
 
     @Test
     public void testInsert() {
-        String tableName = "test";
+        String sourceTbl = "test";
+        String sinkTbl = "test2";
         String sessionId = createSession();
-        createTable(sessionId, tableName, tableName);
-        String querySQl = "select msg,sum(money) from  " + tableName + " group by msg";
-        String req = sendReq(sessionId, querySQl);
-        String jobId = getJobId(req);
-        System.out.println(jobId);
-        String insertSql =
-                "insert into " + tableName + " VALUES ('hello', 100), ('word', 200), ('word', 200)";
+        createTable(sessionId, sourceTbl, sourceTbl);
+        createTable(sessionId, sinkTbl, sinkTbl);
+        // 任务1： 执行insert
+        String insertSql = "insert into " + sinkTbl + " select msg, money from  " + sourceTbl;
         sendReq(sessionId, insertSql);
-
-        printStreamingResult(sessionId, jobId, 0);
     }
 
     /**
@@ -250,20 +271,19 @@ public class FlinkSqlGatewayRESTApiTest {
         createTable(sessionId, sourceTbl, sourceTbl);
         createTable(sessionId, sinkTbl, "test2");
         createTable(sessionId, sinkTbl2, "test2");
-        sendReq(sessionId, "show tables");
 
 // 这个方式提交是两个 job
 //        // 任务1： 执行insert
         String insertSql = "insert into " + sinkTbl + " select msg,money from  " + sourceTbl + "";
-        sendReq(sessionId, insertSql);
+//        sendReq(sessionId, insertSql);
 //        // 任务2： 执行insert
-        String insertSql2 = "insert into " + sinkTbl + " select msg,money  from  " + sourceTbl + "";
-        sendReq(sessionId, insertSql2);
+        String insertSql2 = "insert into " + sinkTbl + " select msg,money*100 as money from  " + sourceTbl + "";
+//        sendReq(sessionId, insertSql2);
 
-// 两种提交方式 这种方式不支持
+// 两种提交方式 这种方式不支持, 经过改写，现在可以支持了，但是 换行要带过去
         // 任务3： 执行insert
-//        String insertSql3 = insertSql+";" + insertSql2;
-//        sendReq(sessionId, insertSql3);
+        String insertSql3 = insertSql+";\\n" + insertSql2;
+        sendReq(sessionId, insertSql3);
 
         // 插入两数据给 sourceTbl
         String insertValueSql =
@@ -272,6 +292,45 @@ public class FlinkSqlGatewayRESTApiTest {
 
         // 查询结果
 //        printStreamingResult(sessionId, jobId, 0);
+    }
+
+
+    /**
+     * 同一个session维持的同一个tableEnv，所以即使分多次请求会启动多个job
+     */
+    @Test
+    public void createViewTest(){
+        String sourceTbl = "test";
+        String viewTbl = "test2";
+        String sessionId = createSession();
+        createTable(sessionId, sourceTbl, sourceTbl);
+        sendReq(sessionId, "show tables");
+
+        String createViewSQL = String.format("CREATE VIEW %s as select * from %s", viewTbl, sourceTbl);
+        System.out.println(createViewSQL);
+        sendReq(sessionId, createViewSQL);
+        sendReq(sessionId, "show tables");
+
+        String querySQl = "select msg,count(money) as totalMoney from " + sourceTbl + " group by msg";
+        String viewQuerySQl = "select msg,sum(money) as totalMoney from " + viewTbl + " group by msg";
+        sendReq(sessionId, querySQl);
+        sendReq(sessionId, viewQuerySQl);
+
+    }
+
+    @Test
+    public void testFromFileGetSQL() throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader("/Users/eminem/workspace/flink/flink-learn/resources/file/ddl/flink-sql-gateway.sql"));
+        StringBuilder stmt = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            stmt.append(line);
+            stmt.append("\\n");// 必须要有这个，妈的
+        }
+        br.close();
+        String sessionId = createSession();
+        System.out.println(stmt);
+        sendReq(sessionId, stmt.toString());
     }
 
 
