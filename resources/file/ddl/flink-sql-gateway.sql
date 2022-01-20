@@ -30,5 +30,5 @@ CREATE TABLE test3 (
        'properties.group.id' = 'test',
        'scan.startup.mode' = 'latest-offset',
        'format' = 'json',  'json.ignore-parse-errors' = 'true');
-select msg,count(money) as money from  test group by msg;
-select msg,sum(money) as money from  test group by msg;
+select msg,count(money) as money from  test /*+  OPTIONS('properties.group.id'='test','scan.startup.mode' = 'group-offsets') */ group by msg;
+insert into test3 select msg,money as money from  test;

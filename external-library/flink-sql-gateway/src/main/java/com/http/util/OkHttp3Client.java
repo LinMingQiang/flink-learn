@@ -27,7 +27,22 @@ public class OkHttp3Client {
             return null;
         }
     }
-
+    /** @param url */
+    public static String delete(String url) {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request request = new Request.Builder().url(url).method("DELETE", null).build();
+        Call call = okHttpClient.newCall(request);
+        Response response = null;
+        try {
+            response = call.execute();
+            // String str = response.body().string();
+            String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
+            return str;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     /** @param url */
     public static String getWithParameter(String url, Map<String, String> para) throws IOException {
         OkHttpClient okHttpClient = new OkHttpClient();

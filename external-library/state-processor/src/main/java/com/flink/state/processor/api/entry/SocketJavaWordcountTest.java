@@ -1,6 +1,7 @@
 package com.flink.state.processor.api.entry;
 
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.java.functions.KeySelector;
@@ -9,6 +10,7 @@ import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 
 import com.flink.common.core.EnvironmentalKey;
@@ -74,6 +76,7 @@ public class SocketJavaWordcountTest {
                                 lastState = getRuntimeContext().getState(desc);
                             }
                         })
+
                 .name("flatMapUID")
                 .uid("flatMapUID")
                 .addSink(new WordCountJavaSink())

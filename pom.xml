@@ -19,6 +19,7 @@
         <module>flink-offline</module>
         <module>external-library/state-processor</module>
         <module>flink-example</module>
+        <module>flink-datalake/flink-catalog</module>
     </modules>
     <name>${project.artifactId}</name>
     <description>My wonderfull scala app</description>
@@ -38,7 +39,7 @@
         <encoding>UTF-8</encoding>
         <flink.version>1.13.3</flink.version>
         <scala.version>2.12.8</scala.version>
-        <hive.version>1.1.0</hive.version>
+        <hive.version>3.1.2</hive.version>
         <scala.binary.version>2.12</scala.binary.version>
         <fastjson.version>1.2.39</fastjson.version>
         <hbase.version>1.3.2</hbase.version>
