@@ -50,6 +50,7 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void statementSetTest() throws ExecutionException, InterruptedException {
+        // {""}
         StatementSet set = tableEnv.createStatementSet();
         tableEnv.getConfig()
                 .getConfiguration()
@@ -62,10 +63,11 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
         tableEnv.executeSql(
                 DDLSourceSQLManager.createStreamFromKafka(
                         "localhost:9092", "test", "test", "test", "json"));
-        tableEnv.executeSql(DDLSourceSQLManager.createDynamicPrintlnRetractSinkTbl("printSink"));
+        tableEnv.executeSql(DDLSourceSQLManager.createPrintSinkTbl("printSink"));
         // 产生一个 StreamGraph里面带两个Sink，两个 Agg， 产生一个 JobGraph
-        set.addInsertSql("insert into printSink select msg,count(1) cnt from test group by msg");
-        set.addInsertSql("insert into printSink select msg,max(1) cnt from test group by msg");
+        set.addInsertSql("insert into printSink select msg,1 cnt from test ");
+//        set.addInsertSql("insert into printSink select msg,count(1) cnt from test group by msg");
+//        set.addInsertSql("insert into printSink select msg,max(1) cnt from test group by msg");
         set.execute().await();
     }
 

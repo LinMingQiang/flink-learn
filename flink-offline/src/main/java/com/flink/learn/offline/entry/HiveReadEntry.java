@@ -11,28 +11,22 @@ public class HiveReadEntry {
         System.out.println(sql);
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().build();
         TableEnvironment tableEnv = TableEnvironment.create(settings);
-        String name = "myhive";
-        String defaultDatabase = "dw_adplatform_log_test";
-        String hiveConfDir = "/etc/hive/conf";
+        String name = "hcatalog";
+        String defaultDatabase = "test";
+        String hiveConfDir = "/Users/eminem/programe/hadoop/hive-3.1.2/conf";
         HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
         tableEnv.registerCatalog(name, hive);
         for (String s : tableEnv.listCatalogs()) {
             System.out.println(s);
         }
-        String sinksql =
-                "create table print_table("
-                        + "app_id VARCHAR"
-                        + ") WITH("
-                        + "'connector' = 'print')";
-        tableEnv.executeSql(sinksql);
 
         // 必须转hive才能找到hive的表
         tableEnv.useCatalog(name);
-        Table r = tableEnv.sqlQuery(sql);
+
+
 
         // 必须转回 default_catalog，否则找不到sink表。
         tableEnv.useCatalog("default_catalog");
-        //        tableEnv.createTemporaryView("hive_result", r);
-        r.executeInsert("print_table");
+        //tableEnv.createTemporaryView("hive_result", r);
     }
 }

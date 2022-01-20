@@ -375,6 +375,20 @@ object DDLSourceSQLManager {
        |)""".stripMargin
   }
 
+  /**
+   * 新版的是connector,旧版是 connector.type
+   * @param printlnSinkTbl
+   * @return
+   */
+  def createPrintSinkTbl(printlnSinkTbl: String): String = {
+    s"""CREATE TABLE ${printlnSinkTbl} (
+       |msg VARCHAR,
+       |cnt BIGINT
+       |) WITH (
+       |'connector' = 'print'
+       |)""".stripMargin
+  }
+
   def createPrint(printlnSinkTbl: String): String = {
     s"""CREATE TABLE ${printlnSinkTbl} (
        |rowtime TIMESTAMP(3)
