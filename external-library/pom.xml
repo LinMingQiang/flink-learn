@@ -16,6 +16,7 @@
       <module>java-learn</module>
       <module>metric-report</module>
       <module>flink-sql-gateway</module>
+      <module>hadoop-yarn-hive</module>
       <!--    <module>calcite-test</module>-->
   </modules>
 
