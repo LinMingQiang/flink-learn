@@ -12,9 +12,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FlinkSqlGatewayRESTApiTest {
 
+	public static String YARN_SESSION = "yarn-session";
+	public static String YARN_PER_JOB = "yarn-per-job";
+	public static String STANDALONE = "remote";
 	public static String appid = null;
 	/**
 	 * 组装一个请求的json
@@ -70,13 +75,13 @@ public class FlinkSqlGatewayRESTApiTest {
 	 *
 	 * @return
 	 */
-	public static String createSession(String applicationId) {
-		String executionTarget = "";
+	public static String createSession(String tarGet,String applicationId) {
+		String executionTarget ;
 		if (applicationId != null) {
 			executionTarget = String.format("\"execute.target\": \"%s\",\n" +
-					"\"yarn.application.id\": \"%s\",", "yarn-session", applicationId);
+					"\"yarn.application.id\": \"%s\",", tarGet, applicationId);
 		} else {
-			executionTarget = String.format("\"execute.target\": \"%s\",\n", "remote");
+			executionTarget = String.format("\"execute.target\": \"%s\",\n", tarGet);
 		}
 		String json =
 				"{\n" +
@@ -91,6 +96,9 @@ public class FlinkSqlGatewayRESTApiTest {
 						"\"execution.checkpointing.interval\":10000," +
 						"\"table.exec.state.ttl\":\"100000\"," +
 						"\"state.backend\":\"rocksdb\"," +
+						"\"flink.yarn.provided.lib.dirs\":\"/tmp/flink-lib\"," +
+						// 要以flink开头
+						"\"flink.yarn.resourcemanager.hostname\":\"127.0.0.1\"," + // 这个无法生效，因为flink-shade-hadoop里面打进了 yarn-default.xml，导致一直被0.0.0.0覆盖 -> Utils.getYarnAndHadoopConfiguration
 						"\"state.checkpoints.dir\":\"file:///Users/eminem/workspace/flink/flink-learn/checkpoint\"," +
 						"\"execution.checkpointing.externalized-checkpoint-retention\":\"RETAIN_ON_CANCELLATION\"" +
 						"}\n"
@@ -104,11 +112,13 @@ public class FlinkSqlGatewayRESTApiTest {
 	}
 
 	public static String createYarnSessionSession(String appId) {
-		return createSession(appId);
+		return createSession(YARN_SESSION, appId);
 	}
-
+	public static String createYarnPerJobSession() {
+		return createSession(YARN_PER_JOB, null);
+	}
 	public static String createRemoteSession() {
-		return createSession(null);
+		return createSession(STANDALONE,null);
 	}
 
 	/**
@@ -203,6 +213,23 @@ public class FlinkSqlGatewayRESTApiTest {
 		sendReq(sessionId, sTablesSql);
 	}
 
+	@Test
+	public void testCreateHiveCatalogTable() {
+		String sessionId = createRemoteSession();
+		createTable(sessionId, "hcatalog.test.test", "test");
+		String sTablesSql = "show tables";
+		sendReq(sessionId, sTablesSql);
+	}
+	@Test
+	public void testAlterTable() {
+		String sessionId = createRemoteSession();
+//		createTable(sessionId, "test", "test");
+//		String alertTable = "ALTER TABLE hcatalog.test.test SET (\'properties.group.id\'=\'aa\')";
+//		sendReq(sessionId, alertTable);
+		String addColumn = "ALTER TABLE hcatalog.test.test ADD COLUMNS (col_name5 STRING);";
+		sendReq(sessionId, addColumn);
+	}
+
 	/**
 	 * 只有SET 的话是返回所有配置参数， set xxx = xxx 是设置参数
 	 */
@@ -224,12 +251,12 @@ public class FlinkSqlGatewayRESTApiTest {
 		String sFunctionsSql = ("show functions");
 		String sModulesSql = ("show modules");
 		sendReq(sessionId, sCatalogsSql);
-		sendReq(sessionId, sCCatalogsSql);
-		sendReq(sessionId, sDatabasesSql);
-		sendReq(sessionId, scDatabasesSql);
-		sendReq(sessionId, sTablesSql);
-		sendReq(sessionId, sFunctionsSql);
-		sendReq(sessionId, sModulesSql);
+//		sendReq(sessionId, sCCatalogsSql);
+//		sendReq(sessionId, sDatabasesSql);
+//		sendReq(sessionId, scDatabasesSql);
+//		sendReq(sessionId, sTablesSql);
+//		sendReq(sessionId, sFunctionsSql);
+//		sendReq(sessionId, sModulesSql);
 	}
 
 	@Test
@@ -368,7 +395,7 @@ public class FlinkSqlGatewayRESTApiTest {
 			stmt.append("\\n");// 必须要有这个，妈的
 		}
 		br.close();
-		String sessionId = appid == null? createRemoteSession() : createYarnSessionSession(appid);
+		String sessionId = appid == null? createYarnPerJobSession() : createYarnSessionSession(appid);
 		System.out.println(stmt);
 		sendReq(sessionId, stmt.toString(), "testFromFileGetSQL");
 	}
@@ -398,7 +425,7 @@ public class FlinkSqlGatewayRESTApiTest {
 //		String yarnPerJob = "yarn-per-job";
 		// 需要上传 applicationid
 //		String yarnSesion = "yarn-session";
-		appid = "application_1642643760963_0003";
+//		appid = "application_1643081854438_0001";
 //		createYarnSessionSession(appid);
 		testFromFileGetSQL();
 	}
