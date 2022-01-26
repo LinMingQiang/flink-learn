@@ -57,7 +57,7 @@ object MysqlJdbcHandler {
   }
 
   def main(args: Array[String]): Unit = {
-    val jdbc = "jdbc:mysql://localhost:3306/test"
+    val jdbc = "jdbc:mysql://localhost:3306/TEST"
     val user = "root"
     val passw = "123456"
     val conn = getMysqlConn(jdbc, user, passw)
