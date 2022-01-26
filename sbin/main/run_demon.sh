@@ -4,10 +4,9 @@
 #-s file:///Users/eminem/workspace/flink/flink-learn/savepoint/savepoint-c4fb21-d0e5d7045b40 \
 #flink savepoint b530724c897463ace25054491c67d085 file:///Users/eminem/workspace/flink/flink-learn/checkpoint/savepoint/
 echo "start ........"
-
-flink run -s file:///Users/eminem/workspace/flink/flink-learn/checkpoint/SocketScalaWordcountTest/savepoint/savepoint-4574f7-a7873e4cd50f \
--c com.flink.learn.stateprocessor.SocketScalaWordcountTest \
-/Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
+#flink run -s file:///Users/eminem/workspace/flink/flink-learn/checkpoint/SocketScalaWordcountTest/savepoint/savepoint-4574f7-a7873e4cd50f \
+#-c com.flink.learn.stateprocessor.SocketScalaWordcountTest \
+#/Users/eminem/workspace/flink/flink-learn/flink-core/target/flink-core-1.13.3.jar
 #flink run -s file:///Users/eminem/workspace/flink/flink-learn/checkpoint/tanssavepoint \
 #-c com.flink.learn.stateprocessor.SocketJavaPoJoWordcountTest \
 #/Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
@@ -16,4 +15,4 @@ flink run -s file:///Users/eminem/workspace/flink/flink-learn/checkpoint/SocketS
 
 #flink run -c com.flink.learn.stateprocessor.SocketScalaWordcountTest /Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
 #flink run -c com.flink.learn.stateprocessor.SocketJavaPoJoWordcountTest /Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
-#flink run -c com.flink.learn.entry.KafkaWordCountTest /Users/eminem/workspace/flink/flink-learn/flink-demo/target/flink-demo-1.0.0.jar
+flink run -t yarn-per-job --yarnname Flink-Learn  -p 5 -yjm 1024 -ytm 1024 -ys 2 -c com.flink.learn.stateprocessor.SocketScalaWordcountTest /Users/eminem/workspace/flink/flink-learn/flink-core/target/flink-core-1.13.3.jar

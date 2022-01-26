@@ -19,6 +19,8 @@ public class FLinkStreamDdlFactoryTest extends FlinkJavaStreamTableTestBase {
 
     @Test
     public void writetoJdbcTest() throws ExecutionException, InterruptedException {
+        // {"rowtime":"2020-11-11 12:31:11","msg":"1","uid":"1"}
+        // {"rowtime":"2020-11-11 14:31:11","msg":"1","uid":"1"}
         StatementSet set = tableEnv.createStatementSet();
         tableEnv.getConfig()
                 .getConfiguration()
