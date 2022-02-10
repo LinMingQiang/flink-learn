@@ -21,10 +21,10 @@ public class HiveReadEntry {
 
 	public static void main(String[] args) throws Exception {
 		init();
-//		createTableToHive();
+		createTableToHive();
 //		dropTableToHive();
 //		selectTable();
-		descTable();
+//		descTable();
 		// 在hive终端 通过 show create table flink_kafka_test 可以看到建表信息，跟正常的hive表不一样
 		// 必须转回 default_catalog，否则找不到sink表。
 //        tableEnv.useCatalog("default_catalog");
@@ -32,25 +32,35 @@ public class HiveReadEntry {
 	}
 
 	public static void descTable() throws TableNotExistException {
-		String sql = DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
-				"test",
-				"flink_kafka_test",
-				"test",
-				"json");
-		tableEnv.executeSql(sql);
-		tableEnv
-				.getCatalog("default_catalog")
-				.get()
-				.getTable(ObjectPath.fromString("default_database.flink_kafka_test"))
-				.getOptions()
-				.forEach((x, v) -> System.out.println(x + ": " + v));
+//		String sql = DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
+//				"test",
+//				"flink_kafka_test",
+//				"test",
+//				"json");
+//		tableEnv.executeSql(sql);
 
-		tableEnv
-				.getCatalog("hcatalog")
-				.get()
-				.getTable(ObjectPath.fromString("test.test"))
+//		tableEnv
+//				.getCatalog("default_catalog")
+//				.get()
+//				.getTable(ObjectPath.fromString("default_database.flink_kafka_test"))
+//				.getOptions()
+//				.forEach((x, v) -> System.out.println(x + ": " + v));
+//		CatalogBaseTable tbl = tableEnv
+//				.getCatalog("hcatalog")
+//				.get()
+//				.getTable(ObjectPath.fromString("test.test"));
+
+		// 不需要 flink env
+		HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
+		hive.open();
+		CatalogBaseTable tbl = hive.getTable(ObjectPath.fromString("test.test"));
+		tbl.getUnresolvedSchema().getColumns().forEach(x -> {
+			System.out.println(x);
+		});
+				tbl
 				.getOptions()
 				.forEach((x, v) -> System.out.println(x + ": " + v));
+		hive.close();
 		//		System.out.println();
 //		String sql = "show create table hcatalog.test.flink_kafka_test";
 //		tableEnv.executeSql(sql);
@@ -61,7 +71,7 @@ public class HiveReadEntry {
 		// show create table flink_kafka_test;
 		String sql = DDLSourceSQLManager.createStreamFromKafka("localhost:9092",
 				"test",
-				"hcatalog.test.flink_kafka_test",
+				"hcatalog.test.kafka_source",
 				"test",
 				"json");
 		tableEnv.executeSql(sql);

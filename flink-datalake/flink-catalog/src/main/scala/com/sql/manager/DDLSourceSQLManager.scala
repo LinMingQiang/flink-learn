@@ -22,6 +22,7 @@ object DDLSourceSQLManager {
        |    rowtime TIMESTAMP(3),
        |    msg VARCHAR,
        |    proctime AS PROCTIME(),
+       |    `dt` as DATE_FORMAT(rowtime, 'yyyy-MM-dd'),
        |    WATERMARK FOR rowtime AS rowtime - INTERVAL '10' SECOND
        |) WITH (
        |    'connector' = 'kafka',
