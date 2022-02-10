@@ -40,6 +40,7 @@
         <flink.version>1.13.3</flink.version>
         <scala.version>2.12.8</scala.version>
         <hive.version>3.1.2</hive.version>
+        <hadoop.version>3.1.2</hadoop.version>
         <hudi.version>0.10.0</hudi.version>
         <scala.binary.version>2.12</scala.binary.version>
         <fastjson.version>1.2.39</fastjson.version>
@@ -303,35 +304,35 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.4.2</version>
-                <configuration>
-                    <java>
-                        <googleJavaFormat>
-                            <version>1.7</version>
-                            <style>AOSP</style>
-                        </googleJavaFormat>
+<!--            <plugin>-->
+<!--                <groupId>com.diffplug.spotless</groupId>-->
+<!--                <artifactId>spotless-maven-plugin</artifactId>-->
+<!--                <version>2.4.2</version>-->
+<!--                <configuration>-->
+<!--                    <java>-->
+<!--                        <googleJavaFormat>-->
+<!--                            <version>1.7</version>-->
+<!--                            <style>AOSP</style>-->
+<!--                        </googleJavaFormat>-->
 
-                        <!-- \# refers to the static imports -->
-                        <importOrder>
-                            <order>org.apache.flink,org.apache.flink.shaded,,javax,java,scala,\#</order>
-                        </importOrder>
+<!--                        &lt;!&ndash; \# refers to the static imports &ndash;&gt;-->
+<!--                        <importOrder>-->
+<!--                            <order>org.apache.flink,org.apache.flink.shaded,,javax,java,scala,\#</order>-->
+<!--                        </importOrder>-->
 
-                        <removeUnusedImports />
-                    </java>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>spotless-check</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--                        <removeUnusedImports />-->
+<!--                    </java>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>spotless-check</id>-->
+<!--                        <phase>validate</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>check</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.scalastyle</groupId>
                 <artifactId>scalastyle-maven-plugin</artifactId>
