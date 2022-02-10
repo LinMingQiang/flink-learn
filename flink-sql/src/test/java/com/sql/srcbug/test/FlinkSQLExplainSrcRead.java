@@ -1,4 +1,4 @@
-package com.streamddl.test;
+package com.sql.srcbug.test;
 
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;

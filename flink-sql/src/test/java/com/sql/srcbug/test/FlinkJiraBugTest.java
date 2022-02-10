@@ -1,4 +1,4 @@
-package com.streamddl.test;
+package com.sql.srcbug.test;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;

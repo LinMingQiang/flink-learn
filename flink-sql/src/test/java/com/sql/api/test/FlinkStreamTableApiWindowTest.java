@@ -1,4 +1,4 @@
-package com.streamtable.test;
+package com.sql.api.test;
 
 import org.apache.flink.table.api.*;
 

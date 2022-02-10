@@ -1,4 +1,4 @@
-package com.streamddl.test;
+package com.sql.dml.test;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;

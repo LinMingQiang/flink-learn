@@ -1,4 +1,4 @@
-package com.streamhive.test;
+package com.sql.hive.test;
 
 import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.TableResult;

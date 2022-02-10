@@ -1,4 +1,4 @@
-package com.streamddl.test;
+package com.sql.api.test;
 
 import org.apache.flink.types.Row;
 

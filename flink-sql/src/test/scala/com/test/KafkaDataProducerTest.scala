@@ -1,7 +1,6 @@
 package com.test
 
-import java.util.Date
-
+import java.util.{Date, UUID}
 import org.apache.kafka.clients.producer.KafkaProducer
 
 object KafkaDataProducerTest {
@@ -29,7 +28,7 @@ object KafkaDataProducerTest {
       val s = new ProducerRecord[String, String](
         "test",
         System.currentTimeMillis().toString,
-        s"""{"rowtime":"2020-01-01 00:00:01","msg":"${i}"}""".stripMargin
+        s"""{"msg":"${i}","rowtime":"2021-01-01 11:11:11"}""".stripMargin
       )
       println(i, s)
       producer.send(s)

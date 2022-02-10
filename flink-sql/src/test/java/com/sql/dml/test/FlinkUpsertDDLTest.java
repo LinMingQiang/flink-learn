@@ -1,4 +1,4 @@
-package com.streamddl.test;
+package com.sql.dml.test;
 
 import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.TableResult;
