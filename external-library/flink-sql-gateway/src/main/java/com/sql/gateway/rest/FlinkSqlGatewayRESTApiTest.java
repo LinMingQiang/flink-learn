@@ -21,6 +21,10 @@ public class FlinkSqlGatewayRESTApiTest {
 	public static String YARN_PER_JOB = "yarn-per-job";
 	public static String STANDALONE = "remote";
 	public static String appid = null;
+	public static String host = "127.0.0.1";
+	public static String yarn_host = "10.107.99.153"; // docker
+//	public static String yarn_host = "0.0.0.0"; // local
+
 	/**
 	 * 组装一个请求的json
 	 *
@@ -53,7 +57,7 @@ public class FlinkSqlGatewayRESTApiTest {
 						+ "  'topic' = '"
 						+ topic
 						+ "',"
-						+ "  'properties.bootstrap.servers' = 'localhost:9092',"
+						+ "  'properties.bootstrap.servers' = '"+host+":9092',"
 						+ "  'properties.group.id' = 'test',"
 						+ "  'scan.startup.mode' = 'latest-offset',"
 						+ "  'format' = 'json',"
@@ -96,16 +100,16 @@ public class FlinkSqlGatewayRESTApiTest {
 						"\"execution.checkpointing.interval\":10000," +
 						"\"table.exec.state.ttl\":\"100000\"," +
 						"\"state.backend\":\"rocksdb\"," +
-						"\"flink.yarn.provided.lib.dirs\":\"/tmp/flink-lib\"," +
+						"\"flink.yarn.provided.lib.dirs\":\"hdfs://"+yarn_host+":9000/tmp/flink-lib\"," + // yarn-per-job需要flink包，这是hdfs的地址
 						// 要以flink开头
-						"\"flink.yarn.resourcemanager.hostname\":\"127.0.0.1\"," + // 这个无法生效，因为flink-shade-hadoop里面打进了 yarn-default.xml，导致一直被0.0.0.0覆盖 -> Utils.getYarnAndHadoopConfiguration
+						"\"flink.yarn.resourcemanager.hostname\":\""+yarn_host+"\"," +
 						"\"state.checkpoints.dir\":\"file:///Users/eminem/workspace/flink/flink-learn/checkpoint\"," +
 						"\"execution.checkpointing.externalized-checkpoint-retention\":\"RETAIN_ON_CANCELLATION\"" +
 						"}\n"
 						+ "}";
 		System.out.println(json);
 		String sessionId =
-				JSON.parseObject(OkHttp3Client.postJson("http://localhost:8083/v1/sessions", json))
+				JSON.parseObject(OkHttp3Client.postJson("http://"+host+":8083/v1/sessions", json))
 						.getString("session_id");
 		System.out.println(sessionId);
 		return sessionId;
@@ -132,7 +136,7 @@ public class FlinkSqlGatewayRESTApiTest {
 		System.out.println(sqlJson);
 		String res =
 				OkHttp3Client.postJson(
-						"http://localhost:8083/v1/sessions/" + sessionId + "/statements",
+						"http://"+host+":8083/v1/sessions/" + sessionId + "/statements",
 						sqlJson);
 		System.out.println(res);
 		return res;
@@ -141,7 +145,7 @@ public class FlinkSqlGatewayRESTApiTest {
 	public static String sendGetRequest(String sessionId, String jobId) {
 		String res =
 				OkHttp3Client.delete(
-						"http://localhost:8083/v1/sessions/" + sessionId + "/jobs/" + jobId);
+						"http://"+host+":8083/v1/sessions/" + sessionId + "/jobs/" + jobId, null);
 		System.out.println(res);
 		return res;
 	}
@@ -157,7 +161,7 @@ public class FlinkSqlGatewayRESTApiTest {
 		System.out.println(sqlJson);
 		String res =
 				OkHttp3Client.postJson(
-						"http://localhost:8083/v1/sessions/" + sessionId + "/statements",
+						"http://"+host+":8083/v1/sessions/" + sessionId + "/statements",
 						sqlJson);
 		System.out.println(res);
 		return res;
@@ -172,7 +176,7 @@ public class FlinkSqlGatewayRESTApiTest {
 	 */
 	public static void printStreamingResult(String sessionId, String jobId, int token) {
 		String reqURL =
-				"http://localhost:8083/v1/sessions/"
+				"http://"+host+":8083/v1/sessions/"
 						+ sessionId
 						+ "/jobs/"
 						+ jobId
@@ -216,7 +220,7 @@ public class FlinkSqlGatewayRESTApiTest {
 	@Test
 	public void testCreateHiveCatalogTable() {
 		String sessionId = createRemoteSession();
-		createTable(sessionId, "hcatalog.test.test", "test");
+		createTable(sessionId, "hcatalog.test.test2", "test");
 		String sTablesSql = "show tables";
 		sendReq(sessionId, sTablesSql);
 	}
@@ -387,7 +391,7 @@ public class FlinkSqlGatewayRESTApiTest {
 
 	@Test
 	public void testFromFileGetSQL() throws Exception {
-		BufferedReader br = new BufferedReader(new FileReader("/Users/eminem/workspace/flink/flink-learn/resources/file/ddl/flink-sql-gateway.sql"));
+		BufferedReader br = new BufferedReader(new FileReader("/Users/eminem/workspace/git_pro/flink-learn/resources/file/ddl/flink-sql-gateway.sql"));
 		StringBuilder stmt = new StringBuilder();
 		String line;
 		while ((line = br.readLine()) != null) {
@@ -410,7 +414,7 @@ public class FlinkSqlGatewayRESTApiTest {
 		System.out.println(sqlJson);
 		String res =
 				OkHttp3Client.postJson(
-						"http://localhost:8083/v1/sessions/" + sessionId + "/jobs/" + jobId + "/savepoint",
+						"http://"+host+":8083/v1/sessions/" + sessionId + "/jobs/" + jobId + "/savepoint",
 						sqlJson);
 		System.out.println(res);
 	}
@@ -425,7 +429,7 @@ public class FlinkSqlGatewayRESTApiTest {
 //		String yarnPerJob = "yarn-per-job";
 		// 需要上传 applicationid
 //		String yarnSesion = "yarn-session";
-//		appid = "application_1643081854438_0001";
+//		appid = "application_1643441704049_0008";
 //		createYarnSessionSession(appid);
 		testFromFileGetSQL();
 	}

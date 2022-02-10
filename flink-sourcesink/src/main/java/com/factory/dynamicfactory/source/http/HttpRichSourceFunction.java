@@ -11,7 +11,7 @@ import org.apache.flink.table.types.logical.RowType;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dbutil.OkHttp3Client;
+import com.dbutil.OkHttp3Client2;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class HttpRichSourceFunction<RowData> extends RichParallelSourceFunction<
                     DateFormatUtils.format(System.currentTimeMillis(), "yyyy-MM-dd HH:mm:ss");
             ;
             String reqJson = "{\"startDate\":\"" + toDay + "\",\"endDate\":\"" + toDay + "\"}";
-            JSONArray jsonArr = OkHttp3Client.getAppinfos(httpURL, reqJson);
+            JSONArray jsonArr = null ;// OkHttp3Client.getAppinfos(httpURL, reqJson);
             if (jsonArr != null) {
                 jsonArr.forEach(
                         j -> {

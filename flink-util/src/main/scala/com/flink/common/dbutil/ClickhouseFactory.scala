@@ -42,7 +42,9 @@ object ClickhouseFactory {
   /**
    * clickhouse不支持 upsert的操作
    * 分片 = 节点
-   *
+   * 本地表建表的时候会按cluster Name 一次性在集群的所有节点上建表，所以在写入本地表的时候，可以通过cluster name找到所有需要写数据的本地表节点地址
+   * SELECT shard_num, host_address, port FROM system.clusters WHERE cluster = ?
+   * 然后再拼 jdbc:clickhouse://host_address:port/ 往每个节点的本地表里面写数据，这个是本地表分布式写入的逻辑
    * @param args
    */
   def main(args: Array[String]): Unit = {

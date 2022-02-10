@@ -1,5 +1,6 @@
-package com.http.util;
+package com.dbutil;
 
+import com.alibaba.fastjson.JSON;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 
@@ -8,7 +9,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class OkHttp3Client {
+public class OkHttp3Client2 {
 
 	private static OkHttpClient asynokHttpClient = null;
 
@@ -92,20 +93,26 @@ public class OkHttp3Client {
 	public static void closeAsyn() {
 	}
 
-	public static String post(String url, String json) throws IOException {
-		initClient();
-//		RequestBody formBody =
-//				new FormBody.Builder().add("username", "test").add("password", "test").build();
-		RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
+//	public static String post(String url, String json) throws IOException {
+//		initClient();
+////		RequestBody formBody =
+////				new FormBody.Builder().add("username", "test").add("password", "test").build();
+//		RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
+//
+//		Request request = new Request.Builder().url(url).post(body).build();
+//
+//		Call call = asynokHttpClient.newCall(request);
+//		Response response = call.execute();
+//		String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
+//		return str;
+//	}
 
-		Request request = new Request.Builder().url(url).post(body).build();
-
-		Call call = asynokHttpClient.newCall(request);
-		Response response = call.execute();
-		String str = IOUtils.toString(new BufferedInputStream(response.body().byteStream()));
-		return str;
-	}
-
+	/**
+	 * 参数放在 body里面
+	 * @param url
+	 * @param json
+	 * @return
+	 */
 	public static String postJson(String url, String json) {
 		initClient();
 		RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
@@ -123,6 +130,13 @@ public class OkHttp3Client {
 		}
 	}
 
+	/**
+	 * 参数带在url里面
+	 * @param url
+	 * @param json
+	 * @param para
+	 * @return
+	 */
 	public static String postJsonWithParam(String url, String json, Map<String, String> para) {
 		initClient();
 		FormBody.Builder formBody =
@@ -131,7 +145,6 @@ public class OkHttp3Client {
 				(x, y) -> {
 					formBody.add(x, y);
 				});
-
 		Request request = new Request.Builder().url(url).post(formBody.build()).build();
 
 		Call call = asynokHttpClient.newCall(request);
@@ -150,10 +163,15 @@ public class OkHttp3Client {
 //		String json = "{\"dbName\":\"hive.test\",\"tblName\":\"test2\"}";
 //		delete("http://localhost:80/api/v1/ddl/table/drop", json);
 
-		String json = "{\"alterTableSql\":\"alter table hive.test.src_kafka_msg set ('properties.group.id'='lmq')\"}";
-		System.out.println(post("http://localhost:80/api/v1/ddl/table/alter", json));
+//		String json = "{\"alterTableSql\":\"alter table hive.test.src_kafka_msg set ('properties.group.id'='lmq')\"}";
+//		System.out.println(postJson("http://localhost:80/api/v1/ddl/table/alter", json));
 
 //		String json = "{\"addColumnsSQL\":\"alter table hive.test.test add columns(hello_world string)\"}";
 //		System.out.println(post("http://localhost:80/api/v1/ddl/table/addcolumns", json));
+
+		String json = "{\"tableName\":\"hive.test.test\"}";
+		String data = JSON.parseObject(postJson("http://localhost:80/api/v1/ddl/table/showcreatetable", json)).getString("data");
+		System.out.println(data);
+
 	}
 }
