@@ -160,18 +160,45 @@ public class OkHttp3Client2 {
 	}
 
 	public static void main(String[] args) throws IOException {
+		String tableName = "hive.temp_vipflink.sqlGateWay_test";
+//		String host = "flink-sql-gateway.ai.vip.com:80";
+		String host = "10.189.108.75:8080";
+// 不能带\n
+
+		String cjson = "{\"createTableSql\":\"CREATE TABLE "+tableName+" (" +
+				"    topic VARCHAR METADATA FROM 'topic'," +
+				"    `offset` bigint METADATA," +
+				"    msg VARCHAR" +
+				") WITH (" +
+				"    'connector' = 'kafka'," +
+				"    'topic' = 'test'," +
+				"    'scan.startup.mode' = 'latest-offset'," +
+				"    'properties.bootstrap.servers' = 'localhost:9092'," +
+				"    'properties.group.id' = 'test'," +
+				"    'format' = 'json'," +
+				"    'json.ignore-parse-errors' = 'true'" +
+				")\"}";
+//		postJson("http://"+host+"/api/v1/ddl/table/create", cjson);
+
+
+
 //		String json = "{\"dbName\":\"hive.test\",\"tblName\":\"test2\"}";
 //		delete("http://localhost:80/api/v1/ddl/table/drop", json);
 
-//		String json = "{\"alterTableSql\":\"alter table hive.test.src_kafka_msg set ('properties.group.id'='lmq')\"}";
-//		System.out.println(postJson("http://localhost:80/api/v1/ddl/table/alter", json));
+//		String ajson = "{\"alterTableSql\":\"alter table "+tableName+" set ('properties.group.id'='lmq')\"}";
+//		System.out.println(postJson("http://"+host+"/api/v1/ddl/table/alter", ajson));
+//
+//		String addjson = "{\"addColumnsSQL\":\"alter table "+tableName+" add columns(hello_world string)\"}";
+//		System.out.println(postJson("http://"+host+"/api/v1/ddl/table/addcolumns", addjson));
 
-//		String json = "{\"addColumnsSQL\":\"alter table hive.test.test add columns(hello_world string)\"}";
-//		System.out.println(post("http://localhost:80/api/v1/ddl/table/addcolumns", json));
-
-		String json = "{\"tableName\":\"hive.test.test\"}";
-		String data = JSON.parseObject(postJson("http://localhost:80/api/v1/ddl/table/showcreatetable", json)).getString("data");
+		String sjson = "{\"tableName\":\"temp_vipflink.hudi_nullcol_test\"}";
+		JSON data = JSON.parseObject(postJson("http://"+host+"/api/v1/ddl/table/showcreatetable", sjson)) ; //.getString("data");
 		System.out.println(data);
+
+
+//				String json = "{\"tableName\":\"test.kafka_source\"}";
+//		JSON data = JSON.parseObject(postJson("http://localhost:80/api/v1/ddl/table/showcreatetable", json)) ; //.getString("data");
+//		System.out.println(data);
 
 	}
 }

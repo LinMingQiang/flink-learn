@@ -21,6 +21,8 @@ object DDLSourceSQLManager {
        |    `offset` bigint METADATA,
        |    rowtime TIMESTAMP(3),
        |    msg VARCHAR,
+       |    name varchar,
+       |    age int,
        |    proctime AS PROCTIME(),
        |    `dt` as DATE_FORMAT(rowtime, 'yyyy-MM-dd'),
        |    WATERMARK FOR rowtime AS rowtime - INTERVAL '10' SECOND

@@ -74,7 +74,8 @@ public class HiveReadEntry {
 				"hcatalog.test.kafka_source",
 				"test",
 				"json");
-		tableEnv.executeSql(sql);
+		System.out.println(sql);
+//		tableEnv.executeSql(sql);
 		for (String s : tableEnv.listTables()) {
 			System.out.println(s);
 		}

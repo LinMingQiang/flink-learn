@@ -3,15 +3,14 @@ package com.flink.learn.hudi;
 import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 import org.apache.flink.types.Row;
-import scala.Tuple2;
+import org.apache.hudi.cli.commands.SparkMain;
 
 import java.util.concurrent.ExecutionException;
 
-public class entry {
+public class HudiTest {
 	public static StreamTableEnvironment tableEnv = null;
 	public static StreamExecutionEnvironment env = null;
 	public static String path = "hdfs://localhost:9000/tmp/hudi/";
@@ -27,16 +26,17 @@ public class entry {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
+//		SparkMain.main(new String[1]);
 		init();
 //		createTable("hive.test.hudi_test");
 		// 在hive同步建表，这样可以通过hive查询数据
-//		createHiveSyncTable("hive.test.hudi_test");
-//		kafkaToHudi("hive.test.hudi_test");
+//		createHiveSyncTable("hive.test.hudi_svp_test");
+		kafkaToHudi("hive.test.hudi_svp_test");
 
 
 //		createHiveSyncCOWTable("hive.test.hudi_cow_test");
 //		kafkaToHudi("hive.test.hudi_cow_test");
-//		readHudi("hive.test.hudi_test");
+//		readHudi("hive.test.hudi_svp_test");
 	}
 
 	/**
@@ -52,10 +52,10 @@ public class entry {
 		// {"msg":"2","rowtime":"2021-01-01 11:11:11"}
 		// {"msg":"3","rowtime":"2021-01-01 11:11:11"}
 		// {"msg":"4","rowtime":"2021-01-01 11:11:11"}
-		// {"msg":"5","rowtime":"2021-01-01 11:11:11"}  {"msg":"10","rowtime":"2021-01-01 11:11:11"}
+		// {"msg":"vv","rowtime":"2021-01-01 11:11:11"}  {"msg":"10","rowtime":"2021-01-01 11:11:11"}
 // 进行 compaction ,这时候hive查询的是 compaction 1 的文件 parquet
 		// 在输入5个
-		// {"msg":"1","rowtime":"2021-01-01 11:11:11"}
+		// {"msg":"1","rowtime":"2021-01-01 12:11:11"}
 		// {"msg":"2","rowtime":"2021-01-01 11:11:11"}
 		// {"msg":"3","rowtime":"2021-01-01 11:11:11"}
 		// {"msg":"4","rowtime":"2021-01-01 11:11:11"}
@@ -67,7 +67,12 @@ public class entry {
 
 		// insert into hive.test.hudi_test_msg_cnt values('msg', 1);
 		// hive.test.hudi_test_msg_cnt
-		String insertSql = "insert into " + targetTable + " select msg,count(1) cnt,dt from hive.test.kafka_source group by dt,msg";
+		String insertSql = "insert into " + targetTable +
+				" select msg," +
+				"count(1) cnt," +
+				"max(rowtime) as rowtime," +
+				" dt" +
+				" from hive.test.kafka_source group by dt, msg";
 		tableEnv.executeSql(insertSql).await();
 	}
 
@@ -89,11 +94,14 @@ public class entry {
 		String s = "CREATE TABLE " + tableName + "(\n" +
 				"    msg STRING PRIMARY KEY NOT ENFORCED,\n" +
 				"    cnt BIGINT," +
+				"    rowttime TIMESTAMP(3)," +
 				"	`dt` STRING\n" +
 				") PARTITIONED BY (`dt`) WITH (\n" +
 				"    'connector' = 'hudi',\n" +
 				"    'table.type' = 'MERGE_ON_READ',\n" +
 				"    'path' = '" + path + tableName + "'," +
+				"    'write.precombine' = 'true'," + // 是否启用预聚合，一个commit里面。按 主键去重，选时间最新的。
+				"    'write.bucket_assign.tasks' = '1'," + // 决定最终写出去的文件
 				// 读取的时候配置
 				"    'read.streaming.enabled' = 'true'," +
 				"    'read.streaming.start-commit' = '20220209170729182'," + // read.streaming.start-commit 时间戳后的所有数据。该功能的特殊在于可以同时在流和批的 pipeline 上执行。
@@ -109,7 +117,7 @@ public class entry {
 				"	'hive_sync.table' = 'hudi_test'," +
 				"    'index.bootstrap.enabled' = 'true'," +
 				"    'changelog.enabled' = 'false'," + // false = upsert, true = full (一条输入会产生 2条到 hudi sink)
-				"    'write.tasks' = '3'" + // 并行度，其他是跟着 default并行度一起的
+				"    'write.tasks' = '2'" + // 并行度，其他是跟着 default并行度一起的
 				")";
 		System.out.println(s);
 		tableEnv.executeSql(s);
@@ -187,7 +195,7 @@ public class entry {
 		env.setStateBackend(new EmbeddedRocksDBStateBackend());
 		EnvironmentSettings sett = EnvironmentSettings.newInstance().useBlinkPlanner().build();
 		tableEnv = StreamTableEnvironment.create(env, sett);
-		HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
+		HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir, "3.1.2");
 		tableEnv.registerCatalog(name, hive);
 	}
 }

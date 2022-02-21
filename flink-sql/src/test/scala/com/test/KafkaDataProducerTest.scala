@@ -28,12 +28,13 @@ object KafkaDataProducerTest {
       val s = new ProducerRecord[String, String](
         "test",
         System.currentTimeMillis().toString,
-        s"""{"msg":"${i}","rowtime":"2021-01-01 11:11:11"}""".stripMargin
+        s"""{"msg":"kk${i}","rowtime":"2021-01-01 11:11:11"}""".stripMargin
       )
+      // {"msg":"adad","rowtime":"2021-01-01 11:11:11"}
       println(i, s)
       producer.send(s)
 //      producer.close()
-      Thread.sleep(10)
+      Thread.sleep(100)
     }
   }
 }
